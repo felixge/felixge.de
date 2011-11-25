@@ -1,0 +1,9 @@
+{
+    "name": "felixge.de"
+  , "version": "0.0.0"
+  , "private": true
+  , "dependencies": {
+      "express": "2.5.1"
+    , "jade": "0.0.1"
+  }
+}
