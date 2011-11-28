@@ -1,11 +1,17 @@
+var _     = require('underscore');
+var async = require('async');
+
 module.exports = HomepageController;
 function HomepageController(properties) {
-  this.talks = properties.talks;
+  this._talks = properties.talks;
 }
 
 HomepageController.prototype.index = function(req, res) {
-  res.render('homepage', {
-    title: 'Felix Geisendörfer',
-    talks: {}
+  async.parallel({
+    recentTalks: this._talks.findRecent,
+  }, function(err, results) {
+    res.render('homepage/index', _.extend(results, {
+      title: 'Felix Geisendörfer',
+    }));
   });
 };

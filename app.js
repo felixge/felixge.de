@@ -27,4 +27,4 @@ var homepageController = new controllers.HomepageController({
 });
 
 // Routes
-app.get('/', homepageController.index);
+app.get('/', homepageController.index.bind(homepageController));

@@ -1,0 +1,14 @@
+em
+  != link(talk.title, talk.url)
+!= ' on ' + days(talk.date)
+!= ' at ' + link(talk.event.name, talk.event.url)
+!= ' in ' + link(talk.location.name, talk.location.url)
+if talk.slides
+  - var links = [];
+  = ' ('
+  if (talk.slides.slideshare)
+    - links.push(link('slideshare', talk.slides.slideshare))
+  if (talk.slides.pdf)
+    - links.push(link('pdf', talk.slides.pdf))
+  != links.join(', ')
+  = ')'
