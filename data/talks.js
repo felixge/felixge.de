@@ -1,6 +1,6 @@
 // Missing:
-// * Ruby talk at Backfabrik
-// * Node.js as a networking tool CCC
+// CakePHP talks in Argentina, Berlin
+// CakePHP talk in Singapore
 
 module.exports = [
   {
