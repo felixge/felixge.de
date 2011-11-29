@@ -7,8 +7,10 @@ var root    = require('path').dirname(__dirname);
 
 if (typeof cluster === 'function') {
   var server = cluster(app);
-  server
-   .use(cluster.reload(root, {extensions: ['.js', '.less', '.ejs', '.mo']}))
+
+  if (!!parseInt(process.env.CLUSTER_RELOAD || '1')) {
+    server.use(cluster.reload(root, {extensions: ['.js', '.less', '.ejs', '.mo']}))
+  }
 } else {
   server = app;
 }
