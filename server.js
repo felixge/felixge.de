@@ -2,7 +2,7 @@
 var env     = process.env;
 var app     = require('./app');
 var cluster = require('cluster');
-var port    = parseInt(env.HTTP_PORT, 10) || 3000;
+var port    = parseInt(env.PORT, 10) || 3000;
 var root    = require('path').dirname(__dirname);
 
 if (typeof cluster === 'function') {
