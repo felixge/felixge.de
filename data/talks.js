@@ -1,3 +1,7 @@
+// Missing:
+// * Ruby talk at Backfabrik
+// * Node.js as a networking tool CCC
+
 module.exports = [
   {
     title : 'Node.js in production',
@@ -10,10 +14,17 @@ module.exports = [
       name : 'Web Rebels',
       url  : 'http://www.webrebels.org/',
     },
-    location: {
-      name : 'Oslo, Norway',
-      url  : 'http://maps.google.com/maps?q=oslo+in+sweden&hl=en&sll=59.89186,10.76393&sspn=0.083097,0.2635&vpsrc=0&hnear=Oslo,+Norway&t=m&z=11',
-    }
+    location: 'Oslo, Norway'
+  },
+  {
+    title : 'Node.js - A practical introduction',
+    url   : 'http://www.mnug.de/artikel/meetups/dezember2011',
+    date  : new Date('December 1, 2012 GMT'),
+    event: {
+      name : 'Munich Node.js User Group',
+      url  : 'http://www.mnug.de/',
+    },
+    location: 'Munich, Germany',
   },
   {
     title : 'Node.js - A practical introduction',
@@ -23,10 +34,7 @@ module.exports = [
       name : 'Øredev',
       url  : 'http://oredev.org/2011',
     },
-    location: {
-      name : 'Malmö, Sweden',
-      url  : 'http://maps.google.com/maps?q=malm%C3%B6+sweden&hl=en&ie=UTF8&sll=37.0625,-95.677068&sspn=80.09673,168.574219&vpsrc=0&hnear=Malm%C3%B6+Municipality,+Sk%C3%A5ne,+Sweden&t=m&z=12',
-    },
+    location: 'Malmö, Sweden',
     slides: {
       slideshare : 'http://www.slideshare.net/the_undefined/nodejs-apracticalintroductionoredev',
       pdf        : 'http://felixge.s3.amazonaws.com/11/nodejs-a-practical-introduction-oredev.pdf',
@@ -37,183 +45,149 @@ module.exports = [
     url   : null,
     date  : new Date('Oct 29, 2011 GMT'),
     event: {
-      name : 'Reject.JS',
-      url  : 'http://berlinjs.org/',
+      name : 'Reject.js',
+      url  : 'http://lanyrd.com/2011/rejectjs/',
     },
-    location: {
-      name : 'Berlin, Germany',
-      url  : null,
-    },
+    location: 'Berlin, Germany',
     slides: {
       slideshare : 'http://www.slideshare.net/the_undefined/building-an-alarm-clock-with-nodejs',
-      pdf        : null,
+      pdf        : 'http://felixge.s3.amazonaws.com/11/node.js%20-%20alarm%20clock.pdf',
     }
   },
   {
     title : 'Node.js - Eine praktische Einführung',
-    url   : null,
-    date  : null,
+    url   : 'http://www.devcon-hamburg.de/workshops-2011/#Einf%C3%BChrung%20node.js',
+    date  : new Date('May 21, 2011'),
     event: {
-      name : null,
-      url  : null,
+      name : 'Developer Conference',
+      url  : 'http://www.devcon-hamburg.de/',
     },
-    location: {
-      name : null,
-      url  : null,
-    },
+    location: 'Hamburg, Germany',
     slides: {
       slideshare : 'http://www.slideshare.net/the_undefined/nodejs-eine-praktische-einfhrung-v7',
-      pdf        : null,
     }
   },
   {
     title : 'How to Test Asynchronous Code',
     url   : null,
-    date  : null,
+    date  : new Date('May 19, 2011'),
     event: {
-      name : null,
-      url  : null,
+      name : 'Berlin JS Usergroup',
+      url  : 'http://berlinjs.org/',
     },
-    location: {
-      name : null,
-      url  : null,
-    },
+    location: 'Berlin, Germany',
     slides: {
       slideshare : 'http://www.slideshare.net/the_undefined/how-to-test-asynchronous-code-v2',
-      pdf        : null,
     }
   },
   {
     title : 'How to Test Asynchronous Code',
-    url   : null,
-    date  : null,
+    url   : 'http://2011.nodeconf.com/schedule.html',
+    date  : new Date('May 5, 2011'),
     event: {
-      name : null,
-      url  : null,
+      name : 'NodeConf',
+      url  : 'http://www.nodeconf.com/',
     },
-    location: {
-      name : null,
-      url  : null,
-    },
+    location: 'Portland, Oregon',
     slides: {
       slideshare : 'http://www.slideshare.net/the_undefined/how-to-test-asynchronous-code-8051756',
-      pdf        : null,
+      pdf        : 'http://felixge.s3.amazonaws.com/11/how-to-test-async-code.pdf',
     }
   },
   {
     title : 'Node.js - A quick tour',
     url   : null,
-    date  : null,
+    date  : new Date('April 20, 2011'),
     event: {
-      name : null,
-      url  : null,
+      name : 'Gameforge AG',
+      url  : 'http://corporate.gameforge.com/',
     },
-    location: {
-      name : null,
-      url  : null,
-    },
+    location: 'Karlsruhe, Germany',
     slides: {
       slideshare : 'http://www.slideshare.net/the_undefined/nodejs-a-quick-tour-v6',
-      pdf        : null,
+      pdf        : 'http://felixge.s3.amazonaws.com/11/nodejs-a-quick-tour-v6.pdf',
+    }
+  },
+  {
+    title : 'Transloadit',
+    url   : null,
+    date  : new Date('February 16, 2011'),
+    event: {
+      name : 'Startup Riot',
+      url  : 'http://startupriot.com/',
+    },
+    location: 'Atlanta, Georgia',
+    slides: {
+      slideshare : 'http://www.slideshare.net/the_undefined/transloadit-at-startupriot',
+      pdf        : 'http://felixge.s3.amazonaws.com/11/transloadit-startupriot.pdf',
     }
   },
   {
     title : 'Node.js - A quick tour',
-    url   : null,
-    date  : null,
+    url   : 'http://www.meetup.com/AtlantaJavaScript/events/16170144/',
+    date  : new Date('February 15, 2011'),
     event: {
-      name : null,
-      url  : null,
+      name : 'Atlanta JavaScript Meetup Group',
+      url  : 'http://www.meetup.com/AtlantaJavaScript/',
     },
-    location: {
-      name : null,
-      url  : null,
-    },
+    location: 'Atlanta, Georgia',
     slides: {
       slideshare : 'http://www.slideshare.net/the_undefined/nodejs-a-quick-tour-v5',
       pdf        : null,
     }
   },
   {
-    title : 'Transloadit',
-    url   : null,
-    date  : null,
-    event: {
-      name : 'Startup Riot',
-      url  : null,
-    },
-    location: {
-      name : null,
-      url  : null,
-    },
-    slides: {
-      slideshare : 'http://www.slideshare.net/the_undefined/transloadit-at-startupriot',
-      pdf        : null,
-    }
-  },
-  {
     title : 'Node.js - Should Ruby Developers Care?',
-    url   : null,
-    date  : null,
+    url   : 'http://www.meetup.com/atlantaruby/events/15955963/',
+    date  : new Date('February 9, 2011'),
     event: {
-      name : 'Startup Riot',
-      url  : null,
+      name : 'Atlanta Ruby Meetup Group',
+      url  : 'http://www.meetup.com/atlantaruby/',
     },
-    location: {
-      name : null,
-      url  : null,
-    },
+    location: 'Atlanta, Georgia',
     slides: {
       slideshare : 'http://www.slideshare.net/the_undefined/nodejs-should-ruby-developers-care',
-      pdf        : null,
-    }
-  },
-  {
-    title : 'Node.js - A quick tour',
-    url   : null,
-    date  : null,
-    event: {
-      name : null,
-      url  : null,
-    },
-    location: {
-      name : null,
-      url  : null,
-    },
-    slides: {
-      slideshare : 'http://www.slideshare.net/the_undefined/nodejs-a-quick-tour-v4',
-      pdf        : null,
+      pdf        : 'http://felixge.s3.amazonaws.com/11/nodejs-should-ruby-developers-care.pdf',
     }
   },
   {
     title : 'Node.js in production',
     url   : null,
-    date  : null,
+    date  : new Date('January 20, 2011'),
     event: {
-      name : null,
-      url  : null,
+      name : 'Berlin JS Usergroup',
+      url  : 'http://berlinjs.org/',
     },
-    location: {
-      name : null,
-      url  : null,
-    },
+    location: 'Berlin, Germany',
     slides: {
       slideshare : 'http://www.slideshare.net/the_undefined/nodejs-in-production',
-      pdf        : null,
+      pdf        : 'http://felixge.s3.amazonaws.com/11/nodejs-in-production.pdf',
+    }
+  },
+  {
+    title : 'Node.js as a networking tool',
+    url   : 'http://events.ccc.de/congress/2010/Fahrplan/events/4142.en.html',
+    date  : new Date('December 28, 2010'),
+    event: {
+      name : 'Chaos Communication Congress ',
+      url  : 'http://events.ccc.de/congress/2010/wiki/Main_Page',
+    },
+    location: 'Berlin, Germany',
+    slides: {
+      slideshare : null,
+      pdf        : 'http://events.ccc.de/congress/2010/Fahrplan/attachments/1799_nodejs-as-a-networking-tool',
+      video      : 'http://www.youtube.com/watch?feature=player_detailpage&v=g29PemqW7lQ#t=0s',
     }
   },
   {
     title : 'Node.js - A quick tour',
     url   : null,
-    date  : null,
+    date  : new Date('October 7, 2010'),
     event: {
-      name : null,
-      url  : null,
+      name : 'Ruby User Group Berlin',
+      url  : 'http://www.rug-b.de/',
     },
-    location: {
-      name : null,
-      url  : null,
-    },
+    location: 'Berlin, Germany',
     slides: {
       slideshare : 'http://www.slideshare.net/the_undefined/nodejs-aquicktourv3',
       pdf        : null,
@@ -221,33 +195,28 @@ module.exports = [
   },
   {
     title : 'Dirty - How simple is your database?',
-    url   : null,
-    date  : null,
+    url   : 'http://jsconf.eu/2010/speaker/dirty_nosql.html',
+    date  : new Date('September 25, 2010'),
     event: {
-      name : null,
-      url  : null,
+      name : 'JSConf EU',
+      url  : 'http://jsconf.eu/2010',
     },
-    location: {
-      name : null,
-      url  : null,
-    },
+    location: 'Berlin, Germany',
     slides: {
       slideshare : 'http://www.slideshare.net/the_undefined/dir-5299121',
       pdf        : null,
+      video      : 'http://jsconf.eu/2010/speaker/dirty_nosql.html'
     }
   },
   {
     title : 'Node.js - A quick tour',
     url   : null,
-    date  : null,
+    date  : new Date('March 4, 2010'),
     event: {
-      name : null,
-      url  : null,
+      name : 'Hamburg.js User Group',
+      url  : 'http://www.meetup.com/hamburg-js/',
     },
-    location: {
-      name : null,
-      url  : null,
-    },
+    location: 'Hamburg, Germany',
     slides: {
       slideshare : 'http://www.slideshare.net/the_undefined/nodejs-a-quick-tour-ii',
       pdf        : null,
@@ -256,15 +225,12 @@ module.exports = [
   {
     title : 'Node.js - A quick tour',
     url   : null,
-    date  : null,
+    date  : new Date('January 12, 2010'),
     event: {
-      name : null,
-      url  : null,
+      name : 'Berlin JS Usergroup',
+      url  : 'http://berlinjs.org/',
     },
-    location: {
-      name : null,
-      url  : null,
-    },
+    location: 'Berlin, Germany',
     slides: {
       slideshare : 'http://www.slideshare.net/the_undefined/nodejs-a-quick-tour',
       pdf        : null,
@@ -273,15 +239,12 @@ module.exports = [
   {
     title : 'With jQuery & CakePHP to World Domination',
     url   : null,
-    date  : null,
+    date  : new Date('February 6, 2008'),
     event: {
-      name : null,
-      url  : null,
+      name : 'CakeFest',
+      url  : 'http://debuggable.com/posts/cakefest-orlando-2008-summary:480f4dd6-6404-4774-a771-4e8fcbdd56cb',
     },
-    location: {
-      name : null,
-      url  : null,
-    },
+    location: 'Orlando, Florida',
     slides: {
       slideshare : 'http://www.slideshare.net/the_undefined/with-jquery-cakephp-to-world-domination',
       pdf        : null,
@@ -290,15 +253,12 @@ module.exports = [
   {
     title : 'ActiveDOM',
     url   : null,
-    date  : null,
+    date  : new Date('October 27, 2007'),
     event: {
-      name : null,
-      url  : null,
+      name : 'jQuery Camp',
+      url  : 'http://docs.jquery.com/JQueryCamp07',
     },
-    location: {
-      name : null,
-      url  : null,
-    },
+    location: 'Cambridge, Massachusetts',
     slides: {
       slideshare : 'http://www.slideshare.net/the_undefined/activedom',
       pdf        : null,

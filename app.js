@@ -4,6 +4,9 @@ var app     = module.exports = express.createServer();
 // Settings
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
+app.set('view options', {
+  layout: false
+});
 
 // Middleware
 app.use(express.bodyParser());
@@ -21,10 +24,12 @@ var repositories    = require('./repositories');
 var talksRepository = new repositories.TalksRepository();
 
 // Controllers
-var controllers        = require('./controllers')
-var homepageController = new controllers.HomepageController({
+var controllers     = require('./controllers')
+var pagesController = new controllers.PagesController({
   talks: talksRepository,
 });
 
 // Routes
-app.get('/', homepageController.index.bind(homepageController));
+app.get('/', pagesController.action('homepage'));
+app.get('/consulting', pagesController.action('consulting'));
+app.get('/speaking', pagesController.action('speaking'));

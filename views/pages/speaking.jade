@@ -1,0 +1,23 @@
+extends ../layout
+block content
+  :markdown
+    I'm generally very happy to receive invitations to tech conferences or user
+    groups, so if you are looking for a speaker to talk about node.js or related
+    topics, please get in [touch][email].
+
+    [email]: mailto:felix@debuggable.com
+
+  h2 List of talks
+  ul
+    each talk in talks
+      li
+        include talk
+
+  :markdown
+    ## Speaker Bio
+
+    Felix Geisendörfer ([picture][]) is a node.js core developer and has experienced it's
+    strength and shortcomings first-hand while building transloadit.com.
+    When not event-looping, he loves street unicycling and watching squirrels.
+
+    [picture]: http://felixge.s3.amazonaws.com/11/felix_geisendoerfer.jpg

@@ -1,0 +1,14 @@
+!!!5
+html
+  head
+    title= title
+    link(rel='stylesheet', href='/css/main.css')
+  body
+    div(class='container')
+      block breadcrumbs
+        a(href='/') Home
+        \ &raquo
+        = title
+      h1= title
+      block content
+        p Nothing to see here yet ...

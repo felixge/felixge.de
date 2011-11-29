@@ -1,0 +1,34 @@
+extends ../layout
+block breadcrumbs
+block content
+  :markdown
+    Hi, I run a small consultancy in Berlin called [debuggable][]. We bootstrap
+    a web service named [transloadit][].
+
+    [debuggable]: http://debuggable.com/
+    [transloadit]: https://transloadit.com/
+
+    I am also a long time [node.js][] core contributor, and sometimes available for
+    [consulting][].
+
+    [node.js]: http://nodejs.org/
+    [consulting]: /consulting
+
+  h2 Writing
+
+  ul
+    each post in recentPosts
+      li
+
+  h2 Speaking
+
+  ul
+    each talk in recentTalks
+      li
+        include talk
+
+  :markdown
+    If you'd like to see a list of all talks, or invite me to your event, check my
+    [speaking][] page.
+
+    [speaking]: /speaking

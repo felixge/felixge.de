@@ -11,13 +11,11 @@ TalksRepository.prototype.findUpcoming = function(cb) {
 };
 
 TalksRepository.prototype.findRecent = function(cb) {
-  cb(null, talks);
+  cb(null, talks.slice(0, 5));
 };
 
-TalksRepository.prototype.findPast = function(cb) {
-  cb(null, talks.filter(function(talk) {
-    return TalksRepository._isPast(talk);
-  }));
+TalksRepository.prototype.findTalks = function(cb) {
+  cb(null, talks);
 };
 
 TalksRepository._isPast = function(talk) {
