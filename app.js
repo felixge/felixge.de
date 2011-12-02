@@ -4,7 +4,7 @@ var app     = module.exports = express.createServer();
 // Settings
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
-app.set('view cache', true);
+app.set('view cache', !!parseInt(process.env.VIEW_CACHE));
 app.set('view options', {
   layout: false
 });
