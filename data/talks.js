@@ -17,14 +17,32 @@ module.exports = [
     location: 'Oslo, Norway'
   },
   {
-    title : 'Node.js - A practical introduction',
+    title : 'Node.js - Best Practices',
     url   : 'http://www.mnug.de/artikel/meetups/dezember2011',
-    date  : new Date('December 1, 2012 GMT'),
+    date  : new Date('December 1, 2011 GMT'),
     event: {
       name : 'Munich Node.js User Group',
       url  : 'http://www.mnug.de/',
     },
     location: 'Munich, Germany',
+    slides: {
+      slideshare : 'http://www.slideshare.net/the_undefined/nodejs-best-practices-10428790',
+      pdf        : 'http://felixge.s3.amazonaws.com/11/nodejs%20-%20best%20practices.pdf',
+    }
+  },
+  {
+    title : 'Node.js - A practical introduction',
+    url   : 'http://www.mnug.de/artikel/meetups/dezember2011',
+    date  : new Date('December 1, 2011 GMT'),
+    event: {
+      name : 'Munich Node.js User Group',
+      url  : 'http://www.mnug.de/',
+    },
+    location: 'Munich, Germany',
+    slides: {
+      slideshare : 'http://www.slideshare.net/the_undefined/nodejs-a-practical-introduction-v2',
+      pdf        : 'http://felixge.s3.amazonaws.com/11/nodejs%20-%20a%20practical%20introduction%20(v2).pdf',
+    }
   },
   {
     title : 'Node.js - A practical introduction',

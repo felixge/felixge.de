@@ -1,4 +1,4 @@
-if talk.date && (talk.date > Date.now() || talk.date[1] > Date.now())
+if talk.date > Date.now() || talk.date[1] > Date.now()
   <strong>Upcoming:</strong>
 em
   != link(talk.title, talk.url)
