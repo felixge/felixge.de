@@ -1,14 +1,14 @@
 if talk.date > Date.now() || talk.date[1] > Date.now()
   <strong>Upcoming:</strong>
 em
-  != link(talk.title, talk.url)
+  != link(talk.title, talk.formats.slideshare || talk.url)
 != ' on ' + days(talk.date)
 != ' at ' + link(talk.event.name, talk.event.url)
 != ' in ' + talk.location
-if talk.slides
+if Object.keys(talk.formats).length
   - var links = [];
   = ' ('
-  each url, type in talk.slides
+  each url, type in talk.formats
     if url
       - links.push(link(type, url))
   != links.join(', ')
