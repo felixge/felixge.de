@@ -16,6 +16,7 @@ if (typeof cluster === 'function') {
 }
 
 server.listen(port)
+console.log('listening on port', port);
 
 if (env.PROCESS_USER) cluster.set('user', env.PROCESS_USER);
 if (env.PROCESS_GROUP) cluster.set('user', env.PROCESS_GROUP);
