@@ -1,8 +1,30 @@
 // Missing:
-// CakePHP talks in Argentina, Berlin
 // CakePHP talk in Singapore
+// CakePHP Ralleigh workshop
 
 module.exports = [
+  {
+    title : 'Node.js - A practical introduction',
+    url   : null,
+    date  : new Date('June 15, 2012 GMT'),
+    event: {
+      name : 'Big Techday',
+      url  : 'http://www.tngtech.com/events-bigtechday05.html',
+    },
+    location: 'Munich, Germany',
+    formats: {}
+  },
+  {
+    title : 'Node.js - To be determined',
+    url   : null,
+    date  : new Date('June 14, 2012 GMT'),
+    event: {
+      name : 'Munich Node.js User Group',
+      url  : 'http://www.mnug.de/',
+    },
+    location: 'Munich, Germany',
+    formats: {}
+  },
   {
     title : 'Node.js in production',
     url   : null,
@@ -16,6 +38,19 @@ module.exports = [
     },
     location: 'Oslo, Norway',
     formats: {},
+  },
+  {
+    title : 'JavaScript - The Bad Parts',
+    url   : 'http://speakerdeck.com/u/felixge/p/javascript-the-bad-parts',
+    date  : new Date('January 19, 2012 GMT'),
+    event: {
+      name : 'Berlin JS Usergroup',
+      url  : 'http://berlinjs.org/',
+    },
+    location: 'Berlin, Germany',
+    formats: {
+      'pdf': 'http://felixge.s3.amazonaws.com/12/js-the-bad-parts.pdf',
+    },
   },
   {
     title : 'Node.js - Best Practices',
@@ -230,6 +265,52 @@ module.exports = [
       url  : 'http://berlinjs.org/',
     },
     location: 'Berlin, Germany',
+    formats: {
+    }
+  },
+  {
+    title : 'JavaScript and Git',
+    url   : 'http://cakedc.com/eng/graham_weldon/2009/07/19/felix-geisendorfer-javascript-and-git',
+    date  : new Date('July 12, 2009'),
+    event: {
+      name : 'CakeFest',
+      url  : 'http://cakefest.org/',
+    },
+    location: 'Berlin, Germany',
+    formats: {}
+  },
+  {
+    title : 'Recipies for successful CakePHP projects',
+    url   : 'http://cakedc.com/eng/graham_weldon/2009/07/13/felix-geisendorfer-recipies-for-successful-cakephp-projects',
+    date  : new Date('July 11, 2009'),
+    event: {
+      name : 'CakeFest',
+      url  : 'http://cakefest.org/',
+    },
+    location: 'Berlin, Germany',
+    formats: {}
+  },
+  {
+    title : 'jQuery and CakePHP',
+    url   : 'http://cakedc.com/mark_story/2008/12/05/felix-geisendorfer-jquery-and-cakephp',
+    date  : new Date('December 5, 2008'),
+    event: {
+      name : 'CakeFest',
+      url  : 'http://cakefest.org/',
+    },
+    location: 'Buenos Aires, Argentina',
+    formats: {
+    }
+  },
+  {
+    title : 'Git and CakePHP',
+    url   : 'http://cakedc.com/mark_story/2008/12/02/felix-geisendorfer-git-and-cakephp',
+    date  : new Date('December 2, 2008'),
+    event: {
+      name : 'CakeFest',
+      url  : 'http://cakefest.org/',
+    },
+    location: 'Buenos Aires, Argentina',
     formats: {
     }
   },
