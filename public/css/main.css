@@ -33,3 +33,19 @@ h3 a:hover,
 h4 a:hover {
   text-decoration: underline;
 }
+.clear {
+  float: left;
+  clear: both;
+}
+.talks {
+  margin: 0 0 0 20px;
+  padding: 0;
+  float: left;
+}
+.talks .talk {
+  float: left;
+  margin-right: 10px;
+  margin-bottom: 10px;
+  display: inline;
+  list-style-type: none;
+}

@@ -2,6 +2,10 @@
 // CakePHP talk in Singapore
 // CakePHP Ralleigh workshop
 
+// Licenses
+// * http://commons.wikimedia.org/wiki/File:Brandenburger_Tor_abends.jpg
+// * http://commons.wikimedia.org/wiki/File:Puerto_Madero_DLightning.jpg
+
 module.exports = [
   {
     title : 'Node.js - A practical introduction',
@@ -48,6 +52,7 @@ module.exports = [
       url  : 'http://berlinjs.org/',
     },
     location: 'Berlin, Germany',
+    image: '/img/berlin.jpg',
     formats: {
       'pdf': 'http://felixge.s3.amazonaws.com/12/js-the-bad-parts.pdf',
     },
@@ -102,6 +107,7 @@ module.exports = [
       url  : 'http://lanyrd.com/2011/rejectjs/',
     },
     location: 'Berlin, Germany',
+    image: '/img/berlin.jpg',
     formats: {
       pdf        : 'http://felixge.s3.amazonaws.com/11/node.js%20-%20alarm%20clock.pdf',
     }
@@ -127,6 +133,7 @@ module.exports = [
       url  : 'http://berlinjs.org/',
     },
     location: 'Berlin, Germany',
+    image: '/img/berlin.jpg',
     formats: {
     }
   },
@@ -203,6 +210,7 @@ module.exports = [
       url  : 'http://berlinjs.org/',
     },
     location: 'Berlin, Germany',
+    image: '/img/berlin.jpg',
     formats: {
       pdf        : 'http://felixge.s3.amazonaws.com/11/nodejs-in-production.pdf',
     }
@@ -216,6 +224,7 @@ module.exports = [
       url  : 'http://events.ccc.de/congress/2010/Fahrplan/events/4142.en.html',
     },
     location: 'Berlin, Germany',
+    image: '/img/berlin.jpg',
     formats: {
       pdf        : 'http://events.ccc.de/congress/2010/Fahrplan/attachments/1799_nodejs-as-a-networking-tool',
       video      : 'http://www.youtube.com/watch?feature=player_detailpage&v=g29PemqW7lQ#t=0s',
@@ -230,6 +239,7 @@ module.exports = [
       url  : 'http://www.rug-b.de/',
     },
     location: 'Berlin, Germany',
+    image: '/img/berlin.jpg',
     formats: {
     }
   },
@@ -242,6 +252,7 @@ module.exports = [
       url  : 'http://jsconf.eu/2010/speaker/dirty_nosql.html',
     },
     location: 'Berlin, Germany',
+    image: '/img/berlin.jpg',
     formats: {
       video      : 'http://jsconf.eu/2010/speaker/dirty_nosql.html'
     }
@@ -267,6 +278,7 @@ module.exports = [
       url  : 'http://berlinjs.org/',
     },
     location: 'Berlin, Germany',
+    image: '/img/berlin.jpg',
     formats: {
     }
   },
@@ -279,6 +291,7 @@ module.exports = [
       url  : 'http://cakefest.org/',
     },
     location: 'Berlin, Germany',
+    image: '/img/berlin.jpg',
     formats: {}
   },
   {
@@ -290,6 +303,7 @@ module.exports = [
       url  : 'http://cakefest.org/',
     },
     location: 'Berlin, Germany',
+    image: '/img/berlin.jpg',
     formats: {}
   },
   {
@@ -301,6 +315,7 @@ module.exports = [
       url  : 'http://cakefest.org/',
     },
     location: 'Buenos Aires, Argentina',
+    image: '/img/buenos-aires.jpg',
     formats: {
     }
   },
@@ -313,6 +328,7 @@ module.exports = [
       url  : 'http://cakefest.org/',
     },
     location: 'Buenos Aires, Argentina',
+    image: '/img/buenos-aires.jpg',
     formats: {
     }
   },
@@ -337,6 +353,7 @@ module.exports = [
       url  : 'http://docs.jquery.com/JQueryCamp07',
     },
     location: 'Cambridge, Massachusetts',
+    image: '/img/cambridge-ma.jpg',
     formats: {
     }
   },

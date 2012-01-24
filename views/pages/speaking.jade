@@ -8,10 +8,13 @@ block content
     [email]: mailto:felix@debuggable.com
 
   h2 List of talks
-  ul
+  ul.talks
     each talk in talks
-      li
-        include talk
+      li.talk
+        img(src='#{ talk.image || 'http://placehold.it/220x146' }')
+        //-include talk
+
+  div.clear
 
   :markdown
     ## Speaker Bio
