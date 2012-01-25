@@ -38,7 +38,7 @@ h4 a:hover {
   clear: both;
 }
 .talks {
-  margin: 0 0 0 20px;
+  margin: 0 0 20px 20px;
   padding: 0;
   float: left;
 }
@@ -48,4 +48,49 @@ h4 a:hover {
   margin-bottom: 10px;
   display: inline;
   list-style-type: none;
+  height: 188px;
+}
+.talks .talk img {
+  display: block;
+  width: 220px;
+  height: 146px;
+  background-color: #ccc;
+}
+.talks .talk .link:hover img {
+  opacity: .2;
+}
+.talks .talk .link {
+  text-decoration: none;
+}
+.talks .talk .name, .talks .talk .title, .talks .talk .date {
+  display: block;
+  position: relative;
+  z-index: 10;
+  height: 22px;
+  line-height: 22px;
+  font-size: 13px;
+  color: #fff;
+}
+.talks .talk .name {
+  width: 220px;
+  background-color: #000;
+  text-align: center;
+}
+.talks .talk .title {
+  margin-top: -146px;
+  height: 126px;
+  padding: 10px;
+  width: 200px;
+  color: #000;
+  font-size: 15px;
+  visibility: hidden;
+}
+.talks .talk .link:hover .title {
+  visibility: visible;
+}
+.talks .talk .date {
+  color: #000;
+}
+.talks .talk .date .upcoming {
+  font-weight: bold;
 }

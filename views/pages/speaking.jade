@@ -7,15 +7,6 @@ block content
 
     [email]: mailto:felix@debuggable.com
 
-  h2 List of talks
-  ul.talks
-    each talk in talks
-      li.talk
-        img(src='#{ talk.image || 'http://placehold.it/220x146' }')
-        //-include talk
-
-  div.clear
-
   :markdown
     ## Speaker Bio
 
@@ -25,3 +16,18 @@ block content
 
     [picture]: http://felixge.s3.amazonaws.com/11/felix_geisendoerfer.jpg
     [street unicycling]: http://www.youtube.com/results?search_query=street+unicycling
+
+  h2 List of talks
+  ul.talks
+    each talk in talks
+      - var upcoming = (talk.date > Date.now() || talk.date[1] > Date.now())
+      li.talk
+        a.link(href='#{ talk.url }')
+          span.date
+            if upcoming
+              span.upcoming Upcoming:&nbsp;
+            = days(talk.date)
+          img(src='#{ talk.image || 'http://placehold.it/220x146' }')
+          span.title!= talk.title + '<br><br>' + talk.location
+          span.name= talk.event.name
+        //-include talk

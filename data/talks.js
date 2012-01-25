@@ -4,7 +4,17 @@
 
 // Licenses
 // * http://commons.wikimedia.org/wiki/File:Brandenburger_Tor_abends.jpg
-// * http://commons.wikimedia.org/wiki/File:Puerto_Madero_DLightning.jpg
+// * http://commons.wikimedia.org/wiki/File:Midtown_Atlanta_skyline_from_Clara_Meer_in_Piedmont_Park.JPG
+// * http://commons.wikimedia.org/wiki/File:Buenos_Aires_D%C3%A9cembre_2007_-_Avenida_5_de_Mayo.jpg
+// * http://upload.wikimedia.org/wikipedia/commons/4/48/Munich_skyline.jpg
+// * http://en.wikipedia.org/wiki/File:Stortinget_2009.jpg
+// * http://en.wikipedia.org/wiki/File:Jorchr-Malm%C3%B6_r%C3%A5dhus.jpg
+// * http://de.wikipedia.org/w/index.php?title=Datei:Alsterzufluss-Zentrum_(CherryX).jpg&filetimestamp=20110430150428
+// * http://en.wikipedia.org/wiki/File:TomMcCallWaterfrontPark.jpg
+// * http://de.wikipedia.org/w/index.php?title=Datei:Karlsruher_Pyramide.JPG&filetimestamp=20080312150653
+// * http://en.wikipedia.org/wiki/File:UCFlibrary.jpg
+//
+// Berlin Buzzwords
 
 module.exports = [
   {
@@ -16,6 +26,7 @@ module.exports = [
       url  : 'http://www.tngtech.com/events-bigtechday05.html',
     },
     location: 'Munich, Germany',
+    image: '/img/munich.jpg',
     formats: {}
   },
   {
@@ -27,6 +38,7 @@ module.exports = [
       url  : 'http://www.mnug.de/',
     },
     location: 'Munich, Germany',
+    image: '/img/munich.jpg',
     formats: {}
   },
   {
@@ -41,6 +53,7 @@ module.exports = [
       url  : 'http://www.webrebels.org/',
     },
     location: 'Oslo, Norway',
+    image: '/img/oslo.jpg',
     formats: {},
   },
   {
@@ -66,6 +79,7 @@ module.exports = [
       url  : 'http://www.mnug.de/artikel/meetups/dezember2011',
     },
     location: 'Munich, Germany',
+    image: '/img/munich.jpg',
     formats: {
       pdf   : 'http://felixge.s3.amazonaws.com/11/nodejs%20-%20best%20practices.pdf',
       video : 'http://video.tngtech.com/veranstaltungen/2011/MNUG/MNUG_2011-12-01_Felix_Node_Best_Practices.html',
@@ -80,6 +94,7 @@ module.exports = [
       url  : 'http://www.mnug.de/artikel/meetups/dezember2011',
     },
     location: 'Munich, Germany',
+    image: '/img/munich.jpg',
     formats: {
       pdf   : 'http://felixge.s3.amazonaws.com/11/nodejs%20-%20a%20practical%20introduction%20(v2).pdf',
       video : 'http://video.tngtech.com/veranstaltungen/2011/MNUG/MNUG_2011-12-01_Felix_Node_Practical_Introduction.html',
@@ -94,8 +109,9 @@ module.exports = [
       url  : 'http://oredev.org/2011/sessions/node-js--a-practical-introduction',
     },
     location: 'Malmö, Sweden',
+    image: '/img/malmoe.jpg',
     formats: {
-      pdf        : 'http://felixge.s3.amazonaws.com/11/nodejs-a-practical-introduction-oredev.pdf',
+      pdf : 'http : //felixge.s3.amazonaws.com/11/nodejs-a-practical-introduction-oredev.pdf',
     }
   },
   {
@@ -121,6 +137,7 @@ module.exports = [
       url  : 'http://www.devcon-hamburg.de/workshops-2011/#Einf%C3%BChrung%20node.js',
     },
     location: 'Hamburg, Germany',
+    image: '/img/hamburg.jpg',
     formats: {
     }
   },
@@ -146,6 +163,7 @@ module.exports = [
       url  : 'http://2011.nodeconf.com/schedule.html',
     },
     location: 'Portland, Oregon',
+    image: '/img/portland.jpg',
     formats: {
       pdf        : 'http://felixge.s3.amazonaws.com/11/how-to-test-async-code.pdf',
     }
@@ -159,6 +177,7 @@ module.exports = [
       url  : 'http://corporate.gameforge.com/',
     },
     location: 'Karlsruhe, Germany',
+    image: '/img/karlsruhe.jpg',
     formats: {
       pdf        : 'http://felixge.s3.amazonaws.com/11/nodejs-a-quick-tour-v6.pdf',
     }
@@ -172,6 +191,7 @@ module.exports = [
       url  : 'http://startupriot.com/',
     },
     location: 'Atlanta, Georgia',
+    image: '/img/atlanta.jpg',
     formats: {
       pdf        : 'http://felixge.s3.amazonaws.com/11/transloadit-startupriot.pdf',
     }
@@ -185,6 +205,7 @@ module.exports = [
       url  : 'http://www.meetup.com/AtlantaJavaScript/events/16170144/',
     },
     location: 'Atlanta, Georgia',
+    image: '/img/atlanta.jpg',
     formats: {
     }
   },
@@ -197,6 +218,7 @@ module.exports = [
       url  : 'http://www.meetup.com/atlantaruby/events/15955963/',
     },
     location: 'Atlanta, Georgia',
+    image: '/img/atlanta.jpg',
     formats: {
       pdf        : 'http://felixge.s3.amazonaws.com/11/nodejs-should-ruby-developers-care.pdf',
     }
@@ -266,6 +288,7 @@ module.exports = [
       url  : 'http://www.meetup.com/hamburg-js/',
     },
     location: 'Hamburg, Germany',
+    image: '/img/hamburg.jpg',
     formats: {
     }
   },
@@ -341,6 +364,7 @@ module.exports = [
       url  : 'http://debuggable.com/posts/cakefest-orlando-2008-summary:480f4dd6-6404-4774-a771-4e8fcbdd56cb',
     },
     location: 'Orlando, Florida',
+    image: '/img/orlando.jpg',
     formats: {
     }
   },
