@@ -62,7 +62,8 @@ module.exports = [
     },
     location: 'Munich, Germany',
     formats: {
-      pdf        : 'http://felixge.s3.amazonaws.com/11/nodejs%20-%20best%20practices.pdf',
+      pdf   : 'http://felixge.s3.amazonaws.com/11/nodejs%20-%20best%20practices.pdf',
+      video : 'http://video.tngtech.com/veranstaltungen/2011/MNUG/MNUG_2011-12-01_Felix_Node_Best_Practices.html',
     }
   },
   {
@@ -75,7 +76,8 @@ module.exports = [
     },
     location: 'Munich, Germany',
     formats: {
-      pdf        : 'http://felixge.s3.amazonaws.com/11/nodejs%20-%20a%20practical%20introduction%20(v2).pdf',
+      pdf   : 'http://felixge.s3.amazonaws.com/11/nodejs%20-%20a%20practical%20introduction%20(v2).pdf',
+      video : 'http://video.tngtech.com/veranstaltungen/2011/MNUG/MNUG_2011-12-01_Felix_Node_Practical_Introduction.html',
     }
   },
   {
