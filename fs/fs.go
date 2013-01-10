@@ -13,7 +13,7 @@ var (
 
 func New() http.FileSystem {
 	pages := newPages(http.Dir(root))
-	public := http.Dir(root + "/public")
+	public := newLessProcessor(http.Dir(root + "/public"))
 
 	fs := newChain(public, pages)
 	return fs
