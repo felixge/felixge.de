@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"path"
 	"runtime"
+	"github.com/felixge/felixge.de/fs"
 )
 
 var (
@@ -14,7 +15,7 @@ var (
 )
 
 func main() {
-	fs := http.Dir(root+"/pages")
+	fs := fs.New(http.Dir(root+"/pages"))
 
 	listener, err := net.Listen("tcp", "localhost:8080")
 	if err != nil {
@@ -22,6 +23,7 @@ func main() {
 	}
 
 	fmt.Printf("Listening at: http://%s\n", listener.Addr())
+
 	if err := http.Serve(listener, http.FileServer(fs)); err != nil {
 		panic(err)
 	}
