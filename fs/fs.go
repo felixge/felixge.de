@@ -8,7 +8,8 @@ import (
 
 var (
 	_, filename, _, _ = runtime.Caller(0)
-	root              = path.Join(path.Dir(filename), "..")
+	__dirname         = path.Dir(filename)
+	root              = path.Join(__dirname, "..")
 )
 
 func New() http.FileSystem {
