@@ -2,9 +2,19 @@ package fs
 
 import (
 	"net/http"
-	"github.com/transloadit/magicfs"
+	"path"
+	"runtime"
 )
 
-func New(baseFs http.FileSystem) http.FileSystem {
-	return magicfs.New(baseFs)
+var (
+	_, filename, _, _ = runtime.Caller(0)
+	root              = path.Join(path.Dir(filename), "..")
+)
+
+func New() http.FileSystem {
+	pages := newPages(http.Dir(root))
+	public := http.Dir(root + "/public")
+
+	fs := newChain(public, pages)
+	return fs
 }

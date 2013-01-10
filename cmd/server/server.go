@@ -2,20 +2,13 @@ package main
 
 import (
 	"fmt"
+	"github.com/felixge/felixge.de/fs"
 	"net"
 	"net/http"
-	"path"
-	"runtime"
-	"github.com/felixge/felixge.de/fs"
-)
-
-var (
-	_, filename, _, _ = runtime.Caller(0)
-	root       = path.Join(path.Dir(filename), "../..")
 )
 
 func main() {
-	fs := fs.New(http.Dir(root+"/pages"))
+	fs := fs.New()
 
 	listener, err := net.Listen("tcp", "localhost:8080")
 	if err != nil {
