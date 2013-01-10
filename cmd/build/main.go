@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/felixge/felixge.de/fs"
 	"net/http"
+	"path/filepath"
 )
 
 func main() {
@@ -38,6 +39,11 @@ func list(fs http.FileSystem, path string) error {
 	}
 
 	for _, stat = range stats {
+		if !stat.IsDir() {
+			fmt.Printf("file\t%s\t%d\n", filepath.Clean(path+"/"+stat.Name()), stat.Size())
+			continue
+		}
+
 		if err := list(fs, path+stat.Name()); err != nil {
 			return err
 		}
