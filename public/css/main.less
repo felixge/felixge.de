@@ -1,3 +1,125 @@
+/* Layout */
+#logo{
+  display: block;
+  width: 391px;
+  margin: 0 auto;
+
+  img{
+    height: 250px;
+  }
+}
+
+.container{
+  width: 860px;
+  margin: 0 auto;
+}
+
+.toc{
+  width: 100%;
+
+  tr{
+    line-height: 30px;
+  }
+
+  td{
+
+    a,span{
+      background-color: #fff;
+      bottom: -10px;
+      position: relative;
+    }
+  }
+
+  .title {
+    a{
+      padding-right: 20px;
+    }
+  }
+
+  .title, .location{
+    border-bottom: 2px dotted #ccc;
+  }
+
+  .date, .location{
+    color: grey;
+  }
+
+  .location{
+    text-align: right;
+      padding-right: 0;
+    span{
+      padding-left: 20px;
+    }
+  }
+
+  .date{
+    text-align: right;
+    width: 100px;
+  }
+
+
+  /*padding: 0;*/
+
+  /*li{*/
+    /*list-style-type: none;*/
+    /*border-bottom: 2px dotted #ccc;*/
+    /*height: 16px;*/
+    /*clear: both;*/
+    /*margin-bottom: 10px;*/
+  /*}*/
+
+  /*a{*/
+    /*background-color: #fff;*/
+    /*padding: 0 20px 0 0;*/
+  /*}*/
+
+  /*span{*/
+    /*background-color: #fff;*/
+    /*float: right;*/
+    /*padding: 0 0 0 5px;*/
+    /*color: gray;*/
+  /*}*/
+}
+
+/* Generic Styles */
+
 body{
-	color: #f00
+  font-family: helvetica, arial, clean, sans-serif;
+  color: #333;
+  margin: 0;
+  padding-bottom: 30px;
+}
+
+p, li, dd, dt{
+  font-size: 17px;
+}
+
+a{
+  color: #0050C0;
+}
+
+a:visited{
+  color: #B950B7;
+}
+
+
+h1 a, h2 a, h3 a, h4 a{
+  text-decoration: none;
+}
+
+h1 a:hover, h2 a:hover, h3 a:hover, h4 a:hover{
+  text-decoration: underline;
+}
+
+h1{
+  font-size: 25px;
+}
+
+h2{
+  font-size: 20px;
+}
+
+p{
+  line-height: 28px;
+  clear: both;
 }
