@@ -33,50 +33,19 @@ I have been blogging since 2006, my older posts can be found [here](http://debug
 
 <table class="toc">
   <tbody>
+		{{range .}}
     <tr>
-      <td class="title"><a href="#">Dirty - How simple is your database?</a></td>
-      <td class="location"><span>JSConf.eu, Berlin</span></td>
-      <td class="date"><span>Sep 25 2010</span></td>
+			<td class="title">
+				<span>
+					<a href="{{.Url}}">{{.Title}}</a>
+					{{if .VideoUrl}}
+					- <a href="{{.VideoUrl}}">video</a>
+					{{end}}
+				</span>
+			</td>
+			<td class="location"><span><a href="{{.EventUrl}}">{{.Location}}</a></span></td>
+			<td class="date"><span>{{.Date}}</span></td>
     </tr>
-    <tr>
-      <td class="title"><a href="#">Node.js - A quick tour</a></td>
-      <td class="location"><span>Hamburg.js Usergroup, Hamburg</span></td>
-      <td class="date"><span>Mar 4 2010</span></td>
-    </tr>
-    <tr>
-      <td class="title"><a href="#">Node.js - A quick tour</a></td>
-      <td class="location"><span>Berlin JS Usergroup, Berlin</span></td>
-      <td class="date"><span>Jan 12 2010</span></td>
-    </tr>
-    <tr>
-      <td class="title"><a href="#">JavaScript and Git</a></td>
-      <td class="location"><span>CakeFest, Berlin</span></td>
-      <td class="date"><span>Jul 12 2009</span></td>
-    </tr>
-    <tr>
-      <td class="title"><a href="#">Receipes for successful CakePHP projects</a></td>
-      <td class="location"><span>CakeFest, Berlin</span></td>
-      <td class="date"><span>Jul 11 2009</span></td>
-    </tr>
-    <tr>
-      <td class="title"><a href="#">jQuery and CakePHP</a></td>
-      <td class="location"><span>CakeFest, Buenos Aires</span></td>
-      <td class="date"><span>Dec 3 2008</span></td>
-    </tr>
-    <tr>
-      <td class="title"><a href="#">Git and CakePHP</a></td>
-      <td class="location"><span>CakeFest, Buenos Aires</span></td>
-      <td class="date"><span>Dec 2 2008</span></td>
-    </tr>
-    <tr>
-      <td class="title"><a href="#">With jQuery & CakePHP to World Domination</a></td>
-      <td class="location"><span>CakeFest, Orlando</span></td>
-      <td class="date"><span>Feb 6 2008</span></td>
-    </tr>
-    <tr>
-      <td class="title"><a href="#">ActiveDOM</a></td>
-      <td class="location"><span>jQuery Camp, Boston</span></td>
-      <td class="date"><span>Oct 27 2007</span></td>
-    </tr>
+		{{end}}
   </tbody>
 </table>

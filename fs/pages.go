@@ -76,7 +76,7 @@ func (pages *pages) Open(path string) (http.File, error) {
 	}
 
 	buf := &bytes.Buffer{}
-	if err := layout.Execute(buf, nil); err != nil {
+	if err := layout.Execute(buf, talks); err != nil {
 		return nil, err
 	}
 
