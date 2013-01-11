@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"path"
 	"runtime"
+	"github.com/felixge/magicfs"
 )
 
 var (
@@ -16,7 +17,7 @@ func New() http.FileSystem {
 	pages := newPages(http.Dir(root))
 	public := newLessProcessor(http.Dir(root + "/public"))
 
-	chain := newChain(public, pages)
+	chain := magicfs.NewChainFs(public, pages)
 	fs := newExclude(chain, ".*")
 	return fs
 }
