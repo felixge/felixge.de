@@ -16,6 +16,7 @@ func New() http.FileSystem {
 	pages := newPages(http.Dir(root))
 	public := newLessProcessor(http.Dir(root + "/public"))
 
-	fs := newChain(public, pages)
+	chain := newChain(public, pages)
+	fs := newExclude(chain, ".*")
 	return fs
 }
