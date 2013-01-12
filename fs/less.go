@@ -72,15 +72,8 @@ func (less *lessProcessor) Open(path string) (http.File, error) {
 		return nil, err
 	}
 
-	stdout, err := cmd.StdoutPipe()
-	if err != nil {
-		return nil, err
-	}
-
-	stderr, err := cmd.StderrPipe()
-	if err != nil {
-		return nil, err
-	}
+	cmd.Stderr = buf
+	cmd.Stdout = buf
 
 	if err := cmd.Start(); err != nil {
 		return nil, err
@@ -91,9 +84,6 @@ func (less *lessProcessor) Open(path string) (http.File, error) {
 	if err := stdin.Close(); err != nil {
 		return nil, err
 	}
-
-	io.Copy(buf, stdout)
-	io.Copy(buf, stderr)
 
 	cmd.Wait()
 
