@@ -16,27 +16,26 @@ var (
 )
 
 func New() http.FileSystem {
-	fs := magicfs.NewMagicFs(http.Dir(root + "/public"))
-	fs.Exclude(".*")
-	fs.Map(".less", ".css", func(less io.Reader) (io.Reader) {
-		r, w := io.Pipe()
-		cmd := exec.Command(__dirname+"/processors/bin/less.js")
+	return magicfs.
+		NewMagicFs(http.Dir(root + "/public")).
+		Exclude(".*").
+		Map(".less", ".css", func(less io.Reader) (io.Reader) {
+			r, w := io.Pipe()
+			cmd := exec.Command(__dirname+"/processors/bin/less.js")
 
-		cmd.Stdin = less
-		cmd.Stderr = w
-		cmd.Stdout = w
+			cmd.Stdin = less
+			cmd.Stderr = w
+			cmd.Stdout = w
 
-		go func() {
-			err := cmd.Run()
-			if err != nil {
-				w.Write([]byte("lessc: "+err.Error()))
-			}
-			w.CloseWithError(err)
-		}()
+			go func() {
+				err := cmd.Run()
+				if err != nil {
+					w.Write([]byte("lessc: "+err.Error()))
+				}
+				w.CloseWithError(err)
+			}()
 
-		return r
-	})
-	fs.Or(newPages(http.Dir(root)))
-
-	return fs
+			return r
+		}).
+		Or(newPages(http.Dir(root)))
 }
