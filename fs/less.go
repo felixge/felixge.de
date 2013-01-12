@@ -3,7 +3,6 @@ package fs
 import (
 	"bytes"
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 	"os/exec"
@@ -67,25 +66,14 @@ func (less *lessProcessor) Open(path string) (http.File, error) {
 
 	buf := &bytes.Buffer{}
 	cmd := exec.Command("lessc", "-", "--no-color")
-	stdin, err := cmd.StdinPipe()
-	if err != nil {
-		return nil, err
-	}
 
+	cmd.Stdin = lessFile
 	cmd.Stderr = buf
 	cmd.Stdout = buf
 
-	if err := cmd.Start(); err != nil {
+	if err := cmd.Run(); err != nil {
 		return nil, err
 	}
-
-	io.Copy(stdin, lessFile)
-
-	if err := stdin.Close(); err != nil {
-		return nil, err
-	}
-
-	cmd.Wait()
 
 	result := newFile(lessFile, path, buf.Bytes())
 	return result, nil
