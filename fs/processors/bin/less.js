@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-var rs = require('robotskirt');
+var less = require('less');
 var input = '';
 process.stdin.setEncoding('utf8');
 process.stdin
@@ -7,8 +7,12 @@ process.stdin
     input += chunk
   })
   .on('end', function() {
-    var renderer = new rs.HtmlRenderer();
-    var parser = new rs.Markdown(renderer);
-    process.stdout.write(parser.render(input))
+    less.render(input, function(err, output) {
+      if (err) {
+        throw err;
+      }
+
+      process.stdout.write(output)
+    });
   })
   .resume();

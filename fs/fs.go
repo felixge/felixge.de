@@ -20,7 +20,7 @@ func New() http.FileSystem {
 	fs.Exclude(".*")
 	fs.Map(".less", ".css", func(less io.Reader) (io.Reader) {
 		r, w := io.Pipe()
-		cmd := exec.Command("lessc", "-", "--no-color")
+		cmd := exec.Command(__dirname+"/processors/bin/less.js")
 
 		cmd.Stdin = less
 		cmd.Stderr = w

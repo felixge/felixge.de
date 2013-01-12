@@ -1,4 +1,8 @@
 {
   "name": "processors",
   "version": "0.0.0",
+  "dependencies": {
+    "less": "~1.3.3",
+    "robotskirt": "~2.7.1"
+  }
 }
