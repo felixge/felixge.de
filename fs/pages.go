@@ -3,10 +3,8 @@ package fs
 import (
 	"bytes"
 	"html/template"
-	"io"
 	"io/ioutil"
 	"net/http"
-	"os/exec"
 	"path/filepath"
 )
 
@@ -39,39 +37,7 @@ func (pages *pages) Open(path string) (http.File, error) {
 		return nil, err
 	}
 
-	htmlBuf := &bytes.Buffer{}
-	cmd := exec.Command(__dirname+"/processors/bin/markdown.js")
-	stdin, err := cmd.StdinPipe()
-	if err != nil {
-		return nil, err
-	}
-
-	stdout, err := cmd.StdoutPipe()
-	if err != nil {
-		return nil, err
-	}
-
-	stderr, err := cmd.StderrPipe()
-	if err != nil {
-		return nil, err
-	}
-
-	if err := cmd.Start(); err != nil {
-		return nil, err
-	}
-
-	stdin.Write(pageHtml)
-
-	if err := stdin.Close(); err != nil {
-		return nil, err
-	}
-
-	io.Copy(htmlBuf, stdout)
-	io.Copy(htmlBuf, stderr)
-
-	cmd.Wait()
-
-	if _, err := layout.New("page").Parse(string(htmlBuf.Bytes())); err != nil {
+	if _, err := layout.New("page").Parse(string(pageHtml)); err != nil {
 		return nil, err
 	}
 

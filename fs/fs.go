@@ -16,6 +16,27 @@ var (
 )
 
 func New() http.FileSystem {
+	pageFs := magicfs.
+		NewMagicFs(http.Dir(root)).
+		Map(".md", ".html", func(less io.Reader) (io.Reader) {
+			r, w := io.Pipe()
+			cmd := exec.Command(__dirname+"/processors/bin/markdown.js")
+
+			cmd.Stdin = less
+			cmd.Stderr = w
+			cmd.Stdout = w
+
+			go func() {
+				err := cmd.Run()
+				if err != nil {
+					w.Write([]byte("markdown: "+err.Error()))
+				}
+				w.CloseWithError(err)
+			}()
+
+			return r
+		})
+
 	return magicfs.
 		NewMagicFs(http.Dir(root + "/public")).
 		Exclude(".*").
@@ -37,5 +58,5 @@ func New() http.FileSystem {
 
 			return r
 		}).
-		Or(newPages(http.Dir(root)))
+		Or(newPages(pageFs))
 }
