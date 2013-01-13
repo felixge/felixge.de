@@ -5,8 +5,9 @@ Hi, I am Felix Geisendörfer, a programmer and entrepreneur living in Berlin, Ge
 I work at [transloadit.com](http://transloadit.com/),
 a small, bootstrapped and profitable SaaS business that I co-founded in 2009.
 
-A lot of my time is spend on [open source](/open-source), and I was an active contributor in
-the early development of [node.js](http://nodejs.org/).
+A lot of my time is spend on [open source](http://github.com/felixge), and I
+was an active contributor in the early development of
+[node.js](http://nodejs.org/).
 
 More recently, I helped to start a movement around programming flying
 robots with JavaScript called [NodeCopter](http://nodecopter.com/).
