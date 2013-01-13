@@ -19,16 +19,9 @@ You can find me on [twitter](https://twitter.com/felixge) and
 
 ## Writing
 
-<table class="toc">
-  <tbody>
-    <tr>
-      <td class="title"><a href="#">Back to the Internet</a></td>
-      <td class="date"><span>Nov 18 2012</span></td>
-    </tr>
-  </tbody>
-</table>
-
-I have been blogging since 2006, my older posts can be found [here](http://debuggable.com/posts/archive).
+I have been blogging since 2006, my older posts can be found
+[here](http://debuggable.com/posts/archive). A new blog will be started here
+soon.
 
 ## Speaking
 
@@ -44,6 +37,9 @@ I have been blogging since 2006, my older posts can be found [here](http://debug
           {{end}}
           {{if .VideoUrl}}
           &middot; <a href="{{.VideoUrl}}">video</a>
+          {{end}}
+          {{if .CodeUrl}}
+          &middot; <a href="{{.CodeUrl}}">code</a>
           {{end}}
         </span>
       </td>

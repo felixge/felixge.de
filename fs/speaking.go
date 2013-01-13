@@ -8,4 +8,5 @@ type talk struct {
 	EventUrl string
 	VideoUrl string
 	PdfUrl   string
+	CodeUrl  string
 }
