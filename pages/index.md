@@ -15,7 +15,12 @@ As of late, [go](http://golang.org/) has become my new language of choice. You
 should check it out, it's amazing.
 
 You can find me on [twitter](https://twitter.com/felixge) and
-[github](https://github.com/felixge), or [contact me](/contact) directly.
+[github](https://github.com/felixge), or [contact me](/contact.html) directly.
+
+## Consulting
+
+I am planning to take on 20 days of consulting projects in 2013. [Get
+in touch](/contact.html).
 
 ## Writing
 
