@@ -5,8 +5,6 @@ import (
 	"path"
 	"runtime"
 	"github.com/felixge/magicfs"
-	"io"
-	"os/exec"
 )
 
 var (
@@ -18,45 +16,11 @@ var (
 func New() http.FileSystem {
 	pageFs := magicfs.
 		NewMagicFs(http.Dir(root)).
-		Map(".md", ".html", func(less io.Reader) (io.Reader) {
-			r, w := io.Pipe()
-			cmd := exec.Command(__dirname+"/processors/bin/markdown.js")
-
-			cmd.Stdin = less
-			cmd.Stderr = w
-			cmd.Stdout = w
-
-			go func() {
-				err := cmd.Run()
-				if err != nil {
-					w.Write([]byte("markdown: "+err.Error()))
-				}
-				w.CloseWithError(err)
-			}()
-
-			return r
-		})
+		ExecMap(".md", ".html", __dirname+"/processors/bin/markdown.js");
 
 	return magicfs.
 		NewMagicFs(http.Dir(root + "/public")).
 		Exclude(".*").
-		Map(".less", ".css", func(less io.Reader) (io.Reader) {
-			r, w := io.Pipe()
-			cmd := exec.Command(__dirname+"/processors/bin/less.js")
-
-			cmd.Stdin = less
-			cmd.Stderr = w
-			cmd.Stdout = w
-
-			go func() {
-				err := cmd.Run()
-				if err != nil {
-					w.Write([]byte("lessc: "+err.Error()))
-				}
-				w.CloseWithError(err)
-			}()
-
-			return r
-		}).
+		ExecMap(".less", ".css", __dirname+"/processors/bin/less.js").
 		Or(newPages(pageFs))
 }
