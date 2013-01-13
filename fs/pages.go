@@ -2,6 +2,7 @@ package fs
 
 import (
 	"bytes"
+	"encoding/json"
 	"html/template"
 	"io/ioutil"
 	"net/http"
@@ -41,6 +42,11 @@ func (pages *pages) Open(path string) (http.File, error) {
 		return nil, err
 	}
 
+	talks, err := pages.talks()
+	if err != nil {
+		return nil, err
+	}
+
 	buf := &bytes.Buffer{}
 	if err := layout.Execute(buf, talks); err != nil {
 		return nil, err
@@ -63,4 +69,21 @@ func (pages *pages) layout() (*template.Template, error) {
 	}
 
 	return template.New("layout").Parse(string(layoutHtml))
+}
+
+func (pages *pages) talks() ([]*talk, error) {
+	talksFile, err := pages.baseFs.Open("/talks.json")
+	if err != nil {
+		return nil, err
+	}
+	defer talksFile.Close()
+
+	talksJson, err := ioutil.ReadAll(talksFile)
+	if err != nil {
+		return nil, err
+	}
+
+	talks := make([]*talk, 0)
+	json.Unmarshal(talksJson, &talks)
+	return talks, err
 }

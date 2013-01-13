@@ -34,19 +34,22 @@ I have been blogging since 2006, my older posts can be found [here](http://debug
 
 <table class="toc">
   <tbody>
-		{{range .}}
+    {{range .}}
     <tr>
-			<td class="title">
-				<span>
-					<a href="{{.Url}}">{{.Title}}</a>
-					{{if .VideoUrl}}
+      <td class="title">
+        <span>
+          <a href="{{.Url}}">{{.Title}}</a>
+          {{if .PdfUrl}}
+          &middot; <a href="{{.PdfUrl}}">pdf</a>
+          {{end}}
+          {{if .VideoUrl}}
           &middot; <a href="{{.VideoUrl}}">video</a>
-					{{end}}
-				</span>
-			</td>
-			<td class="location"><span><a href="{{.EventUrl}}">{{.Location}}</a></span></td>
-			<td class="date"><span>{{.Date}}</span></td>
+          {{end}}
+        </span>
+      </td>
+      <td class="location"><span><a href="{{.EventUrl}}">{{.Location}}</a></span></td>
+      <td class="date"><span>{{.Date}}</span></td>
     </tr>
-		{{end}}
+    {{end}}
   </tbody>
 </table>
