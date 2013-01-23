@@ -33,7 +33,7 @@ soon.
 
 <table class="toc">
   <tbody>
-    {{range .}}
+    {{range .Talks}}
     <tr>
       <td class="title">
         <span>

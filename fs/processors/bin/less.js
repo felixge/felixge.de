@@ -7,7 +7,8 @@ process.stdin
     input += chunk
   })
   .on('end', function() {
-    less.render(input, function(err, output) {
+    var options = {};
+    less.render(input, options, function(err, output) {
       if (err) {
         throw err;
       }
