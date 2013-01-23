@@ -2,7 +2,6 @@ package generator
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"path"
 	"runtime"
@@ -27,7 +26,6 @@ func NewFs() http.FileSystem {
 		"/public/index.html",
 		[]string{"/pages/index.html", "/layouts/default.html", "/talks.json"},
 		func(t *makefs.Task) error {
-			fmt.Printf("making homepage\n")
 			sources := t.Sources()
 
 			pageHtml, err := ioutil.ReadAll(sources["/pages/index.html"])
