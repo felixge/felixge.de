@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/felixge/felixge.de/fs"
+	"github.com/felixge/felixge.de/generator"
 	"log"
 	"net"
 	"net/http"
@@ -23,7 +23,7 @@ func main() {
 }
 
 func newHandler() *handler {
-	fs := fs.New()
+	fs := generator.NewFs()
 	return &handler{fileServer: http.FileServer(fs)}
 }
 

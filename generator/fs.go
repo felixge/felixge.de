@@ -1,4 +1,4 @@
-package fs
+package generator
 
 import (
 	"encoding/json"
@@ -17,7 +17,7 @@ var (
 	root              = path.Join(__dirname, "..")
 )
 
-func New() http.FileSystem {
+func NewFs() http.FileSystem {
 	fs := makefs.NewFs(http.Dir(root))
 
 	fs.ExecMake("%.html", "%.md", __dirname+"/processors/bin/markdown.js")
