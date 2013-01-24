@@ -52,6 +52,21 @@ func NewFs() http.FileSystem {
 		},
 	)
 
+	fs.Make(
+		"/public/contact.html",
+		[]string{"/pages/contact.html", "/layouts/default.html"},
+		func(t *makefs.Task) error {
+			sources := t.Sources()
+
+			return render(
+				t.Target(),
+				sources["/pages/contact.html"],
+				sources["/layouts/default.html"],
+				nil,
+			)
+		},
+	)
+
 	return fs.SubFs("/public")
 }
 
