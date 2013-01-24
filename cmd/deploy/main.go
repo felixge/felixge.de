@@ -62,9 +62,6 @@ func main() {
 			}
 		}
 	}
-
-	_ = s3Files
-	_ = localFiles
 }
 
 func listS3(bucket *s3.Bucket) (map[string]fileInfo, error) {
