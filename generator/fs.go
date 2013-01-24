@@ -52,20 +52,26 @@ func NewFs() http.FileSystem {
 		},
 	)
 
-	fs.Make(
-		"/public/contact.html",
-		[]string{"/pages/contact.html", "/layouts/default.html"},
-		func(t *makefs.Task) error {
-			sources := t.Sources()
+	staticPages := []string{"contact.html", "404.html"}
 
-			return render(
-				t.Target(),
-				sources["/pages/contact.html"],
-				sources["/layouts/default.html"],
-				nil,
-			)
-		},
-	)
+	for _, staticPage := range staticPages {
+		page := staticPage
+
+		fs.Make(
+			"/public/" + page,
+			[]string{"/pages/" + page, "/layouts/default.html"},
+			func(t *makefs.Task) error {
+				sources := t.Sources()
+
+				return render(
+					t.Target(),
+					sources["/pages/" + page],
+					sources["/layouts/default.html"],
+					nil,
+				)
+			},
+		)
+	}
 
 	return fs.SubFs("/public")
 }
