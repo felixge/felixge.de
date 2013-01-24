@@ -7,6 +7,7 @@ import (
 	"runtime"
 	"github.com/felixge/makefs"
 	"html/template"
+	"io"
 	"io/ioutil"
 )
 
@@ -28,26 +29,6 @@ func NewFs() http.FileSystem {
 		func(t *makefs.Task) error {
 			sources := t.Sources()
 
-			pageHtml, err := ioutil.ReadAll(sources["/pages/index.html"])
-			if err != nil {
-				return err
-			}
-
-			tmpl, err := template.New("page").Parse(string(pageHtml))
-			if err != nil {
-				return err
-			}
-
-			layoutHtml, err := ioutil.ReadAll(sources["/layouts/default.html"])
-			if err != nil {
-				return err
-			}
-
-			tmpl, err = tmpl.New("layout").Parse(string(layoutHtml))
-			if err != nil {
-				return err
-			}
-
 			talksJson, err := ioutil.ReadAll(sources["/talks.json"])
 			if err != nil {
 				return err
@@ -62,14 +43,40 @@ func NewFs() http.FileSystem {
 				"Talks": talks,
 			}
 
-			if err := tmpl.Execute(t.Target(), viewVars); err != nil {
-				return err
-			}
-			return nil
+			return render(
+				t.Target(),
+				sources["/pages/index.html"],
+				sources["/layouts/default.html"],
+				viewVars,
+			)
 		},
 	)
 
 	return fs.SubFs("/public")
+}
+
+func render(w io.Writer, page, layout io.Reader, viewVars interface{}) error {
+	pageHtml, err := ioutil.ReadAll(page)
+	if err != nil {
+		return err
+	}
+
+	tmpl, err := template.New("page").Parse(string(pageHtml))
+	if err != nil {
+		return err
+	}
+
+	layoutHtml, err := ioutil.ReadAll(layout)
+	if err != nil {
+		return err
+	}
+
+	tmpl, err = tmpl.New("layout").Parse(string(layoutHtml))
+	if err != nil {
+		return err
+	}
+
+	return tmpl.Execute(w, viewVars)
 }
 
 type talk struct {
