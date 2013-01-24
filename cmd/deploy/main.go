@@ -98,6 +98,11 @@ func listFs(fs http.FileSystem, path string) (map[string]fileInfo, error) {
 	results := make(map[string]fileInfo, len(stats))
 
 	for _, stat := range stats {
+		// skip . files (should be done by fs in the future)
+		name := stat.Name()
+		if name[0:1] == "." {
+			continue
+		}
 		path := gopath.Join(path, stat.Name())
 
 		if stat.IsDir() {
