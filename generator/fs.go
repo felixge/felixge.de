@@ -2,13 +2,13 @@ package generator
 
 import (
 	"encoding/json"
-	"net/http"
-	"path"
-	"runtime"
 	"github.com/felixge/makefs"
 	"html/template"
 	"io"
 	"io/ioutil"
+	"net/http"
+	"path"
+	"runtime"
 )
 
 var (
@@ -29,7 +29,7 @@ func NewFs() http.FileSystem {
 		func(t *makefs.Task) error {
 			sources := t.Sources()
 
-			talksJson, err := ioutil.ReadAll(sources["/talks.json"])
+			talksJson, err := ioutil.ReadAll(sources[2])
 			if err != nil {
 				return err
 			}
@@ -45,8 +45,8 @@ func NewFs() http.FileSystem {
 
 			return render(
 				t.Target(),
-				sources["/pages/index.html"],
-				sources["/layouts/default.html"],
+				sources[0],
+				sources[1],
 				viewVars,
 			)
 		},
@@ -58,19 +58,24 @@ func NewFs() http.FileSystem {
 		page := staticPage
 
 		fs.Make(
-			"/public/" + page,
+			"/public/"+page,
 			[]string{"/pages/" + page, "/layouts/default.html"},
 			func(t *makefs.Task) error {
 				sources := t.Sources()
 
 				return render(
 					t.Target(),
-					sources["/pages/" + page],
-					sources["/layouts/default.html"],
+					sources[0],
+					sources[1],
 					nil,
 				)
 			},
 		)
+	}
+
+	if err := makePosts(fs); err != nil {
+		// @TODO return error
+		panic(err)
 	}
 
 	return fs.SubFs("/public")
