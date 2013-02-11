@@ -1,6 +1,7 @@
 package generator
 
 import (
+	"bytes"
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
@@ -8,7 +9,9 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"regexp"
+	"strings"
 	"time"
 )
 
@@ -20,14 +23,23 @@ func makePosts(fs *makefs.Fs) error {
 		return fmt.Errorf("no BASE_URL env var")
 	}
 
-	fs.Make("/public/%.html", []string{"/posts/%.md"}, func(t *makefs.Task) error {
+	fs.Make("/public/%.html", []string{"/posts/%.md", "/layouts/default.html"}, func(t *makefs.Task) error {
 		post, err := parsePost(t.Source())
 		if err != nil {
 			return err
 		}
 
-		_, err = io.WriteString(t.Target(), post.Html())
-		return err
+		html, err := post.Html()
+		if err != nil {
+			return err
+		}
+
+		return render(
+			t.Target(),
+			strings.NewReader(html),
+			t.Sources()[1],
+			struct{Title string}{post.Title},
+		)
 	})
 
 	fs.Make("/public/posts/atom.xml", []string{"/posts/*/*/*/*.md"}, func(t *makefs.Task) error {
@@ -108,8 +120,18 @@ type post struct {
 	Markdown  string
 }
 
-func (p *post) Html() string {
-	return p.Markdown
+func (p *post) Html() (string, error) {
+	buf := bytes.NewBuffer(nil)
+
+	cmd := exec.Command(__dirname+"/processors/bin/markdown.js")
+	cmd.Stdin = strings.NewReader(p.Markdown)
+	cmd.Stdout = buf
+	cmd.Stderr = buf
+	if err := cmd.Run(); err != nil {
+		return "", fmt.Errorf("generator: %s: %s", buf, err)
+	}
+
+	return buf.String(), nil
 }
 
 type Feed struct {
