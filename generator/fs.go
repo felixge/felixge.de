@@ -20,6 +20,11 @@ var (
 func NewFs() http.FileSystem {
 	fs := makefs.NewFs(http.Dir(root))
 
+	if err := makePosts(fs); err != nil {
+		// @TODO return error
+		panic(err)
+	}
+
 	fs.ExecMake("/pages/%.html", "/pages/%.md", __dirname+"/processors/bin/markdown.js")
 	fs.ExecMake("%.css", "%.less", __dirname+"/processors/bin/less.js")
 
@@ -40,6 +45,7 @@ func NewFs() http.FileSystem {
 			}
 
 			viewVars := map[string]interface{}{
+				"Title": "About",
 				"Talks": talks,
 			}
 
@@ -71,11 +77,6 @@ func NewFs() http.FileSystem {
 				)
 			},
 		)
-	}
-
-	if err := makePosts(fs); err != nil {
-		// @TODO return error
-		panic(err)
 	}
 
 	return fs.SubFs("/public")

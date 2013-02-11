@@ -1,5 +1,3 @@
-# About
-
 Hi, I am Felix Geisendörfer, a programmer and entrepreneur living in Berlin, Germany.
 
 I work at [transloadit.com](http://transloadit.com/),
