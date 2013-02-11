@@ -20,7 +20,7 @@ var (
 func NewFs() http.FileSystem {
 	fs := makefs.NewFs(http.Dir(root))
 
-	fs.ExecMake("%.html", "%.md", __dirname+"/processors/bin/markdown.js")
+	fs.ExecMake("/pages/%.html", "/pages/%.md", __dirname+"/processors/bin/markdown.js")
 	fs.ExecMake("%.css", "%.less", __dirname+"/processors/bin/less.js")
 
 	fs.Make(
