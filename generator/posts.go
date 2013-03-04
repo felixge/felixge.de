@@ -6,6 +6,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"github.com/felixge/makefs"
+	"html/template"
 	"io"
 	"io/ioutil"
 	"os"
@@ -23,25 +24,6 @@ func makePosts(fs *makefs.Fs) error {
 		return fmt.Errorf("no BASE_URL env var")
 	}
 
-	fs.Make("/public/%.html", []string{"/posts/%.md", "/layouts/default.html"}, func(t *makefs.Task) error {
-		post, err := parsePost(t.Source())
-		if err != nil {
-			return err
-		}
-
-		html, err := post.Html()
-		if err != nil {
-			return err
-		}
-
-		return render(
-			t.Target(),
-			strings.NewReader(html),
-			t.Sources()[1],
-			struct{Title string}{post.Title},
-		)
-	})
-
 	fs.Make("/public/posts/atom.xml", []string{"/posts/*/*/*/*.md"}, func(t *makefs.Task) error {
 		atomFeed := Feed{
 			XMLName: xml.Name{"http://www.w3.org/2005/Atom", "feed"},
@@ -57,12 +39,20 @@ func makePosts(fs *makefs.Fs) error {
 			if err != nil {
 				return err
 			}
+
+			html, err := post.Html()
+			if err != nil {
+				return err
+			}
+
 			entry := Entry{
-				Author:  author,
-				Title:   post.Title,
-				Id:      baseUrl+post.Url,
-				Updated: post.Updated,
-				Link:    []Link{{Href: baseUrl+post.Url}},
+				Author:    author,
+				Title:     post.Title,
+				Id:        baseUrl + post.Url,
+				Updated:   post.Updated,
+				Published: post.Published,
+				Link:      []Link{{Href: baseUrl + post.Url}},
+				Summary:   Text{Body: html},
 			}
 
 			atomFeed.Entry = append(atomFeed.Entry, entry)
@@ -83,6 +73,30 @@ func makePosts(fs *makefs.Fs) error {
 
 		return nil
 	})
+
+	fs.Make("/public/%.html", []string{"/posts/%.md", "/templates/post.html", "/templates/layout.html"}, func(t *makefs.Task) error {
+		post, err := parsePost(t.Source())
+		if err != nil {
+			return err
+		}
+
+		html, err := post.Html()
+		if err != nil {
+			return err
+		}
+
+		return render(
+			t.Target(),
+			t.Sources()[1],
+			t.Sources()[2],
+			map[string]interface{}{
+				"Title": post.Title,
+				"Post":  post,
+				"Html":  template.HTML(html),
+			},
+		)
+	})
+
 	return nil
 }
 
@@ -123,7 +137,7 @@ type post struct {
 func (p *post) Html() (string, error) {
 	buf := bytes.NewBuffer(nil)
 
-	cmd := exec.Command(__dirname+"/processors/bin/markdown.js")
+	cmd := exec.Command(__dirname + "/processors/bin/markdown.js")
 	cmd.Stdin = strings.NewReader(p.Markdown)
 	cmd.Stdout = buf
 	cmd.Stderr = buf
@@ -145,12 +159,13 @@ type Feed struct {
 }
 
 type Entry struct {
-	Title   string    `xml:"title"`
-	Id      string    `xml:"id"`
-	Link    []Link    `xml:"link"`
-	Updated time.Time `xml:"updated"`
-	Author  Person    `xml:"author"`
-	Summary Text      `xml:"summary"`
+	Title     string    `xml:"title"`
+	Id        string    `xml:"id"`
+	Link      []Link    `xml:"link"`
+	Updated   time.Time `xml:"updated"`
+	Published time.Time `xml:"published"`
+	Author    Person    `xml:"author"`
+	Summary   Text      `xml:"summary"`
 }
 
 type Link struct {

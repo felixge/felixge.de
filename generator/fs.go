@@ -2,6 +2,7 @@ package generator
 
 import (
 	"encoding/json"
+	"encoding/xml"
 	"github.com/felixge/makefs"
 	"html/template"
 	"io"
@@ -9,6 +10,7 @@ import (
 	"net/http"
 	"path"
 	"runtime"
+	"time"
 )
 
 var (
@@ -30,7 +32,7 @@ func NewFs() http.FileSystem {
 
 	fs.Make(
 		"/public/index.html",
-		[]string{"/pages/index.html", "/layouts/default.html", "/talks.json"},
+		[]string{"/pages/index.html", "/templates/layout.html", "/talks.json", "/public/posts/atom.xml"},
 		func(t *makefs.Task) error {
 			sources := t.Sources()
 
@@ -44,9 +46,20 @@ func NewFs() http.FileSystem {
 				return err
 			}
 
+			atom, err := ioutil.ReadAll(sources[3])
+			if err != nil {
+				return err
+			}
+
+			posts := &Feed{}
+			if err := xml.Unmarshal(atom, posts); err != nil {
+				return err
+			}
+
 			viewVars := map[string]interface{}{
 				"Title": "About",
 				"Talks": talks,
+				"Posts": posts,
 			}
 
 			return render(
@@ -65,7 +78,7 @@ func NewFs() http.FileSystem {
 
 		fs.Make(
 			"/public/"+page,
-			[]string{"/pages/" + page, "/layouts/default.html"},
+			[]string{"/pages/" + page, "/templates/layout.html"},
 			func(t *makefs.Task) error {
 				sources := t.Sources()
 
@@ -88,7 +101,16 @@ func render(w io.Writer, page, layout io.Reader, viewVars interface{}) error {
 		return err
 	}
 
-	tmpl, err := template.New("page").Parse(string(pageHtml))
+	tmpl := template.New("page").Funcs(template.FuncMap{
+		"shortDate": func(t time.Time) string {
+			return t.Format("Jan 2, 2006")
+		},
+		"longDate": func(t time.Time) string {
+			return t.Format("Jan 2, 2006 at 15:04")
+		},
+	})
+
+	tmpl, err = tmpl.Parse(string(pageHtml))
 	if err != nil {
 		return err
 	}

@@ -1,21 +1,59 @@
+/* Macros */
+.box-shadow(@style, @c) when (iscolor(@c)) {
+  box-shadow:         @style @c;
+  -webkit-box-shadow: @style @c;
+  -moz-box-shadow:    @style @c;
+}
+
 /* Layout */
 #logo{
   display: block;
   width: 282px;
-  margin: 20px auto;
+  margin: 20px auto 0 auto; 
 
   img{
     height: 180px;
   }
 }
 
+.header{
+  width: 100%;
+  background-color: #333;
+  line-height: 40px;
+  font-size: 18px;
+
+  ul{
+    padding: 0;
+    margin: 0;
+    text-align: center;
+
+    li{
+      display: inline;
+      list-style-type: none;
+      margin-right: 10px;
+      a{
+        color: #fff;
+        text-decoration: none;
+        &:hover{
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+}
+
 .container{
-  width: 860px;
-  margin: 0 auto;
+  width: 960-120px;
+  padding: 20px 60px;
+  margin: 20px auto;
+  background-color: #fff;
+  border: 1px solid #C1C1C1;
+  .box-shadow(1px 1px 1px, #ccc)
 }
 
 .toc{
   width: 100%;
+  margin: -10px 0 25px 0;
 
   tr{
     line-height: 30px;
@@ -53,20 +91,18 @@
 
   .date{
     text-align: right;
-    width: 100px;
+    width: 105px;
   }
 }
 
 /* Generic Styles */
 
 body{
-  font-family: helvetica, arial, clean, sans-serif;
+  font-family: 'Helvetica Neue Light', HelveticaNeue-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  background-color: #E9E9E9;
   color: #333;
   margin: 0;
   padding-bottom: 30px;
-}
-
-p, li, dd, dt{
   font-size: 17px;
 }
 
