@@ -19,7 +19,7 @@ You should check it out, it's amazing.
 You can find me on [twitter](https://twitter.com/felixge) and
 [github](https://github.com/felixge), or [contact me](#contact) directly.
 
-<h2 id="writing"><a href="#writing">Writing</a></h2>
+<h2 id="blog"><a href="#blog">Blog</a></h2>
 
 You can subscribe to updates via <a
   href="http://feeds.feedburner.com/felixge">RSS</a> or <a
