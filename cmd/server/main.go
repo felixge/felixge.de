@@ -31,7 +31,7 @@ type handler struct {
 	fileServer http.Handler
 }
 
-func (h *handler) ServeHTTP(res http.ResponseWriter, req *http.Request)  {
+func (h *handler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	start := time.Now()
 	h.fileServer.ServeHTTP(res, req)
 	duration := time.Since(start)

@@ -90,9 +90,9 @@ func makePosts(fs *makefs.Fs) error {
 			t.Sources()[1],
 			t.Sources()[2],
 			map[string]interface{}{
-				"Title": post.Title,
-				"Post":  post,
-				"Html":  template.HTML(html),
+				"Title":   post.Title,
+				"Post":    post,
+				"Html":    template.HTML(html),
 				"BaseUrl": baseUrl,
 			},
 		)
@@ -166,7 +166,7 @@ type Entry struct {
 	Updated   time.Time `xml:"updated"`
 	Published time.Time `xml:"published"`
 	Author    Person    `xml:"author"`
-	Content   Text   `xml:"content"`
+	Content   Text      `xml:"content"`
 }
 
 type Link struct {
