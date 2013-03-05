@@ -1,7 +1,7 @@
 [
   {
     "Title": "To be announced",
-    "Date": "April 22, 2013",
+    "Date": "Apr 22, 2013",
     "Location": "Railsberry, Krakow",
     "Url": "http://railsberry.com/speakers#felix",
     "EventUrl": "http://railsberry.com/"
@@ -49,7 +49,7 @@
   },
   {
     "Title": "The power of node.js (with quadcopters)",
-    "Date": "Nov 5 2012",
+    "Date": "Nov 5, 2012",
     "Location": "Øredev, Malmö",
     "Url": "https://speakerdeck.com/felixge/the-power-of-node-dot-js-with-quadcopters",
     "EventUrl": "http://oredev.org/",
@@ -58,7 +58,7 @@
   },
   {
     "Title": "Faster than C?",
-    "Date": "Oct 18 2012",
+    "Date": "Oct 18, 2012",
     "Location": "NodeDublin",
     "Url": "https://speakerdeck.com/felixge/faster-than-c-1",
     "EventUrl": "http://www.nodedublin.com/",
@@ -67,7 +67,7 @@
   },
   {
     "Title": "Faster than C?",
-    "Date": "Oct 7 2012",
+    "Date": "Oct 7, 2012",
     "Location": "JSConf.EU, Berlin",
     "Url": "https://speakerdeck.com/felixge/faster-than-c",
     "EventUrl": "http://2012.jsconf.eu/index.html",
@@ -77,7 +77,7 @@
   },
   {
     "Title": "Programming flying robots with node.js",
-    "Date": "Sep 28 2012",
+    "Date": "Sep 28, 2012",
     "Location": "LXJS Lisbon JavaScript, Lisbon",
     "Url": "https://speakerdeck.com/felixge/programming-flying-robots-with-javascript",
     "EventUrl": "http://2012.lxjs.org/",
@@ -86,7 +86,7 @@
   },
   {
     "Title": "The power of node.js (with quadcopters)",
-    "Date": "Sep 7 2012",
+    "Date": "Sep 7, 2012",
     "Location": "Developer Conference, Hamburg",
     "Url": "https://speakerdeck.com/felixge/the-power-of-node-dot-js",
     "EventUrl": "http://www.developer-conference-hh.de/",
@@ -94,7 +94,7 @@
   },
   {
     "Title": "The zen of node.js",
-    "Date": "Aug 22 2012",
+    "Date": "Aug 22, 2012",
     "Location": "Campus Party Europe, Berlin",
     "Url": "https://speakerdeck.com/felixge/the-zen-of-node-dot-js",
     "EventUrl": "http://www.campus-party.eu/2012/index.html",
@@ -103,7 +103,7 @@
   },
   {
     "Title": "Node.js Quadcopter Programming",
-    "Date": "Aug 16 2012",
+    "Date": "Aug 16, 2012",
     "Location": "Berlin JS Usergroup",
     "Url": "https://speakerdeck.com/felixge/node-dot-js-quadcopter-programming",
     "EventUrl": "http://berlinjs.org/",
@@ -111,7 +111,7 @@
   },
   {
     "Title": "As fast as C?",
-    "Date": "June 27 2012",
+    "Date": "Jun 27, 2012",
     "Location": "London Node.js User Group",
     "Url": "https://speakerdeck.com/felixge/as-fast-as-c",
     "EventUrl": "http://lnug.org/",
@@ -120,7 +120,7 @@
   },
   {
     "Title": "Node.js - A practical introduction",
-    "Date": "June 15 2012",
+    "Date": "Jun 15, 2012",
     "Location": "Big Techday, Munich",
     "Url": "https://speakerdeck.com/u/felixge/p/nodejs-a-practical-introduction",
     "EventUrl": "http://www.tngtech.com/events-bigtechday05.html",
@@ -128,7 +128,7 @@
   },
   {
     "Title": "The Node.js Scalability Myth",
-    "Date": "June 14 2012",
+    "Date": "Jun 14, 2012",
     "Location": "Munich Node.js User Group",
     "Url": "https://speakerdeck.com/u/felixge/p/the-nodejs-scalability-myth-3",
     "EventUrl": "http://www.mnug.de/",
@@ -136,7 +136,7 @@
   },
   {
     "Title": "Node.js in production",
-    "Date": "May 26 2012",
+    "Date": "May 26, 2012",
     "Location": "Web Rebels, Oslo",
     "Url": "https://speakerdeck.com/u/felixge/p/nodejs-in-production",
     "EventUrl": "http://www.webrebels.org/",
@@ -145,7 +145,7 @@
   },
   {
     "Title": "Bootstrapping Transloadit.com",
-    "Date": "Apr 27 2012",
+    "Date": "Apr 27, 2012",
     "Location": "Roots, Bergen",
     "Url": "http://speakerdeck.com/u/felixge/p/boostrapping-transloaditcom",
     "EventUrl": "http://rootsconf.no/",
@@ -153,7 +153,7 @@
   },
   {
     "Title": "The Node.js Scalability Myth",
-    "Date": "Apr 27 2012",
+    "Date": "Apr 27, 2012",
     "Location": "Roots, Bergen",
     "Url": "http://speakerdeck.com/u/felixge/p/the-nodejs-scalability-myth-2",
     "EventUrl": "http://rootsconf.no/",
@@ -161,7 +161,7 @@
   },
   {
     "Title": "The Node.js Scalability Myth",
-    "Date": "Apr 26 2012",
+    "Date": "Apr 26, 2012",
     "Location": "Mix IT, Lyon",
     "Url": "http://speakerdeck.com/u/felixge/p/the-nodejs-scalability-myth-3",
     "EventUrl": "http://www.mix-it.fr/",
@@ -169,7 +169,7 @@
   },
   {
     "Title": "The Node.js Scalability Myth",
-    "Date": "Mar 15 2012",
+    "Date": "Mar 15, 2012",
     "Location": "Berlin JS Usergroup",
     "Url": "http://speakerdeck.com/u/felixge/p/the-nodejs-scalability-myth",
     "EventUrl": "http://berlinjs.org/",
@@ -177,7 +177,7 @@
   },
   {
     "Title": "JavaScript - The Bad Parts",
-    "Date": "Jan 19 2012",
+    "Date": "Jan 19, 2012",
     "Location": "Berlin JS Usergroup",
     "Url": "http://speakerdeck.com/u/felixge/p/javascript-the-bad-parts",
     "EventUrl": "http://berlinjs.org/",
@@ -185,7 +185,7 @@
   },
   {
     "Title": "Node.js - Best Practices",
-    "Date": "Dec 1 2011",
+    "Date": "Dec 1, 2011",
     "Location": "Munich Node.js User Group",
     "Url": "http://www.slideshare.net/the_undefined/nodejs-best-practices-10428790",
     "EventUrl": "http://www.mnug.de/artikel/meetups/dezember2011",
@@ -194,7 +194,7 @@
   },
   {
     "Title": "Node.js - A practical introduction",
-    "Date": "Dec 1 2011",
+    "Date": "Dec 1, 2011",
     "Location": "Munich Node.js User Group",
     "Url": "http://www.slideshare.net/the_undefined/nodejs-a-practical-introduction-v2",
     "EventUrl": "http://www.mnug.de/artikel/meetups/dezember2011",
@@ -203,7 +203,7 @@
   },
   {
     "Title": "Node.js - A practical introduction",
-    "Date": "Nov 9 2011",
+    "Date": "Nov 9, 2011",
     "Location": "Øredev, Malmö",
     "Url": "http://www.slideshare.net/the_undefined/nodejs-apracticalintroductionoredev",
     "EventUrl": "http://oredev.org/2011/sessions/node-js--a-practical-introduction",
@@ -212,7 +212,7 @@
   },
   {
     "Title": "Building an alarm clock with node.js",
-    "Date": "Oct 29 2011",
+    "Date": "Oct 29, 2011",
     "Location": "Reject.js, Berlin",
     "Url": "http://www.slideshare.net/the_undefined/building-an-alarm-clock-with-nodejs",
     "EventUrl": "http://lanyrd.com/2011/rejectjs/",
@@ -220,21 +220,21 @@
   },
   {
     "Title": "Node.js - Eine praktische Einführung",
-    "Date": "May 21 2011",
+    "Date": "May 21, 2011",
     "Location": "Developer Conference, Hamburg",
     "Url": "http://www.slideshare.net/the_undefined/nodejs-eine-praktische-einfhrung-v7",
     "EventUrl": "http://www.devcon-hamburg.de/workshops-2011/#Einf%C3%BChrung%20node.js"
   },
   {
     "Title": "How to Test Asynchronous Code",
-    "Date": "May 19 2011",
+    "Date": "May 19, 2011",
     "Location": "Berlin JS Usergroup",
     "Url": "http://www.slideshare.net/the_undefined/how-to-test-asynchronous-code-v2",
     "EventUrl": "http://berlinjs.org/"
   },
   {
     "Title": "How to Test Asynchronous Code",
-    "Date": "May 5 2011",
+    "Date": "May 5, 2011",
     "Location": "NodeConf, Portland",
     "Url": "http://www.slideshare.net/the_undefined/how-to-test-asynchronous-code-8051756",
     "EventUrl": "http://2011.nodeconf.com/schedule.html",
@@ -242,7 +242,7 @@
   },
   {
     "Title": "Node.js - A quick tour",
-    "Date": "Apr 20 2011",
+    "Date": "Apr 20, 2011",
     "Location": "Gameforge AG, Karlsruhe",
     "Url": "http://www.slideshare.net/the_undefined/nodejs-a-quick-tour-v6",
     "EventUrl": "http://corporate.gameforge.com/",
@@ -250,7 +250,7 @@
   },
   {
     "Title": "Transloadit",
-    "Date": "Feb 16 2011",
+    "Date": "Feb 16, 2011",
     "Location": "Startup Riot, Atlanta",
     "Url": "http://www.slideshare.net/the_undefined/transloadit-at-startupriot",
     "EventUrl": "http://startupriot.com/",
@@ -258,14 +258,14 @@
   },
   {
     "Title": "Node.js - A quick tour",
-    "Date": "Feb 15 2011",
+    "Date": "Feb 15, 2011",
     "Location": "Atlanta JavaScript Meetup Group",
     "Url": "http://www.slideshare.net/the_undefined/nodejs-a-quick-tour-v5",
     "EventUrl": "http://www.meetup.com/AtlantaJavaScript/events/16170144/"
   },
   {
     "Title": "Node.js - Should Ruby Developers Care?",
-    "Date": "Feb 9 2011",
+    "Date": "Feb 9, 2011",
     "Location": "Atlanta Ruby Meetup Group",
     "Url": "http://www.slideshare.net/the_undefined/nodejs-should-ruby-developers-care",
     "EventUrl": "http://www.meetup.com/atlantaruby/events/15955963/",
@@ -273,7 +273,7 @@
   },
   {
     "Title": "Node.js in production",
-    "Date": "Jan 20 2011",
+    "Date": "Jan 20, 2011",
     "Location": "Berlin JS Usergroup",
     "Url": "http://www.slideshare.net/the_undefined/nodejs-in-production",
     "EventUrl": "http://berlinjs.org/",
@@ -281,7 +281,7 @@
   },
   {
     "Title": "Node.js as a networking tool",
-    "Date": "Dec 28 2010",
+    "Date": "Dec 28, 2010",
     "Location": "27C3, Berlin",
     "Url": "http://www.slideshare.net/the_undefined/nodejs-as-a-networking-tool",
     "EventUrl": "http://events.ccc.de/congress/2010/Fahrplan/events/4142.en.html",
@@ -290,14 +290,14 @@
   },
   {
     "Title": "Node.js - A quick tour",
-    "Date": "Oct 7 2010",
+    "Date": "Oct 7, 2010",
     "Location": "Ruby User Group Berlin",
     "Url": "http://www.slideshare.net/the_undefined/nodejs-aquicktourv3",
     "EventUrl": "http://www.rug-b.de/"
   },
   {
     "Title": "Dirty - How simple is your database?",
-    "Date": "Sep 25 2010",
+    "Date": "Sep 25, 2010",
     "Location": "JSConf EU, Berlin",
     "Url": "http://www.slideshare.net/the_undefined/dir-5299121",
     "EventUrl": "http://jsconf.eu/2010/speaker/dirty_nosql.html",
@@ -305,56 +305,56 @@
   },
   {
     "Title": "Node.js - A quick tour",
-    "Date": "Mar 4 2010",
+    "Date": "Mar 4, 2010",
     "Location": "Hamburg.js User Group",
     "Url": "http://www.slideshare.net/the_undefined/nodejs-a-quick-tour-ii",
     "EventUrl": "http://www.meetup.com/hamburg-js/"
   },
   {
     "Title": "Node.js - A quick tour",
-    "Date": "Jan 12 2010",
+    "Date": "Jan 12, 2010",
     "Location": "Berlin JS Usergroup",
     "Url": "http://www.slideshare.net/the_undefined/nodejs-a-quick-tour",
     "EventUrl": "http://berlinjs.org/"
   },
   {
     "Title": "JavaScript and Git",
-    "Date": "July 12 2009",
+    "Date": "Jul 12, 2009",
     "Location": "CakeFest, Berlin",
     "Url": "http://cakedc.com/eng/graham_weldon/2009/07/19/felix-geisendorfer-javascript-and-git",
     "EventUrl": "http://cakefest.org/"
   },
   {
     "Title": "Recipies for successful CakePHP projects",
-    "Date": "July 11 2009",
+    "Date": "Jul 11, 2009",
     "Location": "CakeFest, Berlin",
     "Url": "http://cakedc.com/eng/graham_weldon/2009/07/13/felix-geisendorfer-recipies-for-successful-cakephp-projects",
     "EventUrl": "http://cakefest.org/"
   },
   {
     "Title": "jQuery and CakePHP",
-    "Date": "Dec 5 2008",
+    "Date": "Dec 5, 2008",
     "Location": "CakeFest, Buenos Aires",
     "Url": "http://cakedc.com/mark_story/2008/12/05/felix-geisendorfer-jquery-and-cakephp",
     "EventUrl": "http://cakefest.org/"
   },
   {
     "Title": "Git and CakePHP",
-    "Date": "Dec 2 2008",
+    "Date": "Dec 2, 2008",
     "Location": "CakeFest, Buenos Aires",
     "Url": "http://cakedc.com/mark_story/2008/12/02/felix-geisendorfer-git-and-cakephp",
     "EventUrl": "http://cakefest.org/"
   },
   {
     "Title": "With jQuery & CakePHP to World Domination",
-    "Date": "Feb 6 2008",
+    "Date": "Feb 6, 2008",
     "Location": "CakeFest, Orlando",
     "Url": "http://www.slideshare.net/the_undefined/with-jquery-cakephp-to-world-domination",
     "EventUrl": "http://debuggable.com/posts/cakefest-orlando-2008-summary:480f4dd6-6404-4774-a771-4e8fcbdd56cb"
   },
   {
     "Title": "ActiveDOM",
-    "Date": "Oct 27 2007",
+    "Date": "Oct 27, 2007",
     "Location": "jQuery Camp, Cambridge",
     "Url": "http://www.slideshare.net/the_undefined/activedom",
     "EventUrl": "http://docs.jquery.com/JQueryCamp07"

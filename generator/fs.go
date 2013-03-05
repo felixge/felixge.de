@@ -3,6 +3,7 @@ package generator
 import (
 	"encoding/json"
 	"encoding/xml"
+	"fmt"
 	"github.com/felixge/makefs"
 	"html/template"
 	"io"
@@ -113,7 +114,7 @@ func render(w io.Writer, page, layout io.Reader, viewVars interface{}) error {
 
 	tmpl := template.New("page").Funcs(template.FuncMap{
 		"shortDate": func(t time.Time) string {
-			return t.Format("Jan 2, 2006")
+			return t.Format("Jan 02, 2006")
 		},
 		"longDate": func(t time.Time) string {
 			return t.Format("Jan 2, 2006 at 15:04 MST")
@@ -141,10 +142,24 @@ func render(w io.Writer, page, layout io.Reader, viewVars interface{}) error {
 type talk struct {
 	Title    string
 	Location string
-	Date     string
+	Date     *talkDate
 	Url      string
 	EventUrl string
 	VideoUrl string
 	PdfUrl   string
 	CodeUrl  string
+}
+
+type talkDate time.Time
+
+func (t *talkDate) UnmarshalJSON(data []byte) (err error) {
+	time, err := time.Parse(`"Jan 2, 2006"`, string(data))
+	fmt.Printf("err: %s\n", err)
+	*t = talkDate(time)
+	 return
+}
+
+func (t *talkDate) Time() *time.Time {
+	r := time.Time(*t)
+	return &r
 }

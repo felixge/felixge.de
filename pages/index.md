@@ -70,7 +70,7 @@ small amount of events this year.
         </span>
       </td>
       <td class="location"><span><a href="{{.EventUrl}}">{{.Location}}</a></span></td>
-      <td class="date"><span>{{.Date}}</span></td>
+      <td class="date"><span>{{shortDate .Date.Time}}</span></td>
     </tr>
     {{end}}
   </tbody>
