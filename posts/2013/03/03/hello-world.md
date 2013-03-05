@@ -7,7 +7,7 @@
 After writing over [300 articles](http://debuggable.com/posts/archive) between
 2006 - 2009, I went on a bit of a blogging hiatus for the past three years.
 This was mostly because node.js took off, and being one of the first
-contributors send a steady stream of speaking opportunities my way. This was a
+contributors sent a steady stream of speaking opportunities my way. This was a
 lot of fun, but at this point I am a bit sick of traveling, and I have also
 realized that conferences are not a good platform to share some of the things
 I'm currently excited about. So for 2013 I've decided to cut my traveling to a
@@ -25,15 +25,15 @@ future, including how it compares to node.js.
 Additionally Go has inspired me to come up with a new product and business
 model we're currently pursuing at [transloadit](http://transloadit.com/). This
 is exciting because I've never written much about the process we used to
-bootstrap our business, and our new product should be an exciting case study for
-anybody interested in bootstrapping software businesses without relying on
+bootstrap our business, and our new product should be an exciting case study
+for anybody interested in bootstrapping software businesses without relying on
 external funding. You may also be interested in the fact that our new product
-will be 100% open source, and I am planning to write a lot about the
+will be 100% open source, and that I am planning to write a lot about the
 underlaying strategy and business model.
 
 And for those who are curious, the product itself is going to be a dedicated
 file upload server called [tus](http://tus.io/), so expect to read a lot about
-the challenges of file uploading, and how we're tackling them with go.
+the challenges of file uploading, and how we're tackling them with Go.
 
 Last but not least, I'm still heavily involved with the
 [NodeCopter](http://nodecopter.com/) movement that
@@ -43,6 +43,6 @@ Last but not least, I'm still heavily involved with the
 started last year, so as time allows, I'll write about quad copter hacking and
 the events we're organizing.
 
-So, that's it for now, but please make sure to subscribe to new posts if youre
+So, that's it for now, but please make sure to subscribe to new posts if you're
 interested in Making Money with Open Source, Go, File Uploads or Quad Copter
 hacking - it should be interesting.
