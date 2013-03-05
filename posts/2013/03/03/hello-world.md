@@ -6,7 +6,7 @@
 
 After writing over [300 articles](http://debuggable.com/posts/archive) between
 2006 - 2009, I went on a bit of a blogging hiatus for the past three years.
-This was was mostly because node.js took off, and being one of the first
+This was mostly because node.js took off, and being one of the first
 contributors send a steady stream of speaking opportunities my way. This was a
 lot of fun, but at this point I am a bit sick of traveling, and I have also
 realized that conferences are not a good platform to share some of the things

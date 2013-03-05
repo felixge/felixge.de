@@ -105,6 +105,7 @@ Here are a few things my previous clients had to say:
     <a href="http://www.linkedin.com/in/fredholahan/">Fred Holahan</a>,
     <a href="https://voltdb.com/">VoltDB, Inc.</a>
   </cite>
+  <hr>
 </blockquote>
 
 <blockquote>
@@ -115,6 +116,7 @@ Here are a few things my previous clients had to say:
     <a href="http://uk.linkedin.com/in/nilanpeiris/">Nilan Peiris</a>,
     <a href="http://www.holidayextras.co.uk/">Holiday Extras</a>
   </cite>
+  <hr/>
 </blockquote>
 
 <blockquote>
@@ -131,6 +133,7 @@ Here are a few things my previous clients had to say:
     <a href="http://de.linkedin.com/in/itamarweiss/">Itamar Weiss</a>,
     <a href="http://www.upcload.com/">UPcload</a>
   </cite>
+  <hr/>
 </blockquote>
 
 <blockquote>
@@ -144,6 +147,7 @@ Here are a few things my previous clients had to say:
     <a href="http://de.linkedin.com/in/chrisleishman/">Chris Leishman</a>,
     <a href="http://www.screenspeak.com/">ScreenSpeak</a>
   </cite>
+  <hr/>
 </blockquote>
 
 <blockquote>
