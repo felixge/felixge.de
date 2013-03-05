@@ -8,6 +8,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"path"
 	"runtime"
 	"time"
@@ -54,6 +55,15 @@ func NewFs() http.FileSystem {
 			posts := &Feed{}
 			if err := xml.Unmarshal(atom, posts); err != nil {
 				return err
+			}
+
+			for _, entry := range posts.Entry {
+				uri, err := url.Parse(entry.Link[0].Href)
+				if err != nil {
+					return err
+				}
+
+				entry.Link[0].Href = uri.Path
 			}
 
 			viewVars := map[string]interface{}{
