@@ -3,7 +3,6 @@ package generator
 import (
 	"encoding/json"
 	"encoding/xml"
-	"fmt"
 	"github.com/felixge/makefs"
 	"html/template"
 	"io"
