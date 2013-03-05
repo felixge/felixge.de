@@ -21,6 +21,10 @@ You can find me on [twitter](https://twitter.com/felixge) and
 
 <h2 id="writing"><a href="#writing">Writing</a></h2>
 
+You can subscribe to updates via <a
+  href="http://feeds.feedburner.com/felixge">RSS</a> or <a
+  href="http://feedburner.google.com/fb/a/mailverify?uri=felixge">E-Mail</a>.
+
 <table class="toc">
   <tbody>
     {{range .Posts.Entry}}
@@ -40,6 +44,12 @@ I have been blogging since 2006, my older posts can be found
 [here](http://debuggable.com/posts/archive).
 
 <h2 id="speaking"><a href="#speaking">Speaking</a></h2>
+
+I enjoy speaking at conferences and user groups, so [reach out](#contact) if
+you'd like to invite me to an event.
+
+That being said, I plan to do less traveling in 2013, so I can only attend a
+small amount of events this year.
 
 <table class="toc">
   <tbody>
@@ -152,8 +162,8 @@ Here are a few things my previous clients had to say:
   </cite>
 </blockquote>
 
-My availability for 2013 is limited, so reach out if you need help with
-a project.
+My availability for 2013 is limited, so [email
+me](mailto:felix@transloadit.com) if you need help with a project.
 
 <h2 id="contact"><a href="contact">Contact</a></h2>
 
