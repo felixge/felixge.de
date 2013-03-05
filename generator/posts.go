@@ -93,6 +93,7 @@ func makePosts(fs *makefs.Fs) error {
 				"Title": post.Title,
 				"Post":  post,
 				"Html":  template.HTML(html),
+				"BaseUrl": baseUrl,
 			},
 		)
 	})
