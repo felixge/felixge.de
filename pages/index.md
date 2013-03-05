@@ -13,8 +13,8 @@ event around programming flying robots with JavaScript called
 [NodeCopter](http://nodecopter.com/) which has now turned into a small
 community.
 
-As of late, [go](http://golang.org/) has become my new language of choice. You
-should check it out, it's amazing.
+As of late, I have started to use [go](http://golang.org/) for a lot of things.
+You should check it out, it's amazing.
 
 You can find me on [twitter](https://twitter.com/felixge) and
 [github](https://github.com/felixge), or [contact me](#contact) directly.
