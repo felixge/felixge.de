@@ -106,7 +106,7 @@ func render(w io.Writer, page, layout io.Reader, viewVars interface{}) error {
 			return t.Format("Jan 2, 2006")
 		},
 		"longDate": func(t time.Time) string {
-			return t.Format("Jan 2, 2006 at 15:04")
+			return t.Format("Jan 2, 2006 at 15:04 MST")
 		},
 	})
 
