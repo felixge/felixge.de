@@ -169,7 +169,7 @@ Here are a few things my previous clients had to say:
 My availability for 2013 is limited, so [email
 me](mailto:felix@transloadit.com) if you need help with a project.
 
-<h2 id="contact"><a href="contact">Contact</a></h2>
+<h2 id="contact"><a href="#contact">Contact</a></h2>
 
 My primary e-mail is [felix@transloadit.com](mailto:felix@transloadit.com).
 
