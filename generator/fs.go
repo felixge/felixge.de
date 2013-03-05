@@ -71,7 +71,7 @@ func NewFs() http.FileSystem {
 		},
 	)
 
-	staticPages := []string{"contact.html", "404.html"}
+	staticPages := []string{"404.html"}
 
 	for _, staticPage := range staticPages {
 		page := staticPage
