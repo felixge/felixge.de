@@ -1,7 +1,7 @@
 {
   "Title": "Hello World",
   "Published": "2013-03-04T16:00:00+01:00",
-  "Updated": "2013-03-04T16:00:00+01:00"
+  "Updated": "2013-03-05T10:03:00+01:00"
 }
 
 After writing over [300 articles](http://debuggable.com/posts/archive) between
