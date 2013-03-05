@@ -154,7 +154,6 @@ type talkDate time.Time
 
 func (t *talkDate) UnmarshalJSON(data []byte) (err error) {
 	time, err := time.Parse(`"Jan 2, 2006"`, string(data))
-	fmt.Printf("err: %s\n", err)
 	*t = talkDate(time)
 	 return
 }
