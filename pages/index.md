@@ -1,7 +1,7 @@
 Hi, I am Felix Geisendörfer, a programmer and entrepreneur living in Berlin, Germany.
 
 I am a co-founder at [transloadit.com](http://transloadit.com/), a small,
-bootstrapped and profitable SaaS business. Our latest product is an file upload
+bootstrapped and profitable SaaS business. Our latest product is a file upload
 server called [tus](http://tus.io/).
 
 A lot of my time is spent on [open source](http://github.com/felixge), and I
@@ -68,7 +68,7 @@ I have been blogging since 2006, my older posts can be found
 
 <h2 id="consulting"><a href="consulting">Consulting</a></h2>
 
-I help companies make good technology decisions with a focus on node.js.
+I help companies to make good technology decisions with a focus on node.js.
 
 This often starts with evaluating if node.js is a good fit, and if so, training
 in-house developers to do the right things and coming up with good application
@@ -78,7 +78,7 @@ In other cases I've helped companies to review their existing code bases, as
 well as bringing failing projects back on track.
 
 I also do small development projects, and can help you finding the right people
-to outsource bigger projects to.
+to take on bigger projects.
 
 Here are a few things my previous clients had to say:
 
@@ -152,8 +152,8 @@ Here are a few things my previous clients had to say:
   </cite>
 </blockquote>
 
-My availability for 2013 is very limited, so if you're interested, you should
-reach out.
+My availability for 2013 is limited, so reach out if you need help with
+a project.
 
 <h2 id="contact"><a href="contact">Contact</a></h2>
 
