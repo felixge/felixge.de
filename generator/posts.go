@@ -52,7 +52,7 @@ func makePosts(fs *makefs.Fs) error {
 				Updated:   post.Updated,
 				Published: post.Published,
 				Link:      []Link{{Href: baseUrl + post.Url}},
-				Summary:   Text{Body: html},
+				Content:   Text{Type: "html", Body: html},
 			}
 
 			atomFeed.Entry = append(atomFeed.Entry, entry)
@@ -166,7 +166,7 @@ type Entry struct {
 	Updated   time.Time `xml:"updated"`
 	Published time.Time `xml:"published"`
 	Author    Person    `xml:"author"`
-	Summary   Text      `xml:"summary"`
+	Content   Text   `xml:"content"`
 }
 
 type Link struct {
