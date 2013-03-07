@@ -8,7 +8,7 @@ Today I read a comment on Github about an important feature that is missing in
 one of my open source libraries. I won't link to it, but it basically said: "If
 you care about your library and the community, you must implement this
 feature". These were not his exact words, but author of the comment was clearly
-demanding more attention for his problem based on my responsibilty to the
+demanding more attention for his problem based on my responsibility to the
 community.
 
 And he is not alone. Several people in the discussion agreed with him, and
@@ -19,7 +19,7 @@ projects](http://www.codinghorror.com/blog/2009/12/responsible-open-source-code-
 Tom Dale [has
 suggested](https://plus.google.com/111465598045192916635/posts/CkmmbjmvebM)
 that you should not "release more than you can realistically maintain". And
-that "it takes maturity to realize that open source is a responsbility".
+that "it takes maturity to realize that open source is a responsibility".
 
 I disagree.
 
@@ -29,7 +29,7 @@ Don't get me wrong. I have been on both sides of this table, experiencing
 critical problems with open source software I was unable to fix myself,
 receiving no support. It sucks.
 
-But who's fault is it? We can actually objectively answer this question. When
+But whose fault is it? We can actually objectively answer this question. When
 using somebody else's software, I need to follow the law, more specifically
 copyright. So I have to check for a license file and read it. Which usually
 means I'll come across something like this:
@@ -52,7 +52,7 @@ give you some advise that will yield better results.
 
 In my opinion, the key to successfully leveraging open source projects is to
 become a competent consumer. By that I mean acquiring the ability to estimate
-the "total costs of ownership" that arise from relying on somebodies open
+the "total costs of ownership" that arise from relying on somebody's open
 source project. The idea being that you "cannot consume more than you can
 afford".
 
@@ -74,7 +74,7 @@ this process:
 * What is his motivation for writing this software?
 * Could I pay somebody else to fix issues with this software?
 * Do I have enough money to pay somebody?
-* Can I easily use a modified of this software in production?
+* Can I easily use a modified version of this software in production?
 * Is it viable to fork this software if the author is not cooperating?
 * What features do I actually need?
 * How much would it cost to implement the features I need from scratch?
@@ -83,9 +83,9 @@ This approach has led me to completely avoid certain projects, simply because I
 estimated that I couldn't afford them, due to the way the projects were
 structured.
 
-Of course this process is problematic, and there has be a better way. We need
-to find models for better compensating open source authors, while continuing to
-enjoy the benefits of low marginal costs.
+Of course this process is problematic, and there has to be a better way. We
+need to find models for better compensating open source authors, while
+continuing to enjoy the benefits of low marginal costs.
 
 Luckily I have a few ideas for creating better open source projects, and going
 forward, I will explain how we are using them for our [next
