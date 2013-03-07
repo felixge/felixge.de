@@ -156,7 +156,21 @@ type Feed struct {
 	Link    []Link    `xml:"link"`
 	Updated time.Time `xml:"updated"`
 	Author  Person    `xml:"author"`
-	Entry   []Entry   `xml:"entry"`
+	Entry   Entries   `xml:"entry"`
+}
+
+type Entries []Entry
+
+func (e Entries) Len() int {
+	return len(e)
+}
+
+func (e Entries) Less(i, j int) bool {
+	return e[i].Published.After(e[j].Published)
+}
+
+func (e Entries) Swap(i, j int) {
+	e[i], e[j] = e[j], e[i]
 }
 
 type Entry struct {
