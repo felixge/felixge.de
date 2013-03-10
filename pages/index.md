@@ -13,7 +13,7 @@ event around programming flying robots with JavaScript called
 [NodeCopter](http://nodecopter.com/) which has now turned into a small
 community.
 
-As of late, I have started to use [go](http://golang.org/) for a lot of things.
+As of late, I have started to use [Go](http://golang.org/) for a lot of things.
 You should check it out, it's amazing.
 
 You can find me on [twitter](https://twitter.com/felixge) and
