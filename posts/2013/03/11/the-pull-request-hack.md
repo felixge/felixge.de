@@ -1,7 +1,7 @@
 {
   "Title": "The Pull Request Hack",
   "Published": "2013-03-11T16:43:00+01:00",
-  "Updated": "2013-03-11T16:43:00+01:00"
+  "Updated": "2013-03-11T17:15:00+01:00"
 }
 
 After writing about [Open Source And
@@ -107,3 +107,7 @@ significant contributions to some of my projects recently:
 * Everybody else who I forgot to mention or who made smaller contributions.
 
 You guys are absolutely amazing and I can't thank you enough for all the help.
+
+**Update:** Looking back at it, talking to [Peter
+Hintjens](https://twitter.com/hintjens) at [MixIT](http://www.mix-it.fr/) was
+definitley an inspiration for this.
