@@ -12,9 +12,9 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"sort"
 	"strings"
 	"time"
-	"sort"
 )
 
 var baseUrl = os.Getenv("BASE_URL")
