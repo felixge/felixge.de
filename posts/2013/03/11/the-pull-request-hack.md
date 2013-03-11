@@ -38,7 +38,7 @@ follow the style used by the rest of the code and add some tests to this
 patch.".
 
 The result was pure magic. Within a few hours the same person who had just
-submitted a rather mediocre patch, had now fixed things up and commited them.
+submitted a rather mediocre patch, had now fixed things up and committed them.
 This was highly unusual, so I started using the same strategy for a few other
 small projects I was no longer interested in maintaining. And it worked, over
 and over again. Of course, sometimes it wouldn't make a difference, but it was
@@ -72,7 +72,7 @@ looking for:
 * Github profile: Does this user stand to loose a reputation by doing something
   stupid?
 * Skill: Based on the patch, do I think the user could be a good developer?
-* Usefullness: Is this patch solving a valid problem?
+* Usefulness: Is this patch solving a valid problem?
 
 With these checks in place, I think this approach is a fantastic way to keep
 projects from going stale as well as turning one man projects into small
