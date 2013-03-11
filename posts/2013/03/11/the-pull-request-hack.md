@@ -56,20 +56,20 @@ requests before.
 So why does it work? Well, I have a few ideas. Once people have commit access,
 they are no longer worried that their patch might go unmerged. They now have
 the power to commit it themselves, causing them to put much more work into it.
-Doing the actual commit and push also changes their sense of ownership. Instead
+Doing the actual commit/push also changes their sense of ownership. Instead
 of handing over a diff to somebody else, they are now part of the project,
 owning a small part of it.
 
 But the magic does not stop here. In addition to their contribution quality
 going up, I've observed many people continuing to help out with issues and
-patches send by other users. This is of course fueled by Github notifying every
+patches sent by other users. This is of course fueled by Github notifying every
 contributor on a repository of all activity on it.
 
 So should you really do this for all pull requests? Probably not. While I've
 given a large amount of users access to various projects of mine, I'm still
 looking for:
 
-* Github profile: Does this user stand to loose a reputation by doing something
+* Github profile: Does this user stand to lose a reputation by doing something
   stupid?
 * Skill: Based on the patch, do I think the user could be a good developer?
 * Usefulness: Is this patch solving a valid problem?
