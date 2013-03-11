@@ -14,6 +14,7 @@ import (
 	"regexp"
 	"strings"
 	"time"
+	"sort"
 )
 
 var baseUrl = os.Getenv("BASE_URL")
@@ -57,6 +58,8 @@ func makePosts(fs *makefs.Fs) error {
 
 			atomFeed.Entry = append(atomFeed.Entry, entry)
 		}
+
+		sort.Sort(atomFeed.Entry)
 
 		data, err := xml.MarshalIndent(atomFeed, "", "  ")
 		if err != nil {

@@ -11,7 +11,6 @@ import (
 	"net/url"
 	"path"
 	"runtime"
-	"sort"
 	"time"
 )
 
@@ -57,8 +56,6 @@ func NewFs() http.FileSystem {
 			if err := xml.Unmarshal(atom, posts); err != nil {
 				return err
 			}
-
-			sort.Sort(posts.Entry)
 
 			for _, entry := range posts.Entry {
 				uri, err := url.Parse(entry.Link[0].Href)
