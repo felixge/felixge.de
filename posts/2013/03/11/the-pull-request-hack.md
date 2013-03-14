@@ -115,3 +115,6 @@ definitley an inspiration for this.
 **Update 2:** There is an interesting discussion about this on [Hacker
 News](http://news.ycombinator.com/item?id=5357417) right now, seems like others
 have used this strategy with success as well!
+
+**Update 3:** There is even more discussions going on at
+[Reddit](http://www.reddit.com/r/programming/comments/1a7gns/whenever_somebody_sends_you_a_pull_request_give/).
