@@ -86,7 +86,7 @@ so please let us know which of the things below you would find valuable.
   regardless of user location, utilizing multiple TCP connections to increase
   the effective tcp window size, and maybe in the far future implement a
   specialized UDP protocol.
-* **Huge files:** With HD video on the rise, uploads become bigger and bigger. A
+* **Huge files:** With HD cameras on the rise, uploads become bigger and bigger. A
   good solution should be able to handle files > 2GB with ease.
 * **Streaming:** A lot of files can be processed as a stream, so tus should
   make it easy to let you download and process an active upload.
