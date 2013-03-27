@@ -50,7 +50,7 @@ own to come up with a solution.
 
 Fuck this. It's 2013, and you shouldn't have to waste several days for what
 will only be a rudimentary solution, hard to scale, and a pain to maintain.
-This is where we come in with [tus](http://tus.io/). Tus is an **open source**
+This is where we come in with [tus](http://tus.io/). Tus is an open source
 project that aims to provide you with a turnkey solution to all your file
 uploading needs. We are designing a
 [protocol](http://www.tus.io/docs/http-protocol.html), building a
