@@ -27,7 +27,7 @@ easier said than done. While there is no shortage of bits and pieces that can
 help you with building your own solution, there is no simple solution that you
 can get up and running in a few minutes.
 
-The first thing you'll need to figure out is a server site API. Google has
+The first thing you'll need to figure out is a server side API. Google has
 published several http protocols for resumable uploading (e.g.
 [YouTube](https://developers.google.com/youtube/v3/guides/using_resumable_upload_protocol),
 [Google Drive](https://developers.google.com/drive/manage-uploads)), but they
