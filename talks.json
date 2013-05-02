@@ -1,10 +1,48 @@
 [
   {
+    "Title": "tus.io - Squeezing Cats Through Tiny Mobile Tubes",
+    "Date": "May 29, 2013",
+    "Location": "JSConf.us, Florida",
+    "Url": "https://github.com/jsconf/jsconfus2013/issues/20",
+    "EventUrl": "http://2013.jsconf.us/"
+  },
+  {
+    "Title": "tus.io - Squeezing Cats Through Tiny Mobile Tubes",
+    "Date": "May 23, 2013",
+    "Location": "Web Rebels, Oslo",
+    "Url": "http://webrebels.org/speakers/#felix",
+    "EventUrl": "http://webrebels.org/"
+  },
+  {
+    "Title": "tus.io - Resumable file uploads for web and mobile apps",
+    "Date": "May 11, 2013",
+    "Location": "Codemotion Berlin",
+    "Url": "http://berlin.codemotionworld.com/talk-page/?talk_name=tus-io-resumable-file-uploads-for-web-and-mobile-apps",
+    "EventUrl": "http://berlin.codemotionworld.com/"
+  },
+  {
+    "Title": "tus.io - Resumable File Uploads",
+    "Date": "May 1, 2013",
+    "Location": "UIKonf Preparty, Berlin",
+    "Url": "https://speakerdeck.com/felixge/tus-dot-io-resumable-file-uploads-lightning-talk",
+    "EventUrl": "http://www.uikonf.com/2013/03/28/preparty.html",
+    "PdfUrl": "https://speakerd.s3.amazonaws.com/presentations/321b01b09538013066ae7e72ba47199d/tus.pdf"
+  },
+  {
     "Title": "Programming flying robots with JavaScript",
-    "Date": "Apr 22, 2013",
+    "Date": "Apr 24, 2013",
+    "Location": "NEXT Berlin",
+    "Url": "https://speakerdeck.com/felixge/programming-flying-robots-with-javascript-1",
+    "EventUrl": "http://nextberlin.eu/",
+    "PdfUrl": "https://speakerd.s3.amazonaws.com/presentations/119a85d095380130010d5225ae2bc12a/nodecopter-next.pdf"
+  },
+  {
+    "Title": "Programming flying robots with JavaScript",
+    "Date": "Apr 23, 2013",
     "Location": "Railsberry, Krakow",
-    "Url": "http://www.railsberry.com/talks#felix",
-    "EventUrl": "http://railsberry.com/"
+    "Url": "https://speakerdeck.com/felixge/programming-flying-robots-with-javascript-2",
+    "EventUrl": "http://railsberry.com/",
+    "PdfUrl": "https://speakerd.s3.amazonaws.com/presentations/c8ac6940953701309d49169848220a5c/nodecopter-railsberry.pdf"
   },
   {
     "Title": "Programming an AR Drone Firmware in JS (de)",
