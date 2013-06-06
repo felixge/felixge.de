@@ -5,3 +5,5 @@ author:
   uri: http://felixge.de/
 timezone: UTC
 markdown: redcarpet
+exclude:
+  - NEXT.md
