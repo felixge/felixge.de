@@ -55,28 +55,29 @@ you'd like to invite me to an event.
 That being said, I plan to do less traveling in 2013, so I can only attend a
 small amount of events this year.
 
+{% jsonball talks from file talks.json %}
 <table class="toc">
   <tbody>
-    {{range .Talks}}
+    {% for talk in talks %}
     <tr>
       <td class="title">
         <span>
-          <a href="{{.Url}}">{{.Title}}</a>
-          {{if .PdfUrl}}
-          &middot; <a href="{{.PdfUrl}}">pdf</a>
-          {{end}}
-          {{if .VideoUrl}}
-          &middot; <a href="{{.VideoUrl}}">video</a>
-          {{end}}
-          {{if .CodeUrl}}
-          &middot; <a href="{{.CodeUrl}}">code</a>
-          {{end}}
+          <a href="{{ talk.url }}">{{ talk.title }}</a>
+          {% if talk.pdfUrl %}
+          &middot; <a href="{{ talk.pdfUrl }}">pdf</a>
+          {% endif %}
+          {% if talk.videoUrl %}
+          &middot; <a href="{{ talk.videoUrl }}">video</a>
+          {% endif %}
+          {% if talk.codeUrl %}
+          &middot; <a href="{{ talk.codeUrl }}">code</a>
+          {% endif %}
         </span>
       </td>
-      <td class="location"><span><a href="{{.EventUrl}}">{{.Location}}</a></span></td>
-      <td class="date"><span>{{shortDate .Date.Time}}</span></td>
+      <td class="location"><span><a href="{{ talk.eventUrl }}">{{ talk.location }}</a></span></td>
+      <td class="date"><span>{{ talk.date | date: "%b %d, %Y" }}</span></td>
     </tr>
-    {{end}}
+    {% endfor %}
   </tbody>
 </table>
 
