@@ -1,8 +1,9 @@
-{
-  "Title": "The Pull Request Hack",
-  "Published": "2013-03-11T16:43:00+01:00",
-  "Updated": "2013-03-11T17:15:00+01:00"
-}
+---
+layout: post
+title: The Pull Request Hack
+date: 2013-03-11T16:43:00+01:00
+updated: 2013-03-11T17:15:00+01:00
+---
 
 After writing about [Open Source And
 Responsibility](/2013/03/07/open-source-and-responsibility.html), I'd like to

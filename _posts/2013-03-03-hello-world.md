@@ -1,8 +1,9 @@
-{
-  "Title": "Hello World",
-  "Published": "2013-03-03T16:00:00+01:00",
-  "Updated": "2013-03-05T10:03:00+01:00"
-}
+---
+layout: post
+title: Hello World
+date: 2013-03-03T16:00:00+01:00
+updated: 2013-03-05T10:03:00+01:00
+---
 
 After writing over [300 articles](http://debuggable.com/posts/archive) between
 2006 - 2009, I went on a bit of a blogging hiatus for the past three years.

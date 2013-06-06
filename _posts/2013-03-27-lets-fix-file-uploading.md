@@ -1,8 +1,9 @@
-{
-  "Title": "Let's Fix File Uploading",
-  "Published": "2013-03-27T15:52:00+01:00",
-  "Updated": "2013-03-27T15:52:00+01:00"
-}
+---
+layout: post
+title: Let's Fix File Uploading
+date: 2013-03-27T15:52:00+01:00
+updated: 2013-03-27T15:52:00+01:00
+---
 
 **tl;dr:** We are creating an open source project to provide a turnkey file
 uploading solution called [tus](http://www.tus.io/). Today we are happy to show

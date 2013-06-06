@@ -1,3 +1,7 @@
+---
+layout: default
+title: About
+---
 Hi, I am Felix Geisendörfer, a programmer and entrepreneur living in Berlin, Germany.
 
 I am a co-founder at [transloadit.com](http://transloadit.com/), a small,
@@ -27,16 +31,16 @@ You can subscribe to updates via <a
 
 <table class="toc">
   <tbody>
-    {{range .Posts.Entry}}
+    {% for post in site.posts %}
     <tr>
       <td class="title">
         <span>
-          <a href="{{(index .Link 0).Href}}">{{.Title}}</a>
+          <a href="{{ post.url }}">{{ post.title }}</a>
         </span>
       </td>
-      <td class="date"><span>{{shortDate .Published}}</span></td>
+      <td class="date"><span>{{ post.date | date: "%b %d, %Y" }}</span></td>
     </tr>
-    {{end}}
+    {% endfor %}
   </tbody>
 </table>
 

@@ -2,7 +2,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <title>{{ .Title }} - Felix Geisendörfer</title>
+  <title>{{ page.title }} - {{ site.title }}</title>
 
   <link rel="stylesheet" media="screen" href="/css/main.css" >
   <link href="http://feeds.feedburner.com/felixge" type="application/rss+xml" rel="alternate" title="Posts">
@@ -22,8 +22,8 @@
     <a id="logo" title="GET ON THE SQUIRREL - THERE'S NO TIME TO EXPLAIN" href="/">
       <img src="/img/get-on-the-squirrel.png">
     </a>
-    <h1>{{ .Title }}</h1>
-    {{template "page" .}}
+    <h1>{{ page.title }}</h1>
+    {{ content }}
   </div>
   <script type="text/javascript">
     var _gaq = _gaq || [];

@@ -1,8 +1,9 @@
-{
-  "Title": "Open Source And Responsibility",
-  "Published": "2013-03-07T15:00:00+01:00",
-  "Updated": "2013-03-07T15:00:00+01:00"
-}
+---
+layout: post
+title: Open Source And Responsibility
+date: 2013-03-07T15:00:00+01:00
+updated: 2013-03-07T15:00:00+01:00
+---
 
 Today I read a comment on Github about an important feature that is missing in
 one of my open source libraries. I won't link to it, but it basically said: "If
