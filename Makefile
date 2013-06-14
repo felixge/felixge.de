@@ -1,5 +1,5 @@
 dev:
-	jekyll serve -w
+	jekyll serve --watch --drafts
 
 deploy:
 	jekyll-s3
