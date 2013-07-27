@@ -194,10 +194,11 @@ but I have not gotten around to it yet.
 
 My primary e-mail is [felix@debuggable.com](mailto:felix@debuggable.com).
 
-I get a lot of e-mail, so for some stuff I prefer other channels:
+I love meeting new people, so if you're in berlin, I'm almost always up for
+having lunch or something - just get in touch!
 
-* Github issues for my open source projects.
-* [Twitter](https://twitter.com/felixge) for quick questions.
+Please use Github for any questions or bug reports concerning my open source
+projects, this way the information can become useful to everybody.
 
 I try to answer all e-mails, but sometimes I have a bit of a backlog.
 
