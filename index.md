@@ -174,14 +174,34 @@ Here are a few things my previous clients had to say:
 My availability for 2013 is limited, so [email
 me](mailto:felix@transloadit.com) if you need help with a project.
 
+<h2 id="personal"><a href="#personal">Personal</a></h2>
+
+When not sitting in front of a computer, I enjoy a wide variety of sports.
+During the summer I mostly focus on playing [beach volleyball][], competing in
+tournaments pretty much every weekend. Other summer time passions of mine
+are [street unicycling][] and [slacklining][]. During the colder months I enjoy
+snowboarding, squash and badminton.
+
+You might also be curious about the frog riding the squirrel used on this page.
+The picture is the result of being a huge squirrel fan (long story) and coming
+across the [Get On The Squirrel Theres No Time To Explain][] meme one day. I
+really liked the carpe diem spirit of it, so I had an artist draw create a
+vector based on it. Eventually I want to use it as a logo on my laptop as well,
+but I have not gotten around to it yet.
+
+
 <h2 id="contact"><a href="#contact">Contact</a></h2>
 
-My primary e-mail is [felix@transloadit.com](mailto:felix@transloadit.com).
+My primary e-mail is [felix@debuggable.com](mailto:felix@debuggable.com).
 
 I get a lot of e-mail, so for some stuff I prefer other channels:
 
 * Github issues for my open source projects.
-* [felix@nodecopter.com](mailto:felix@nodecopter.com) for nodecopter stuff.
 * [Twitter](https://twitter.com/felixge) for quick questions.
 
 I try to answer all e-mails, but sometimes I have a bit of a backlog.
+
+[Get On The Squirrel Theres No Time To Explain]: http://weknowmemes.com/2011/12/get-on-the-squirrel-theres-no-time-to-explain/
+[beach volleyball]: http://www.beachberlin.de/beachmitte/info.html
+[street unicycling]: http://en.wikipedia.org/wiki/Street_unicycling
+[slacklining]: http://en.wikipedia.org/wiki/Slacklining
