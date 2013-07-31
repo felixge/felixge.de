@@ -4,9 +4,9 @@ title: About
 ---
 Hi, I am Felix Geisendörfer, a programmer and entrepreneur living in Berlin, Germany.
 
-I am a co-founder at [transloadit.com](http://transloadit.com/), a small,
-bootstrapped and profitable SaaS business. Our latest product is a file upload
-server called [tus](http://tus.io/).
+I am a co-founder of [Transloadit](http://transloadit.com/), a small,
+bootstrapped and profitable SaaS business, as well as
+[Debuggable](http://debuggable.com) a web consulting firm.
 
 A lot of my time is spent on [open source](http://github.com/felixge), and I
 was one of the first users and core contributors of
