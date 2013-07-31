@@ -3,6 +3,7 @@ layout: post
 title: Let's Fix File Uploading
 date: 2013-03-27T15:52:00+01:00
 updated: 2013-03-27T15:52:00+01:00
+hidden: true
 ---
 
 **tl;dr:** We are creating an open source project to provide a turnkey file
