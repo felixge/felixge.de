@@ -32,14 +32,16 @@ You can subscribe to updates via <a
 <table class="toc">
   <tbody>
     {% for post in site.posts %}
-    <tr>
-      <td class="title">
-        <span>
-          <a href="{{ post.url }}">{{ post.title }}</a>
-        </span>
-      </td>
-      <td class="date"><span>{{ post.date | date: "%b %d, %Y" }}</span></td>
-    </tr>
+      {% unless post.hidden %}
+      <tr>
+        <td class="title">
+          <span>
+            <a href="{{ post.url }}">{{ post.title }}</a>
+          </span>
+        </td>
+        <td class="date"><span>{{ post.date | date: "%b %d, %Y" }}</span></td>
+      </tr>
+      {% endunless %}
     {% endfor %}
   </tbody>
 </table>
