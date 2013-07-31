@@ -187,9 +187,9 @@ snowboarding, squash and badminton.
 You might also be curious about the frog riding the squirrel used on this page.
 The picture is the result of being a huge squirrel fan (long story) and coming
 across the [Get On The Squirrel Theres No Time To Explain][] meme one day. I
-really liked the carpe diem spirit of it, so I had an artist draw create a
-vector based on it. Eventually I want to use it as a logo on my laptop as well,
-but I have not gotten around to it yet.
+really liked the carpe diem spirit of it, so I had an artist create a vector
+based on it. Eventually I want to use it as a logo on my laptop as well, but I
+have not gotten around to it yet.
 
 
 <h2 id="contact"><a href="#contact">Contact</a></h2>
