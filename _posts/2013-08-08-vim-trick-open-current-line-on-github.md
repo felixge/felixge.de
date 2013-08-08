@@ -5,6 +5,9 @@ date: 2013-08-08T20:50:00+01:00
 updated: 2013-08-08T20:50:00+01:00
 ---
 
+**Update:** The [fugitive][] vim plugin supports the same feature via
+`:Gbrowse` - thanks to [@CrypticSwarm][] for the tip!
+
 In my never-ending quest to automate my work flow, I recently came up with a
 neat little vim trick I'd like to share.
 
@@ -56,3 +59,5 @@ opening visual selections as line ranges.
 [.gitconfig]: https://github.com/felixge/dotfiles/blob/master/.gitconfig:
 [Protocol.js#L144]: https://github.com/felixge/node-mysql/blob/master/lib/protocol/Protocol.js#L144
 [.vimrc]: https://github.com/felixge/dotfiles/blob/master/.vimrc
+[fugitive]: https://github.com/tpope/vim-fugitive
+[@CrypticSwarm]: https://twitter.com/CrypticSwarm/status/365549237813002240
