@@ -8,3 +8,5 @@ markdown: redcarpet
 pygments: true
 exclude:
   - NEXT.md
+gems:
+  - jekyll-less
