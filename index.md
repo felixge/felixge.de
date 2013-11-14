@@ -57,10 +57,9 @@ you'd like to invite me to an event.
 That being said, I plan to do less traveling in 2013, so I can only attend a
 small amount of events this year.
 
-{% jsonball talks from file talks.json %}
 <table class="toc">
   <tbody>
-    {% for talk in talks %}
+    {% for talk in site.data.talks %}
     <tr>
       <td class="title">
         <span>
