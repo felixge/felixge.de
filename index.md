@@ -195,7 +195,7 @@ have not gotten around to it yet.
 
 My primary e-mail is [felix@debuggable.com](mailto:felix@debuggable.com).
 
-I love meeting new people, so if you're in berlin, I'm almost always up for
+I love meeting new people, so if you're in Berlin, I'm almost always up for
 having lunch or something - just get in touch!
 
 Please use Github for any questions or bug reports concerning my open source
