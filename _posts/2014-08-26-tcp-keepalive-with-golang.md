@@ -13,7 +13,7 @@ The short answer is: nothing. The remote end of the connection won't be able to
 send a FIN packet, and the local OS will not detect that the connection is
 lost. So it's up to you as the developer to address this scenario.
 
-In Go you have several methods available to you that can help with this .
+In Go you have several methods available to you that can help with this.
 Perhaps the first one to consider is the `SetReadDeadline` method of the
 [net.Conn][] interface. Assuming that your connection is expected to receive
 data at a regular interval, you can simply treat a timed out read as equivalent
