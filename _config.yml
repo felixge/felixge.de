@@ -5,7 +5,7 @@ author:
   uri: http://felixge.de/
 timezone: UTC
 markdown: redcarpet
-pygments: true
+highlighter: pygments
 exclude:
   - NEXT.md
 gems:
