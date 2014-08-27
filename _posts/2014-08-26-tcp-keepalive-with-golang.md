@@ -30,7 +30,7 @@ heartbeats to your own protocol, that should be your first choice for
 addressing the unplugged network cable scenario.
 
 However, what happens if you have no control over the protocol, and heartbeats
-are no supported?
+are not supported?
 
 Now it's time to learn about TCP keepalive and how to use it with Go. TCP
 keepalive is defined in [RFC 1122][], and is not part of the TCP specification
