@@ -2,23 +2,21 @@
 layout: default
 title: About
 ---
-Hi, I am Felix Geisendörfer, a programmer and entrepreneur living in Berlin, Germany.
+Hi, I am Felix Geisendörfer, a programmer and entrepreneur living in Berlin,
+Germany.
 
-I am a co-founder of [Transloadit](http://transloadit.com/), a small,
-bootstrapped and profitable SaaS business, as well as
-[Debuggable](http://debuggable.com) a web consulting firm.
+Currently I'm writing software in [Go](http://golang.org/) as a contractor.
 
-A lot of my time is spent on [open source](http://github.com/felixge), and I
-was one of the first users and core contributors of
-[node.js](http://nodejs.org/).
+In the past I've co-founded and bootstrapped
+[Transloadit](http://transloadit.com/) into a profitable business, was one of
+the first contributors to [node.js](http://nodejs.org/) and worked on many
+other [open source projects](http://github.com/felixge) as well.
 
-One of my spare time passions is robotics, so [a few friends](http://nodecopter.com/core) and I organized an
-event around programming flying robots with JavaScript called
+One of my spare time passions is robotics, so [a few
+friends](http://nodecopter.com/core) and I organized an event around
+programming flying robots with JavaScript called
 [NodeCopter](http://nodecopter.com/) which has now turned into a small
 community.
-
-As of late, I have started to use [Go](http://golang.org/) for a lot of things.
-You should check it out, it's amazing.
 
 You can find me on [twitter](https://twitter.com/felixge) and
 [github](https://github.com/felixge), or [contact me](#contact) directly.
@@ -51,11 +49,9 @@ I have been blogging since 2006, my older posts can be found
 
 <h2 id="speaking"><a href="#speaking">Speaking</a></h2>
 
-I enjoy speaking at conferences and user groups, so [reach out](#contact) if
-you'd like to invite me to an event.
-
-That being said, I plan to do less traveling in 2013, so I can only attend a
-small amount of events this year.
+After speaking a little too much in 2012, I've heavily cut down on events, but
+I still enjoy speaking ocassionally, so [reach out](#contact) if you'd like to
+invite me to an event.
 
 <table class="toc">
   <tbody>
@@ -84,19 +80,9 @@ small amount of events this year.
 
 <h2 id="consulting"><a href="consulting">Consulting</a></h2>
 
-I help companies to make good technology decisions with a focus on node.js.
-
-This often starts with evaluating if node.js is a good fit, and if so, training
-in-house developers to do the right things and coming up with good application
-architectures.  
-
-In other cases I've helped companies to review their existing code bases, as
-well as bringing failing projects back on track.
-
-I also do small development projects, and can help you finding the right people
-to take on bigger projects.
-
-Here are a few things my previous clients had to say:
+I'm currently providing development services in Go, but in the past I've
+focused on consulting on node.js projects and a few of my clients where kind
+enough to say nice things about it:
 
 <blockquote>
   <p>
@@ -182,14 +168,6 @@ During the summer I mostly focus on playing [beach volleyball][], competing in
 tournaments pretty much every weekend. Other summer time passions of mine
 are [street unicycling][] and [slacklining][]. During the colder months I enjoy
 snowboarding, squash and badminton.
-
-You might also be curious about the frog riding the squirrel used on this page.
-The picture is the result of being a huge squirrel fan (long story) and coming
-across the [Get On The Squirrel Theres No Time To Explain][] meme one day. I
-really liked the carpe diem spirit of it, so I had an artist create a vector
-based on it. Eventually I want to use it as a logo on my laptop as well, but I
-have not gotten around to it yet.
-
 
 <h2 id="contact"><a href="#contact">Contact</a></h2>
 
