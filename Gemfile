@@ -2,6 +2,6 @@ source 'https://rubygems.org'
 
 gem 'therubyracer'
 gem 'redcarpet'
-gem 'pygments'
+gem 'pygments.rb'
 gem 'jekyll'
 gem 'jekyll-less'
