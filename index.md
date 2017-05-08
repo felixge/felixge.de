@@ -91,3 +91,5 @@ projects, this way the information can become useful to everybody.
 I try to answer all e-mails, but sometimes I have a bit of a backlog.
 
 [Get On The Squirrel Theres No Time To Explain]: http://weknowmemes.com/2011/12/get-on-the-squirrel-theres-no-time-to-explain/
+
+<center><small>Hosted by [netlify](https://www.netlify.com/)</small></center>
