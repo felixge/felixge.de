@@ -78,20 +78,12 @@ invite me to an event.
   </tbody>
 </table>
 
-<h2 id="personal"><a href="#personal">Personal</a></h2>
-
-When not sitting in front of a computer, I enjoy a wide variety of sports.
-During the summer I mostly focus on playing [beach volleyball][], competing in
-tournaments pretty much every weekend. Other summer time passions of mine
-are [street unicycling][] and [slacklining][]. During the colder months I enjoy
-snowboarding, squash and badminton.
-
 <h2 id="contact"><a href="#contact">Contact</a></h2>
 
-My primary e-mail is [felix@debuggable.com](mailto:felix@debuggable.com).
+You can reach me at [hi@felixge.de](mailto:hi@felixge.de).
 
 I love meeting new people, so if you're in Berlin, I'm almost always up for
-having lunch or something - just get in touch!
+having lunch or coffee - just get in touch!
 
 Please use Github for any questions or bug reports concerning my open source
 projects, this way the information can become useful to everybody.
@@ -99,6 +91,3 @@ projects, this way the information can become useful to everybody.
 I try to answer all e-mails, but sometimes I have a bit of a backlog.
 
 [Get On The Squirrel Theres No Time To Explain]: http://weknowmemes.com/2011/12/get-on-the-squirrel-theres-no-time-to-explain/
-[beach volleyball]: http://www.beachberlin.de/beachmitte/info.html
-[street unicycling]: http://en.wikipedia.org/wiki/Street_unicycling
-[slacklining]: http://en.wikipedia.org/wiki/Slacklining
