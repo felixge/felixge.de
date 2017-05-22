@@ -2,5 +2,5 @@
   command = "jekyll build"
   publish = "_site"
 
-[context.branch-deploy]
+[context.deploy-preview]
   command = "jekyll build --drafts"
