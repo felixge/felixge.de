@@ -98,7 +98,7 @@ SET
 # SET client_min_messages='log';
 SET
 # SELECT json_agg(i ORDER BY i DESC) FROM foo;
-LOG:  begin datum sort: workMem = 131072, randomAccess = f
+LOG:  begin datum sort: workMem = 4096, randomAccess = f
 LOG:  performsort starting: CPU 0.00s/0.00u sec elapsed 0.00 sec
 LOG:  performsort done: CPU 0.00s/0.00u sec elapsed 0.00 sec
 LOG:  internal sort ended, 25 KB used: CPU 0.00s/0.00u sec elapsed 0.00 sec
@@ -280,7 +280,7 @@ DETAIL:     {PLANNEDSTMT
    :nParamExec 0
    }
 
-LOG:  begin datum sort: workMem = 131072, randomAccess = f
+LOG:  begin datum sort: workMem = 4096, randomAccess = f
 LOG:  performsort starting: CPU 0.00s/0.00u sec elapsed 0.00 sec
 LOG:  performsort done: CPU 0.00s/0.00u sec elapsed 0.00 sec
 LOG:  internal sort ended, 25 KB used: CPU 0.00s/0.00u sec elapsed 0.00 sec
