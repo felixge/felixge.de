@@ -1,23 +1,23 @@
 ---
 layout: post
-title: "Postgres operations that you can't EXPLAIN"
+title: "PostgreSQL operations that you can't EXPLAIN"
 ---
 
-I am currently dabbling in postgres internals in my spare time, including
+I am currently dabbling in PostgreSQL internals in my spare time, including
 trying to understand the query planner and executor. It's a deeply humbling
 experience, but occasionally I'm delighted to be able to answer simple
 questions I'm researching.
 
-One of these questions is how postgres is executing `ORDER BY` clauses inside
-of aggregate calls.
+One of these questions is how PostgreSQL is executing `ORDER BY` clauses inside
+of aggregate expressions.
 
-Consider a simple table made of 3 integers, 1...3:
+Consider a simple table that holds 3 rows of an int column ranging from 1 to 3:
 
 ```
-postgres=# CREATE TABLE foo AS
-postgres-# SELECT * FROM generate_series(1, 3) i;
+# CREATE TABLE foo AS
+SELECT * FROM generate_series(1, 3) i;
 SELECT 3
-postgres=# SELECT * FROM foo;
+# SELECT * FROM foo;
  i
 ---
  1
@@ -26,23 +26,36 @@ postgres=# SELECT * FROM foo;
 (3 rows)
 ```
 
-Now let's assume we want to convert those rows into a postgres array in
-descending order:
+Now let's assume we want to convert those rows into a json array. This can
+be accomplished using the [json\_agg](https://www.postgresql.org/docs/9.6/static/functions-aggregate.html#FUNCTIONS-AGGREGATE-TABLE) 
+aggregate function:
 
 ```
-postgres=# SELECT array_agg(i ORDER BY i DESC) FROM foo;
- array_agg
+# SELECT json_agg(i) FROM foo;
+ json_agg
 -----------
- {3,2,1}
+ [1, 2, 3]
+(1 row)
+```
+
+But what if we want to order the array elements in descending order? No
+problem, we can simply use the order-by-clause support available to all
+[aggregate expressions](https://www.postgresql.org/docs/9.6/static/sql-expressions.html#SYNTAX-AGGREGATES):
+
+```
+# SELECT json_agg(i ORDER BY i DESC) FROM foo;
+ json_agg
+-----------
+ [3, 2, 1]
 (1 row)
 ```
 
 If you're like me, you'd probably imagine the `EXPLAIN` output for this query
 to contain three nodes: a `Seq Scan`, a `Sort`, and an `Aggregate`. However,
-when we run `EXPLAIN`, it turns out there is no sort node. 
+when we run `EXPLAIN`, it turns out there is no `Sort` node. 
 
 ```
-postgres=# EXPLAIN SELECT array_agg(i ORDER BY i DESC) FROM foo;
+# EXPLAIN SELECT json_agg(i ORDER BY i DESC) FROM foo;
                          QUERY PLAN
 -------------------------------------------------------------
  Aggregate  (cost=41.88..41.89 rows=1 width=32)
@@ -50,18 +63,18 @@ postgres=# EXPLAIN SELECT array_agg(i ORDER BY i DESC) FROM foo;
 (2 rows)
 ```
 
-In fact, the plan even remains unchanged if we change the sort order or remove
-the clause entirely:
+In fact, the plan even remains unchanged even if we change the sort order or
+remove the clause entirely:
 
 ```
-postgres=# postgres=# EXPLAIN SELECT array_agg(i ORDER BY i ASC) FROM foo;
+# EXPLAIN SELECT json_agg(i ORDER BY i ASC) FROM foo;
                          QUERY PLAN
 -------------------------------------------------------------
  Aggregate  (cost=41.88..41.89 rows=1 width=32)
    ->  Seq Scan on foo  (cost=0.00..35.50 rows=2550 width=4)
 (2 rows)
 
-postgres=# EXPLAIN SELECT array_agg(i) FROM foo;
+# EXPLAIN SELECT json_agg(i) FROM foo;
                          QUERY PLAN
 -------------------------------------------------------------
  Aggregate  (cost=41.88..41.89 rows=1 width=32)
@@ -80,18 +93,18 @@ the
 developer option:
 
 ```
-postgres=# SET trace_sort=true;
+# SET trace_sort=true;
 SET
-postgres=# SET client_min_messages='log';
+# SET client_min_messages='log';
 SET
-postgres=# SELECT array_agg(i ORDER BY i DESC) FROM foo;
-LOG:  begin datum sort: workMem = 4096, randomAccess = f
-LOG:  performsort starting: CPU: user: 0.00 s, system: 0.00 s, elapsed: 0.00 s
-LOG:  performsort done: CPU: user: 0.00 s, system: 0.00 s, elapsed: 0.00 s
-LOG:  internal sort ended, 25 KB used: CPU: user: 0.00 s, system: 0.00 s, elapsed: 0.00 s
- array_agg
+# SELECT json_agg(i ORDER BY i DESC) FROM foo;
+LOG:  begin datum sort: workMem = 131072, randomAccess = f
+LOG:  performsort starting: CPU 0.00s/0.00u sec elapsed 0.00 sec
+LOG:  performsort done: CPU 0.00s/0.00u sec elapsed 0.00 sec
+LOG:  internal sort ended, 25 KB used: CPU 0.00s/0.00u sec elapsed 0.00 sec
+ json_agg
 -----------
- {3,2,1}
+ [3, 2, 1]
 (1 row)
 ```
 
@@ -101,9 +114,9 @@ option, but the output is not for the faint of heart. Specifically you need to
 look for the `:aggorder` field below:
 
 ```
-postgres=# SET debug_print_plan=true;
+# SET debug_print_plan=true;
 SET
-postgres=# SELECT array_agg(i ORDER BY i DESC) FROM foo;
+# SELECT json_agg(i ORDER BY i DESC) FROM foo;
 LOG:  plan:
 DETAIL:     {PLANNEDSTMT
    :commandType 1
@@ -126,8 +139,8 @@ DETAIL:     {PLANNEDSTMT
          {TARGETENTRY
          :expr
             {AGGREF
-            :aggfnoid 2335
-            :aggtype 1007
+            :aggfnoid 3175
+            :aggtype 114
             :aggcollid 0
             :inputcollid 0
             :aggtranstype 2281
@@ -145,7 +158,7 @@ DETAIL:     {PLANNEDSTMT
                   :varlevelsup 0
                   :varnoold 1
                   :varoattno 1
-                  :location 17
+                  :location 16
                   }
                :resno 1
                :resname <>
@@ -174,7 +187,7 @@ DETAIL:     {PLANNEDSTMT
             :location 7
             }
          :resno 1
-         :resname array_agg
+         :resname json_agg
          :ressortgroupref 0
          :resorigtbl 0
          :resorigcol 0
@@ -243,7 +256,7 @@ DETAIL:     {PLANNEDSTMT
          :colnames ("i")
          }
       :rtekind 0
-      :relid 404362
+      :relid 404407
       :relkind r
       :tablesample <>
       :lateral false
@@ -262,21 +275,32 @@ DETAIL:     {PLANNEDSTMT
    :subplans <>
    :rewindPlanIDs (b)
    :rowMarks <>
-   :relationOids (o 404362)
+   :relationOids (o 404407)
    :invalItems <>
    :nParamExec 0
    }
 
-LOG:  begin datum sort: workMem = 4096, randomAccess = f
-LOG:  performsort starting: CPU: user: 0.00 s, system: 0.00 s, elapsed: 0.00 s
-LOG:  performsort done: CPU: user: 0.00 s, system: 0.00 s, elapsed: 0.00 s
-LOG:  internal sort ended, 25 KB used: CPU: user: 0.00 s, system: 0.00 s, elapsed: 0.00 s
- array_agg
+LOG:  begin datum sort: workMem = 131072, randomAccess = f
+LOG:  performsort starting: CPU 0.00s/0.00u sec elapsed 0.00 sec
+LOG:  performsort done: CPU 0.00s/0.00u sec elapsed 0.00 sec
+LOG:  internal sort ended, 25 KB used: CPU 0.00s/0.00u sec elapsed 0.00 sec
+ json_agg
 -----------
- {3,2,1}
+ [3, 2, 1]
 (1 row)
 ```
 
 In conlusion: While `EXPLAIN` is a powerful weapon for those seeking to
 understand query performance, you should be aware of the fact that there are
 things that you can't `EXPLAIN` :).
+
+The research for this article was done using PostgreSQL 9.6.3 and LLDB, but
+should also apply to recent versions as well as the upcoming PostgreSQL 10.
+
+```
+# SELECT version();
+                                                   version
+--------------------------------------------------------------------------------------------------------------
+ PostgreSQL 9.6.3 on x86_64-apple-darwin14.5.0, compiled by Apple LLVM version 7.0.0 (clang-700.1.76), 64-bit
+(1 row)
+```
