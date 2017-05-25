@@ -2,7 +2,7 @@
 layout: post
 title: "PostgreSQL operations that you can't EXPLAIN"
 redirect_from:
-  - /2017/05/03/postgresql-operations-that-you-cant-explain.html
+  - /2017/05/05/postgresql-operations-that-you-cant-explain.html
 date: 2017-05-23T16:25:00+02:00
 updated: 2017-05-23T16:25:00+02:00
 ---
