@@ -10,3 +10,4 @@ exclude:
   - NEXT.md
 gems:
   - jekyll-less
+  - jekyll-redirect-from
