@@ -1,8 +1,8 @@
 ---
 layout: post
 title: "PostgreSQL operations that you can't EXPLAIN"
-date: 2017-05-05T16:25:00+02:00
-updated: 2017-05-05T16:25:00+02:00
+date: 2017-05-23T16:25:00+02:00
+updated: 2017-05-23T16:25:00+02:00
 ---
 
 I am currently dabbling in PostgreSQL internals in my spare time, including
