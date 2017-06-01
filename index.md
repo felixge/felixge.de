@@ -23,7 +23,7 @@ You can find me on [twitter](https://twitter.com/felixge) and
 
 <h2 id="blog"><a href="#blog">Blog</a></h2>
 
-You can subscribe to updates via <a
+You can <input type="button" onclick="(function(){var z=document.createElement('script');z.src='https://www.subtome.com/load.js';document.body.appendChild(z);})()" value="Subscribe"> to updates via <a
   href="http://feeds.feedburner.com/felixge">RSS</a> or <a
   href="http://feedburner.google.com/fb/a/mailverify?uri=felixge">E-Mail</a>.
 
