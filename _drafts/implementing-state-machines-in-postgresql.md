@@ -52,7 +52,7 @@ CREATE TABLE order_events (
 );
 ```
 
-Next, let's implement the transitition function, which is the heart of every
+Next, let's implement the transition function, which is the heart of every
 FSM:
 
 ```sql
@@ -113,7 +113,7 @@ function to enforce our FSM on all rows for the same `order_id` in the
 `order_events` table.
 
 The first thing we need is a good way to take a list of events and call our
-transition function on them recurisvely to determine the resulting state. There
+transition function on them recursively to determine the resulting state. There
 are multiple ways to accomplish this in PostgreSQL, but perhaps the most
 elegant is a [user-defined aggregate](https://www.postgresql.org/docs/current/static/xaggr.html).
 
