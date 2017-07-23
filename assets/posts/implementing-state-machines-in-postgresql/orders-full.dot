@@ -1,0 +1,46 @@
+digraph "G" {
+  start [style="dotted"];
+  error [color="red"];
+
+  start -> awaiting_payment [label="create"];
+  start -> error [label="refund"];
+  start -> error [label="pay"];
+  start -> error [label="cancel"];
+  start -> error [label="ship"];
+
+  awaiting_payment -> awaiting_shippment [label="pay"];
+  awaiting_payment -> canceled [label="cancel"];
+  awaiting_payment -> error [label="ship"];
+  awaiting_payment -> error [label="refund"];
+  awaiting_payment -> error [label="create"];
+
+  awaiting_shippment -> awaiting_refund [label="cancel"];
+  awaiting_shippment -> shipped [label="ship"];
+  awaiting_shippment -> error [label="pay"];
+  awaiting_shippment -> error [label="refund"];
+  awaiting_shippment -> error [label="create"];
+
+  awaiting_refund -> canceled [label="refund"];
+  awaiting_refund -> error [label="pay"];
+  awaiting_refund -> error [label="cancel"];
+  awaiting_refund -> error [label="ship"];
+  awaiting_refund -> error [label="create"];
+
+  canceled -> error [label="refund"];
+  canceled -> error [label="pay"];
+  canceled -> error [label="cancel"];
+  canceled -> error [label="ship"];
+  canceled -> error [label="create"];
+
+  shipped -> error [label="refund"];
+  shipped -> error [label="pay"];
+  shipped -> error [label="cancel"];
+  shipped -> error [label="ship"];
+  shipped -> error [label="create"];
+
+  error -> error [label="refund"];
+  error -> error [label="pay"];
+  error -> error [label="cancel"];
+  error -> error [label="ship"];
+  error -> error [label="create"];
+}

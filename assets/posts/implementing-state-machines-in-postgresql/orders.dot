@@ -1,0 +1,12 @@
+digraph "G" {
+  start [style="dotted"];
+  start -> awaiting_payment [label="create"];
+
+  awaiting_payment -> awaiting_shippment [label="pay"];
+  awaiting_payment -> canceled [label="cancel"];
+
+  awaiting_shippment -> awaiting_refund [label="cancel"];
+  awaiting_shippment -> shipped [label="ship"];
+
+  awaiting_refund -> canceled [label="refund"];
+}
