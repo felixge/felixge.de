@@ -8,6 +8,8 @@ markdown: redcarpet
 highlighter: pygments
 exclude:
   - NEXT.md
-gems:
+plugins:
   - jekyll-less
   - jekyll-redirect-from
+redcarpet:
+    extensions: ["footnotes"]
