@@ -24,8 +24,8 @@ the different states are connected to each other via events:
 
 Besides guiding our implementation, these graphs can be very useful for
 discussions and analysis. For example you can immediately see how there is no
-way for a customer to return an order after it has shipped yet. Additionally
-the process of naming the involved states and events automatically creates a
+way for a customer to return an order after it has shipped. Additionally the
+process of naming the involved states and events automatically creates a
 precise language that can be adopted by all stakeholders.
 
 If you paid close attention so far, you might have noticed that the graph above
