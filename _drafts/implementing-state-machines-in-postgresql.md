@@ -279,7 +279,7 @@ FROM
     GROUP BY 1
   ) orders
 GROUP BY 1, 2
-ORDER BY 1, 2
+ORDER BY 1, 2;
 ```
 ```
     date    |       state       | count
