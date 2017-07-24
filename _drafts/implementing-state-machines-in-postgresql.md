@@ -3,8 +3,8 @@ layout: post
 title: "Implementing State Machines in PostgreSQL"
 ---
 
-[Finite-state machines](https://en.wikipedia.org/wiki/Finite-state_machine)
-(FSMs) are a wonderful model of computation that has many practical
+[Finite-state machine](https://en.wikipedia.org/wiki/Finite-state_machine)
+(FSM) is a wonderful model of computation that has many practical
 applications. One of my favorites is turning business logic into simple FSMs.
 For example consider the following requirements for an order management system:
 
