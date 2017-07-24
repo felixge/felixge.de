@@ -87,8 +87,8 @@ $$
 $$;
 ```
 
-And before we proceed, let's check a few examples to make sure the function is
-working:
+And before we proceed, let's test with a few examples to make sure the function
+is working:
 
 ```sql
 SELECT state, event, order_events_transition(state, event)
