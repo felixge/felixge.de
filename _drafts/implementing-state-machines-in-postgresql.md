@@ -246,7 +246,7 @@ INSERT INTO order_events (order_id, event, time) VALUES
 ```
 
 Using our `order_events_fsm` as a [window
-function](https://www.postgresql.org/docs/9.6/static/tutorial-window.html), we
+function](https://www.postgresql.org/docs/current/static/tutorial-window.html), we
 can easily get the state history of a given order:
 
 ```sql
@@ -263,8 +263,8 @@ WHERE order_id = 3;
  2017-07-26 00:00:00 | canceled
 ```
 
-Or perhaps even more interesting, we can use a
-[Lateral](https://www.postgresql.org/docs/9.6/static/queries-table-expressions.html#QUERIES-LATERAL)
+Or perhaps even more interesting, we can use the [generate\_series](https://www.postgresql.org/docs/current/static/functions-srf.html) function and a
+[Lateral](https://www.postgresql.org/docs/current/static/queries-table-expressions.html#QUERIES-LATERAL)
 sub-query to break down the number of orders per state for each day of a given
 date range:
 
