@@ -47,7 +47,7 @@ FROM (VALUES
   ('awaiting_payment', 'pay'),
   ('awaiting_payment', 'cancel'),
   ('awaiting_payment', 'ship')
-) examples(state, event);
+) AS examples(state, event);
 
 CREATE AGGREGATE order_events_fsm(text) (
   SFUNC = order_events_transition,
