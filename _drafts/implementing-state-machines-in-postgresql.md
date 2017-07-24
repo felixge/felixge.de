@@ -225,8 +225,8 @@ SELECT id, order_id, event FROM order_events;
 ```
 
 If you're still on the fence about embedding this kind of logic into your
-database, let's have a look how our approach gives us advanced analytical
-powers as a free by-product. Let's consider a new data set of 3 orders:
+database, let's see how our approach gives us advanced analytical powers as a
+free by-product. Let's consider a new data set of 3 orders:
 
 
 ```sql
