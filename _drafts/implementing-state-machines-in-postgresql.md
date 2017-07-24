@@ -37,8 +37,8 @@ think it's very useful in practice.
 Anyway, as promised in the title of this article we're going to implement this
 FSM in PostgreSQL. This may not be everybody's cup of tea, but you might like
 how this approach us gives advanced analytical powers as a free by-product.
-Embedding this kind of logic into the DB can also help protect against race
-conditions, but this will perhaps be the topic of a future post.
+Embedding this kind of logic into the database can also help protect against
+race conditions, but this will perhaps be the topic of a future post.
 
 Let's begin by creating an `order_events` table which keeps track of all events
 for a given `order_id`.
@@ -224,9 +224,9 @@ SELECT id, order_id, event FROM order_events;
   3 |        1 | ship
 ```
 
-If you're still on the fence about embedding this kind of logic into your db,
-let's have a look how our approach gives us advanced analytical powers as a
-free by-product. Let's consider a new data set of 3 orders:
+If you're still on the fence about embedding this kind of logic into your
+database, let's have a look how our approach gives us advanced analytical
+powers as a free by-product. Let's consider a new data set of 3 orders:
 
 
 ```sql
