@@ -28,9 +28,9 @@ way for a customer to return an order after it has shipped. Additionally the
 process of naming the involved states and events automatically creates a
 precise language that can be adopted by all stakeholders.
 
-If you paid close attention so far, you might have noticed that the graph above
-does not show the combination of all states and events which simply implies
-that the missing combinations lead to an error state. The [complete FSM]({%
+You might have noticed that the graph above does not show all possible
+combinations of all states and all events. The reason is that the missing
+combinations implicitly lead to an error state. The [complete FSM]({%
 asset_path orders-full.svg %}) can be shown as a graph as well, but I don't
 think it's very useful in practice.
 
