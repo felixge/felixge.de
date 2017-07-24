@@ -1,4 +1,5 @@
 \set ECHO queries
+\set ON_ERROR_STOP on
 
 DROP SCHEMA IF EXISTS oms CASCADE;
 CREATE SCHEMA oms;
@@ -90,9 +91,11 @@ INSERT INTO order_events (order_id, event) VALUES
   (1, 'pay'),
   (1, 'ship');
 
+\set ON_ERROR_STOP off
 INSERT INTO order_events (order_id, event) VALUES
   (2, 'create'),
   (2, 'ship');
+\set ON_ERROR_STOP on
 
 SELECT id, order_id, event FROM order_events;
 
