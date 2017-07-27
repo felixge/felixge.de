@@ -300,14 +300,14 @@ ORDER BY 1, 2;
 ```
 
 There you have it, a FSM implemented as a user defined aggregate in PostgreSQL
-providing data integrity and advanced analytics.
+providing both data integrity and advanced analytics.
 
 That being said, your milage may vary, and embedding your business logic into
 your database is always a tradeoff. But if you want some reassurance: I've had
 great success in applying this approach in combination with [eager
 materialization](https://hashrocket.com/blog/posts/materialized-view-strategies-using-postgresql#eager-materialized-view)
 to implement a realtime analytics dashboard for an application with over a
-billion rows.
+billion event rows.
 
 Anyway, I'm really looking forward to feedback on this, and am more than happy
 to answer any questions, so please comment.
