@@ -38,7 +38,7 @@ Anyway, as promised in the title of this article we're going to implement this
 FSM in PostgreSQL. This may not be everybody's cup of tea, but you might like
 how this approach us gives advanced analytical powers as a free by-product.
 Embedding this kind of logic into the database can also help protect against
-race conditions, but this will perhaps be the topic of a future post.
+race conditions, but this will perhaps be the topic of a future post [^race].
 
 Let's begin by creating an `order_events` table which keeps track of all events
 for a given `order_id`.
@@ -299,6 +299,17 @@ ORDER BY 1, 2;
  2017-07-26 | shipped           |     1
 ```
 
-Depending on your level of SQL expertise you may have a lot of questions or
-suggestions at this point. So please don't be shy and leave a comment, I'm
-really looking forward to the discussion and explain things in more detail.
+There you have it, a FSM implemented as a user defined aggregate in PostgreSQL
+providing data integrity and advanced analytics.
+
+That being said, your milage may vary, and embedding your business logic into
+your database is always a tradeoff. But if you want some reassurance: I've had
+great success in applying this approach in combination with [eager
+materialization](https://hashrocket.com/blog/posts/materialized-view-strategies-using-postgresql#eager-materialized-view)
+to implement a realtime analytics dashboard for an application with over a
+billion rows.
+
+Anyway, I'm really looking forward to feedback on this, and am more than happy
+to answer any questions, so please comment.
+
+[^race]: The code in this article immune to concurrency anomalies when using the `SERIALIZABLE` transaction isolation level. Alternative you could modify the trigger to aquire an exclusive lock on the `order_events` table. But as mentioned, this topic deserves a separate post.
