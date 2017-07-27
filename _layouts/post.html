@@ -2,7 +2,7 @@
 layout: default
 ---
 
-Published: {{ page.date | date: "%b %e, %Y at %H:%M %Z" }}
+Published: {{ page.date | date: "%B %e, %Y" }}
 
 {{ content }}
 
@@ -14,9 +14,11 @@ Subscribe to this blog via <a
   href="http://feedburner.google.com/fb/a/mailverify?uri=felixge">E-Mail</a>
 or get small updates from me via <a href="https://twitter.com/felixge">Twitter</a>.
 <br><br>
+{% if post.updated != nil %}
 Last Update:  {{ page.updated | date: "%b %e, %Y at %H:%M %Z" }}
 <br>
 <br>
+{% endif %}
 
 
 <div id="disqus_thread"></div>
