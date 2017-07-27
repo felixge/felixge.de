@@ -263,7 +263,10 @@ WHERE order_id = 3;
  2017-07-26 00:00:00 | canceled
 ```
 
-Or perhaps even more interesting, we can use the [generate\_series](https://www.postgresql.org/docs/current/static/functions-srf.html) function and a
+But we can go even further and apply our state machines to multiple orders,
+e.g. by using the
+[generate\_series](https://www.postgresql.org/docs/current/static/functions-srf.html)
+function and a
 [Lateral](https://www.postgresql.org/docs/current/static/queries-table-expressions.html#QUERIES-LATERAL)
 sub-query to break down the number of orders per state for each day of a given
 date range:
