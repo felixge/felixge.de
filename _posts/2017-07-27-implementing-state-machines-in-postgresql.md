@@ -314,4 +314,4 @@ to answer any questions, so please comment.
 
 <small>Thanks to Thorsten Ball and Johannes Boyne for reviewing.</small>
 
-[^race]: The code in this article immune to concurrency anomalies when using the `SERIALIZABLE` transaction isolation level. Alternative you could modify the trigger to aquire an exclusive lock on the `order_events` table. But as mentioned, this topic deserves a separate post.
+[^race]: The code in this article is immune to concurrency anomalies when using the `SERIALIZABLE` transaction isolation level. Alternative you could modify the trigger to aquire an exclusive lock on the `order_events` table. But as mentioned, this topic deserves a separate post.
