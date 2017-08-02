@@ -314,7 +314,7 @@ to answer any questions, so please comment.
 
 **Join me at Apple**: If the article above has you excited, come and join my
 team at Apple. We're hiring Go and PostgreSQL developers in Shanghai, China
-right now. Relocation is possible, just [send me an e-mail](mailto:fgeisendoerfer@apple.com?subject=PostgreSQL/Go Developer Role) to find out more about
+right now. Relocation is possible, just [send me an e-mail](mailto:felixge_jobs@apple.com?subject=PostgreSQL/Go Developer Role) to find out more about
 this role.
 
 <small>Thanks to Thorsten Ball and Johannes Boyne for reviewing.</small>

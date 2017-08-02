@@ -72,7 +72,7 @@ BEGIN
   SELECT order_events_fsm(event ORDER BY id)
   FROM (
     SELECT id, event FROM order_events WHERE order_id = new.order_id
-    UNION
+    UNION ALL
     SELECT new.id, new.event
   ) s
   INTO new_state;
