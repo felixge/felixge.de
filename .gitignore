@@ -1,2 +1,2 @@
-*.un~
-_site/
+/resources
+/public

@@ -1,0 +1,348 @@
+- title: tus.io - Squeezing Cats Through Tiny Mobile Tubes
+  date: 2013-05-29
+  location: JSConf.us, Florida
+  url: https://github.com/jsconf/jsconfus2013/issues/20
+  eventUrl: http://2013.jsconf.us/
+
+- title: tus.io - Squeezing Cats Through Tiny Mobile Tubes
+  date: 2013-05-23
+  location: Web Rebels, Oslo
+  url: http://webrebels.org/speakers/#felix
+  eventUrl: http://webrebels.org/
+
+- title: tus.io - Resumable file uploads for web and mobile apps
+  date: 2013-05-11
+  location: Codemotion Berlin
+  url: http://berlin.codemotionworld.com/talk-page/?talk_name=tus-io-resumable-file-uploads-for-web-and-mobile-apps
+  eventUrl: http://berlin.codemotionworld.com/
+
+- title: tus.io - Resumable File Uploads
+  date: 2013-05-01
+  location: UIKonf Preparty, Berlin
+  url: https://speakerdeck.com/felixge/tus-dot-io-resumable-file-uploads-lightning-talk
+  eventUrl: http://www.uikonf.com/2013/03/28/preparty.html
+  pdfUrl: https://speakerd.s3.amazonaws.com/presentations/321b01b09538013066ae7e72ba47199d/tus.pdf
+
+- title: Programming flying robots with JavaScript
+  date: 2013-04-24
+  location: NEXT Berlin
+  url: https://speakerdeck.com/felixge/programming-flying-robots-with-javascript-1
+  eventUrl: http://nextberlin.eu/
+  pdfUrl: https://speakerd.s3.amazonaws.com/presentations/119a85d095380130010d5225ae2bc12a/nodecopter-next.pdf
+
+- title: Programming flying robots with JavaScript
+  date: 2013-04-23
+  location: Railsberry, Krakow
+  url: https://speakerdeck.com/felixge/programming-flying-robots-with-javascript-2
+  eventUrl: http://railsberry.com/
+  pdfUrl: https://speakerd.s3.amazonaws.com/presentations/c8ac6940953701309d49169848220a5c/nodecopter-railsberry.pdf
+
+- title: Programming an AR Drone Firmware in JS (de)
+  date: 2012-12-12
+  location: Denkwerk, Cologne
+  url: https://speakerdeck.com/felixge/programming-an-ar-drone-firmware-with-js-de
+  eventUrl: http://www.denkwerk.com/2012/12/17/felix-geisendorfer-beim-funften-kreatifruhstuck/
+  pdfUrl: https://speakerd.s3.amazonaws.com/presentations/8cc549303fff0130b9ec1231381f54b3/slides.pdf
+
+- title: Programming an AR Drone Firmware in JS (de)
+  date: 2012-12-11
+  location: Cologne JS Usergroup
+  url: https://speakerdeck.com/felixge/programming-an-ar-drone-firmware-with-js-de
+  eventUrl: http://colognejs.de/
+  pdfUrl: https://speakerd.s3.amazonaws.com/presentations/8cc549303fff0130b9ec1231381f54b3/slides.pdf
+  videoUrl: http://www.youtube.com/watch?v=nwGNNMJt4mE
+
+- title: Faster than C?
+  date: 2012-11-29
+  location: Prague JS Usergroup
+  url: https://speakerdeck.com/felixge/faster-than-c-3
+  eventUrl: http://praguejs.cz/
+  pdfUrl: https://speakerd.s3.amazonaws.com/presentations/0daac9f03fff0130be8812313d162e8f/slides.pdf
+
+- title: Flying robots over a 10.000 mile distance with JavaScript
+  date: 2012-11-21
+  location: Sydney JS Usergroup
+  url: https://speakerdeck.com/felixge/flying-robots-over-a-10-dot-000-mile-distance-with-javascript
+  eventUrl: http://www.sydjs.com/
+  pdfUrl: https://speakerd.s3.amazonaws.com/presentations/b10d9e003ffe0130e97412313b100342/slides.pdf
+
+- title: Faster than C?
+  date: 2012-11-11
+  location: Nodeconf.it, Italy
+  url: https://speakerdeck.com/felixge/faster-than-c-2
+  eventUrl: http://nodejsconf.it/
+  pdfUrl: https://speakerd.s3.amazonaws.com/presentations/252836503ffc0130e97412313b100342/slides.pdf
+
+- title: The power of node.js (with quadcopters)
+  date: 2012-11-05
+  location: Øredev, Malmö
+  url: https://speakerdeck.com/felixge/the-power-of-node-dot-js-with-quadcopters
+  eventUrl: http://oredev.org/
+  pdfUrl: https://speakerd.s3.amazonaws.com/presentations/4fbfac303ffa0130e97412313b100342/ordev-2012.pdf
+  videoUrl: http://vimeo.com/53211410
+
+- title: Faster than C?
+  date: 2012-10-18
+  location: NodeDublin
+  url: https://speakerdeck.com/felixge/faster-than-c-1
+  eventUrl: http://www.nodedublin.com/
+  pdfUrl: https://speakerd.s3.amazonaws.com/presentations/a926c2103ffb0130e97412313b100342/dublin.pdf
+  videoUrl: http://vimeo.com/56444583
+
+- title: Faster than C?
+  date: 2012-10-07
+  location: JSConf.EU, Berlin
+  url: https://speakerdeck.com/felixge/faster-than-c
+  eventUrl: http://2012.jsconf.eu/index.html
+  codeUrl: https://github.com/felixge/faster-than-c
+  pdfUrl: https://speakerd.s3.amazonaws.com/presentations/1eb132803ffb0130be8812313d162e8f/slides.pdf
+  videoUrl: http://www.youtube.com/watch?v=Kdwwvps4J9A
+
+- title: Programming flying robots with node.js
+  date: 2012-09-28
+  location: LXJS Lisbon JavaScript, Lisbon
+  url: https://speakerdeck.com/felixge/programming-flying-robots-with-javascript
+  eventUrl: http://2012.lxjs.org/
+  pdfUrl: https://speakerd.s3.amazonaws.com/presentations/c7646c803ff90130e97412313b100342/slides.pdf
+  videoUrl: http://www.youtube.com/watch?v=jl5v3bsMH_E
+
+- title: The power of node.js (with quadcopters)
+  date: 2012-09-07
+  location: Developer Conference, Hamburg
+  url: https://speakerdeck.com/felixge/the-power-of-node-dot-js
+  eventUrl: http://www.developer-conference-hh.de/
+  pdfUrl: http://felixge.s3.amazonaws.com/12/the%20power%20of%20node.pdf
+
+- title: The zen of node.js
+  date: 2012-08-22
+  location: Campus Party Europe, Berlin
+  url: https://speakerdeck.com/felixge/the-zen-of-node-dot-js
+  eventUrl: http://www.campus-party.eu/2012/index.html
+  pdfUrl: https://speakerd.s3.amazonaws.com/presentations/2bd99e103ff90130b9ec1231381f54b3/zen-of-node.pdf
+  videoUrl: http://live.campus-party.org/player/load/id/17daa61931d311303d45cf7b50d476c1
+
+- title: Node.js Quadcopter Programming
+  date: 2012-08-16
+  location: Berlin JS Usergroup
+  url: https://speakerdeck.com/felixge/node-dot-js-quadcopter-programming
+  eventUrl: http://berlinjs.org/
+  pdfUrl: https://speakerd.s3.amazonaws.com/presentations/e08a6d103ff80130e97412313b100342/node-quadcopter-programming.pdf
+
+- title: As fast as C?
+  date: 2012-06-27
+  location: London Node.js User Group
+  url: https://speakerdeck.com/felixge/as-fast-as-c
+  eventUrl: http://lnug.org/
+  pdfUrl: http://felixge.s3.amazonaws.com/12/lnug-as-fast-as-c.pdf
+  videoUrl: http://vimeo.com/44936657
+
+- title: Node.js - A practical introduction
+  date: 2012-06-15
+  location: Big Techday, Munich
+  url: https://speakerdeck.com/u/felixge/p/nodejs-a-practical-introduction
+  eventUrl: http://www.tngtech.com/events-bigtechday05.html
+  pdfUrl: https://speakerd.s3.amazonaws.com/presentations/4fdc31b646fe58013002359b/node-a-practical-introduction.pdf
+
+- title: The Node.js Scalability Myth
+  date: 2012-06-14
+  location: Munich Node.js User Group
+  url: https://speakerdeck.com/u/felixge/p/the-nodejs-scalability-myth-3
+  eventUrl: http://www.mnug.de/
+  pdfUrl: https://speakerd.s3.amazonaws.com/presentations/4fdc313ca9c3e9016201ffb4/node-scalability-myth.pdf
+
+- title: Node.js in production
+  date: 2012-05-26
+  location: Web Rebels, Oslo
+  url: https://speakerdeck.com/u/felixge/p/nodejs-in-production
+  eventUrl: http://www.webrebels.org/
+  videoUrl: https://vimeo.com/43380478
+  pdfUrl: https://speakerd.s3.amazonaws.com/presentations/4fdc313aa9c3e9016201ffa1/node-in-production.pdf
+
+- title: Bootstrapping Transloadit.com
+  date: 2012-04-27
+  location: Roots, Bergen
+  url: http://speakerdeck.com/u/felixge/p/boostrapping-transloaditcom
+  eventUrl: http://rootsconf.no/
+  pdfUrl: https://speakerd.s3.amazonaws.com/presentations/4fa13b5f111c07001f081dd0/bootstrapping-transloadit.pdf
+
+- title: The Node.js Scalability Myth
+  date: 2012-04-27
+  location: Roots, Bergen
+  url: http://speakerdeck.com/u/felixge/p/the-nodejs-scalability-myth-2
+  eventUrl: http://rootsconf.no/
+  pdfUrl: https://speakerd.s3.amazonaws.com/presentations/4fa13a9c5f48f7001f082acd/roots-scalability-myth.pdf
+
+- title: The Node.js Scalability Myth
+  date: 2012-04-26
+  location: Mix IT, Lyon
+  url: http://speakerdeck.com/u/felixge/p/the-nodejs-scalability-myth-3
+  eventUrl: http://www.mix-it.fr/
+  pdfUrl: https://speakerd.s3.amazonaws.com/presentations/4fa13ae5111c0700220811b9/mixit-scalability-myth.pdf
+
+- title: The Node.js Scalability Myth
+  date: 2012-03-15
+  location: Berlin JS Usergroup
+  url: http://speakerdeck.com/u/felixge/p/the-nodejs-scalability-myth
+  eventUrl: http://berlinjs.org/
+  pdfUrl: https://speakerd.s3.amazonaws.com/presentations/4f62fb4d789016001f00ceae/slides.pdf
+
+- title: JavaScript - The Bad Parts
+  date: 2012-01-19
+  location: Berlin JS Usergroup
+  url: http://speakerdeck.com/u/felixge/p/javascript-the-bad-parts
+  eventUrl: http://berlinjs.org/
+  pdfUrl: http://felixge.s3.amazonaws.com/12/js-the-bad-parts.pdf
+
+- title: Node.js - Best Practices
+  date: 2011-12-01
+  location: Munich Node.js User Group
+  url: http://www.slideshare.net/the_undefined/nodejs-best-practices-10428790
+  eventUrl: http://www.mnug.de/artikel/meetups/dezember2011
+  videoUrl: http://video.tngtech.com/veranstaltungen/2011/MNUG/MNUG_2011-12-01_Felix_Node_Best_Practices.html
+  pdfUrl: http://felixge.s3.amazonaws.com/11/nodejs%20-%20best%20practices.pdf
+
+- title: Node.js - A practical introduction
+  date: 2011-12-01
+  location: Munich Node.js User Group
+  url: http://www.slideshare.net/the_undefined/nodejs-a-practical-introduction-v2
+  eventUrl: http://www.mnug.de/artikel/meetups/dezember2011
+  videoUrl: http://video.tngtech.com/veranstaltungen/2011/MNUG/MNUG_2011-12-01_Felix_Node_Practical_Introduction.html
+  pdfUrl: http://felixge.s3.amazonaws.com/11/nodejs%20-%20a%20practical%20introduction%20(v2).pdf
+
+- title: Node.js - A practical introduction
+  date: 2011-11-09
+  location: Øredev, Malmö
+  url: http://www.slideshare.net/the_undefined/nodejs-apracticalintroductionoredev
+  eventUrl: http://oredev.org/2011/sessions/node-js--a-practical-introduction
+  videoUrl: http://oredev.org/2011/sessions/node-js--a-practical-introduction
+  pdfUrl: http://felixge.s3.amazonaws.com/11/nodejs-a-practical-introduction-oredev.pdf
+
+- title: Building an alarm clock with node.js
+  date: 2011-10-29
+  location: Reject.js, Berlin
+  url: http://www.slideshare.net/the_undefined/building-an-alarm-clock-with-nodejs
+  eventUrl: http://lanyrd.com/2011/rejectjs/
+  pdfUrl: http://felixge.s3.amazonaws.com/11/node.js%20-%20alarm%20clock.pdf
+
+- title: Node.js - Eine praktische Einführung
+  date: 2011-05-21
+  location: Developer Conference, Hamburg
+  url: http://www.slideshare.net/the_undefined/nodejs-eine-praktische-einfhrung-v7
+  eventUrl: http://www.devcon-hamburg.de/workshops-2011/#Einf%C3%BChrung%20node.js
+
+- title: How to Test Asynchronous Code
+  date: 2011-05-19
+  location: Berlin JS Usergroup
+  url: http://www.slideshare.net/the_undefined/how-to-test-asynchronous-code-v2
+  eventUrl: http://berlinjs.org/
+
+- title: How to Test Asynchronous Code
+  date: 2011-05-05
+  location: NodeConf, Portland
+  url: http://www.slideshare.net/the_undefined/how-to-test-asynchronous-code-8051756
+  eventUrl: http://2011.nodeconf.com/schedule.html
+  pdfUrl: http://felixge.s3.amazonaws.com/11/how-to-test-async-code.pdf
+
+- title: Node.js - A quick tour
+  date: 2011-04-20
+  location: Gameforge AG, Karlsruhe
+  url: http://www.slideshare.net/the_undefined/nodejs-a-quick-tour-v6
+  eventUrl: http://corporate.gameforge.com/
+  pdfUrl: http://felixge.s3.amazonaws.com/11/nodejs-a-quick-tour-v6.pdf
+
+- title: Transloadit
+  date: 2011-02-16
+  location: Startup Riot, Atlanta
+  url: http://www.slideshare.net/the_undefined/transloadit-at-startupriot
+  eventUrl: http://startupriot.com/
+  pdfUrl: http://felixge.s3.amazonaws.com/11/transloadit-startupriot.pdf
+
+- title: Node.js - A quick tour
+  date: 2011-02-15
+  location: Atlanta JavaScript Meetup Group
+  url: http://www.slideshare.net/the_undefined/nodejs-a-quick-tour-v5
+  eventUrl: http://www.meetup.com/AtlantaJavaScript/events/16170144/
+
+- title: Node.js - Should Ruby Developers Care?
+  date: 2011-02-09
+  location: Atlanta Ruby Meetup Group
+  url: http://www.slideshare.net/the_undefined/nodejs-should-ruby-developers-care
+  eventUrl: http://www.meetup.com/atlantaruby/events/15955963/
+  pdfUrl: http://felixge.s3.amazonaws.com/11/nodejs-should-ruby-developers-care.pdf
+
+- title: Node.js in production
+  date: 2011-01-20
+  location: Berlin JS Usergroup
+  url: http://www.slideshare.net/the_undefined/nodejs-in-production
+  eventUrl: http://berlinjs.org/
+  pdfUrl: http://felixge.s3.amazonaws.com/11/nodejs-in-production.pdf
+
+- title: Node.js as a networking tool
+  date: 2010-12-28
+  location: 27C3, Berlin
+  url: http://www.slideshare.net/the_undefined/nodejs-as-a-networking-tool
+  eventUrl: http://events.ccc.de/congress/2010/Fahrplan/events/4142.en.html
+  videoUrl: http://www.youtube.com/watch?feature=player_detailpage&v=g29PemqW7lQ#t=0s
+  pdfUrl: http://events.ccc.de/congress/2010/Fahrplan/attachments/1799_nodejs-as-a-networking-tool
+
+- title: Node.js - A quick tour
+  date: 2010-10-07
+  location: Ruby User Group Berlin
+  url: http://www.slideshare.net/the_undefined/nodejs-aquicktourv3
+  eventUrl: http://www.rug-b.de/
+
+- title: Dirty - How simple is your database?
+  date: 2010-09-25
+  location: JSConf EU, Berlin
+  url: http://www.slideshare.net/the_undefined/dir-5299121
+  eventUrl: http://jsconf.eu/2010/speaker/dirty_nosql.html
+  videoUrl: http://jsconf.eu/2010/speaker/dirty_nosql.html
+
+- title: Node.js - A quick tour
+  date: 2010-03-04
+  location: Hamburg.js User Group
+  url: http://www.slideshare.net/the_undefined/nodejs-a-quick-tour-ii
+  eventUrl: http://www.meetup.com/hamburg-js/
+
+- title: Node.js - A quick tour
+  date: 2010-01-12
+  location: Berlin JS Usergroup
+  url: http://www.slideshare.net/the_undefined/nodejs-a-quick-tour
+  eventUrl: http://berlinjs.org/
+
+- title: JavaScript and Git
+  date: 2009-07-12
+  location: CakeFest, Berlin
+  url: http://cakedc.com/eng/graham_weldon/2009/07/19/felix-geisendorfer-javascript-and-git
+  eventUrl: http://cakefest.org/
+
+- title: Recipies for successful CakePHP projects
+  date: 2009-07-11
+  location: CakeFest, Berlin
+  url: http://cakedc.com/eng/graham_weldon/2009/07/13/felix-geisendorfer-recipies-for-successful-cakephp-projects
+  eventUrl: http://cakefest.org/
+
+- title: jQuery and CakePHP
+  date: 2008-12-05
+  location: CakeFest, Buenos Aires
+  url: http://cakedc.com/mark_story/2008/12/05/felix-geisendorfer-jquery-and-cakephp
+  eventUrl: http://cakefest.org/
+
+- title: Git and CakePHP
+  date: 2008-12-02
+  location: CakeFest, Buenos Aires
+  url: http://cakedc.com/mark_story/2008/12/02/felix-geisendorfer-git-and-cakephp
+  eventUrl: http://cakefest.org/
+
+- title: With jQuery & CakePHP to World Domination
+  date: 2008-02-06
+  location: CakeFest, Orlando
+  url: http://www.slideshare.net/the_undefined/with-jquery-cakephp-to-world-domination
+  eventUrl: http://debuggable.com/posts/cakefest-orlando-2008-summary:480f4dd6-6404-4774-a771-4e8fcbdd56cb
+
+- title: ActiveDOM
+  date: 2007-10-27
+  location: jQuery Camp, Cambridge
+  url: http://www.slideshare.net/the_undefined/activedom
+  eventUrl: http://docs.jquery.com/JQueryCamp07
+

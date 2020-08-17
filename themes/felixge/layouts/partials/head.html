@@ -1,0 +1,10 @@
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+<title>{{ .Title }} &middot; {{ .Site.Title }}</title>
+
+{{ $options := (dict "targetPath" "css/main.css" "outputStyle" "compressed" "enableSourceMap" false ) -}}
+{{ $main := resources.Get "sass/main.scss" | resources.ToCSS $options }}
+<link rel="stylesheet" href="{{ $main.RelPermalink }}" />
+
+<link href="http://feeds.feedburner.com/{{ .Site.Params.feedburnerShortname }}" type="application/rss+xml" rel="alternate" title="Posts">

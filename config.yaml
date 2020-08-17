@@ -1,0 +1,24 @@
+baseURL: "https://felixge.de/"
+languageCode: "en-us"
+title: "Felix Geisendörfer"
+googleAnalytics: "UA-3306079-13"
+disqusShortname: felixge
+permalinks:
+  posts: /:year/:month/:day/:title/
+
+# Keep old jekyll URL for RSS: /posts.atom.xml
+outputFormats:
+  RSS:
+    mediatype: "application/rss"
+    baseName: "posts.atom"
+
+theme: "felixge"
+params:
+  feedburnerShortname: felixge
+  twitterShortname: felixge
+markup:
+  goldmark:
+    renderer:
+      unsafe: true
+  highlight:
+    style: pygments
