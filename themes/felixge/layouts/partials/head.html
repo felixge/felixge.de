@@ -7,4 +7,4 @@
 {{ $main := resources.Get "sass/main.scss" | resources.ToCSS $options }}
 <link rel="stylesheet" href="{{ $main.RelPermalink }}" />
 
-<link href="http://feeds.feedburner.com/{{ .Site.Params.feedburnerShortname }}" type="application/rss+xml" rel="alternate" title="Posts">
+<link href="https://feeds.feedburner.com/{{ .Site.Params.feedburnerShortname }}" type="application/rss+xml" rel="alternate" title="Posts">
