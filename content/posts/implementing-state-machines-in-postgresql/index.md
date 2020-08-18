@@ -30,9 +30,8 @@ precise language that can be adopted by all stakeholders.
 
 You might have noticed that the graph above does not show all possible
 combinations of all states and all events. The reason is that the missing
-combinations implicitly lead to an error state. The [complete FSM]({%
-asset_path orders-full.svg %}) can be shown as a graph as well, but I don't
-think it's very useful in practice.
+combinations implicitly lead to an error state. The [complete FSM](./orders-full.svg)
+can be shown as a graph as well, but I don't think it's very useful in practice.
 
 Anyway, as promised in the title of this article we're going to implement this
 FSM in PostgreSQL. This may not be everybody's cup of tea, but you might like
