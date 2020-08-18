@@ -1,6 +1,11 @@
 [build]
-  command = "jekyll build"
-  publish = "_site"
+  command = "hugo --gc --minify"
+  publish = "public"
+[context.production.environment]
+  HUGO_VERSION = "0.74.3"
+  HUGO_ENV = "production"
 
 [context.deploy-preview]
-  command = "jekyll build --drafts"
+  command = "hugo --gc --minify --buildFuture --buildDrafts -b $DEPLOY_PRIME_URL"
+[context.deploy-preview.environment]
+  HUGO_VERSION = "0.74.3"

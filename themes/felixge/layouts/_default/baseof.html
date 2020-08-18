@@ -1,0 +1,14 @@
+<!doctype html>
+<html>
+    {{- partial "head.html" . -}}
+    <body>
+        {{- partial "header.html" . -}}
+        <div class="container">
+          <a id="logo" title="GET ON THE SQUIRREL - THERE'S NO TIME TO EXPLAIN" href="/">
+            <img src="/img/get-on-the-squirrel.png">
+          </a>
+        {{- block "main" . }}{{- end }}
+        </div>
+        {{- partial "footer.html" . -}}
+    </body>
+</html>
