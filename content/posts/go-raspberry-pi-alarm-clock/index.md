@@ -1,8 +1,6 @@
 ---
 title: "Go + Raspberry Pi powered Alarm Clock"
 date: 2015-03-05T16:30:00+01:00
-aliases:
-  - "/2015/03/05/go-raspberry-pi-powered-alarm-clock.html"
 ---
 
 Invented in 1959, the [snooze

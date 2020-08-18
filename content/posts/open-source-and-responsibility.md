@@ -1,8 +1,6 @@
 ---
 title: Open Source And Responsibility
 date: 2013-03-07T15:00:00+01:00
-aliases:
-  - "/2013/03/07/open-source-and-responsibility.html"
 ---
 
 Today I read a comment on Github about an important feature that is missing in

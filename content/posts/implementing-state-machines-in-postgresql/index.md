@@ -1,8 +1,6 @@
 ---
 title: "Implementing State Machines in PostgreSQL"
 date: 2017-07-27
-aliases:
-  - "/2017/07/27/implementing-state-machines-in-postgresql.html"
 ---
 
 [Finite-state machine](https://en.wikipedia.org/wiki/Finite-state_machine)

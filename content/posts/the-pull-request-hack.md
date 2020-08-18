@@ -1,8 +1,6 @@
 ---
 title: The Pull Request Hack
 date: 2013-03-11T16:43:00+01:00
-aliases:
-  - "/2013/03/11/the-pull-request-hack.html"
 ---
 
 After writing about [Open Source And

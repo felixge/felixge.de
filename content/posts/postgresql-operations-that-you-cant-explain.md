@@ -3,7 +3,6 @@ title: "PostgreSQL operations that you can't EXPLAIN"
 date: 2017-05-23T16:25:00+02:00
 aliases:
   - "/2017/05/05/postgresql-operations-that-you-cant-explain.html"
-  - "/2017/05/23/postgresql-operations-that-you-cant-explain.html"
 ---
 
 I am currently dabbling in PostgreSQL internals in my spare time, including

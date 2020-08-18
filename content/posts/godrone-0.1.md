@@ -1,8 +1,6 @@
 ---
 title: "GoDrone - A Parrot AR Drone 2.0 Firmware written in Go"
 date: 2013-12-25T20:24:00+01:00
-aliases:
-  - "/2013/12/25/godrone-a-parrot-ar-drone-2.0-firmware-written-in-go.html"
 ---
 
 Merry Christmas (or [Newtonmas][1] if you prefer) everybody.

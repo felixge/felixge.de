@@ -1,8 +1,6 @@
 ---
 title: "Vim Trick: Open current line on GitHub"
 date: 2013-08-08T20:50:00+01:00
-aliases:
-  - "/2013/08/08/vim-trick-open-current-line-on-github.html"
 ---
 
 **Update:** The [fugitive][] vim plugin supports the same feature via

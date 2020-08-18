@@ -1,8 +1,6 @@
 ---
 title: "Using TCP keepalive with Go"
 date: 2014-08-26T15:40:00+01:00
-aliases:
-  - "/2014/08/26/using-tcp-keepalive-with-go.html"
 ---
 
 If you have ever written some TCP socket code, you may have wondered: "What
