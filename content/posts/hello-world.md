@@ -1,8 +1,6 @@
 ---
 title: Hello World
 date: 2013-03-03T16:00:00+01:00
-aliases:
-  - "/2013/03/03/hello-world.html"
 ---
 
 After writing over [300 articles](http://debuggable.com/posts/archive) between
