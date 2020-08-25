@@ -1,3 +1,10 @@
+- title: fgprof - The Full Go Profiler
+  date: 2020-07-12
+  location: GoWayFest, Online
+  url: https://github.com/felixge/talks/blob/master/fgprof/
+  eventUrl: https://goway.io/
+  pdfUrl: https://github.com/felixge/talks/raw/master/fgprof/fgprof-presentation.pdf
+
 - title: tus.io - Squeezing Cats Through Tiny Mobile Tubes
   date: 2013-05-29
   location: JSConf.us, Florida
