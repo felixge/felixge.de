@@ -50,7 +50,7 @@ type Car struct {
 }
 ```
 
-My first naive attempt is usually to write some code that defines the headers and struct mapping in a way that is separate from the CSV encoding/decoding itself. An example of that can be seen below:
+Usually my first naive attempt is to write some code that defines the headers and struct mapping in a way that is separate from the CSV encoding/decoding itself. Here's an example:
 
 ```go
 var carHeaders = []string{
