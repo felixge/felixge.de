@@ -84,7 +84,7 @@ func (c *Car) MarshalRecord() ([]string, error) {
 }
 ```
 
-This works, but adding, removing, or reordering any of the columns requires us to modify our code in 4 to 5 different places, which we wanted to avoid. So let's try some abstraction that allows us to declaratively specify our columns and how to marshal/unmarshal them:
+This works, but adding, removing, or reordering any of the columns requires us to modify our code in 4 to 5 different places, and as I mentioned in the beginning, we want to avoid that. So let's try some abstraction that allows us to declaratively specify our columns and how to marshal/unmarshal them:
 
 ```go
 type carColumn struct {
