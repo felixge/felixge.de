@@ -303,3 +303,5 @@ Of course we could also aim to reproduce the float formatting quirks from the or
 Depending on how serious you are about parsing CSVs, you probably also want to test a few error cases and maybe even throw some fuzzing at this. But I've decided the test above is good enough for my boilerplate, so you'll have to do this part yourself.
 
 Ok, that's it. I'd love to hear your thoughts, especially if you have ideas for improving it further. Or let me know if you see good alternatives to the idea of copy & pasting a bunch of boilerplate. It's not like I love it, but as far as I can tell it hits a sweet spot for working with Go in this case.
+
+<small>Thanks to <a href="https://twitter.com/thorstenball">Thorsten Ball</a> and <a href="https://twitter.com/tsenart">Tomás Senart</a> for <a href="https://github.com/felixge/felixge.de/pull/6">reviewing</a> this post and making many valuable suggestions.</small>
