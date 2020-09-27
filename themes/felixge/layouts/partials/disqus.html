@@ -1,11 +1,5 @@
 <div id="disqus_thread"></div>
 <script>
-    // Don't ever inject Disqus on localhost--it creates unwanted
-    // discussions from 'localhost:1313' on your Disqus account...
-    if (window.location.hostname == "localhost") {
-      return;
-    }
-
     /**
      *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
      *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
@@ -15,6 +9,11 @@
       this.page.identifier = '{{ .RelPermalink }}'; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
     };
     (function() {  // REQUIRED CONFIGURATION VARIABLE: EDIT THE SHORTNAME BELOW
+        // Don't ever inject Disqus on localhost--it creates unwanted
+        // discussions from 'localhost:1313' on your Disqus account...
+        if (window.location.hostname == "localhost") {
+          return;
+        }
         var d = document, s = d.createElement('script');
         
         s.src = 'https://{{ .Site.DisqusShortname}}.disqus.com/embed.js';  // IMPORTANT: Replace EXAMPLE with your forum shortname!
