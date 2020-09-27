@@ -212,7 +212,7 @@ The code above accomplishes the main task of returning all cars read from the gi
 
 It should also be easy to modify. For example if you want to ignore the second header line during reading, just remove the code. Or instead of requiring all headers to have a fixed position, you could dynamically discover their position from the input by matching their names against the names in the `carColumns` slice and then reorder the elements in the record accordingly.
 
-Or you might decide you need a streamining interface to lower memory usage and GC pressure like this:
+Or you might decide you need a streaming interface to lower memory usage and GC pressure like this:
 
 ```go
 type CarReader struct {
