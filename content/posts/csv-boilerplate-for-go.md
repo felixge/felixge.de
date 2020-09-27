@@ -132,7 +132,7 @@ var carColumns = []carColumn{
 }
 ```
 
-This is of course a bit verbose, but on the other hand it solves our problem. Reordering our columns is now a single cut & paste operation, and adding or removing a column has gotten a lot easier as well. The approach even gives us a convenient way to put the `Type` information found in the second line of the CSV file, so we can easily duplicate this quirk when writing our own CSV files later on.
+This is of course a bit verbose, but it solves our problem. Reordering our columns is now a single cut & paste operation, and adding or removing a column has gotten a lot easier as well. This approach even gives us a convenient way to put the `Type` information found in the second line of the CSV file, so we can easily duplicate this quirk when writing our own CSV files later on.
 
 Of course we still need to update our `UnmarshalRecord` and `MarshalRecord` from earlier. The good news is that we're unlikely to ever have to modify this code again:
 
