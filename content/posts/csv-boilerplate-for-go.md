@@ -34,7 +34,7 @@ Plymouth Satellite;18.0;8;318.0;150.0;3436.;11.0;70;US
 
 As you can see, there are already two ugly bits to be examined here: semicolons instead of commas as a separator, and a second header line that seems to contain type information for whatever reason. Not great, not terrible, but pretty typical for what's out there.
 
-The goals for my boilerplate is to read and write the file format in a way that solves the three problems outlined in the begining. It should do so without an excessive amount of abstraction, and certainly no reflection, yet as elegantly as possible. There should also be an intermediate Go struct to hold the data in memory as shown below.
+The goals for my boilerplate is to read and write the file format in a way that solves the three problems outlined in the beginning. It should do so without an excessive amount of abstraction, and certainly no reflection, yet as elegantly as possible. There should also be an intermediate Go struct to hold the data in memory as shown below.
 
 ```go
 type Car struct {
