@@ -3,6 +3,8 @@ title: "CSV Boilerplate for Go"
 date: 2020-09-27
 ---
 
+**tl;dr:** Here is [my boilerplate](https://github.com/felixge/dump/blob/master/csv-boilerplate/main.go) for reading and writing CSV files in Go. I hope you'll find it useful.
+
 Every once in a while, I have to deal with the task of reading and/or writing CSV files in Go. In theory it's an easy task. One just has to include [encoding/csv](https://golang.org/pkg/encoding/csv/) from the standard library, and write a bit of boilerplate to map between a Go struct and the CSV records.
 
 However, the resulting code has often left me unsatisifed for a variety of reasons:
