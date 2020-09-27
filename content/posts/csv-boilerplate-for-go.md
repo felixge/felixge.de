@@ -176,7 +176,7 @@ func ReadCarsCSV(r io.Reader) ([]*Car, error) {
 		return nil, err
 	}
 
-	var cars []*Car
+	cars := make([]*Car, 0, len(records))
 	for i, record := range records {
 		if got, want := len(record), len(carColumns); got != want {
 			return nil, fmt.Errorf("row=%d: bad number of columns: got=%d want=%d", i+1, got, want)
