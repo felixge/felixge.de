@@ -60,7 +60,7 @@ var carHeaders = []string{
   // remaining columns ...
 }
 
-func (c *Car) UnmarshalRecord(record []string) (err error) {
+func (c *Car) UnmarshalRecord(record []string) error {
 	if got, want := len(record), len(carHeaders); got != want {
 		return fmt.Errorf("bad column number: got=%d want=%d", got, want)
 	}
