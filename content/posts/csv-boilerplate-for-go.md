@@ -21,7 +21,7 @@ So in the end it seems like you have to chose between two suboptimal options. Yo
 
 Your choice should probably depend on the crazyness of your input, and I won't be able to make it for you. But I've decided that I want to make the boilerplate route a bit less annoying for myself in the future. To accomplish this I've created a [boilerplate template](https://github.com/felixge/dump/blob/master/csv-boilerplate/main.go) that I'll copy and paste for my future needs, adjusting it as needed. For the rest of the blog post I want to walk you through my thought process in designing it.
 
-To begin, I decided I wanted to use a real world CSV file as my example that has a bit of the typical uglyness one has to deal with. I quickly [found](https://perso.telecom-paristech.fr/eagan/class/igr204/datasets) a file called [cars.csv](https://github.com/felixge/dump/blob/master/csv-boilerplate/cars.csv) which looks like this:
+To begin, I decided to use real world CSV as my example, containing bits of the typical ugliness one has to deal with. I quickly [found](https://perso.telecom-paristech.fr/eagan/class/igr204/datasets) a file called [cars.csv](https://github.com/felixge/dump/blob/master/csv-boilerplate/cars.csv) which looks like this:
 
 ```csv
 Car;MPG;Cylinders;Displacement;Horsepower;Weight;Acceleration;Model;Origin
