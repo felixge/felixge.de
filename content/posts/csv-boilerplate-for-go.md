@@ -300,7 +300,7 @@ The test first reads the provided `in` CSV, and makes sure that converting it ba
 
 Of course we could also aim to reproduce the float formatting quirks from the original file. At first glance it seems like all floats are formatted with one digit after the period. However, a closer look reveals that the `Weight` column has a period, but skips the following digit, e.g. `3504.`. I've decided to not go down this rabbit hole, but it should be clear that our boilerplate approach puts us in a great position for dealing with CSV quirks like this.
 
-Depending on how serious you are, you probably also want to test a few error cases and maybe even throw some fuzzing at this. But I've decided the test above is good enough for my boilerplate, so you'll have to do this part yourself.
+Depending on how serious you are about parsing CSVs, you probably also want to test a few error cases and maybe even throw some fuzzing at this. But I've decided the test above is good enough for my boilerplate, so you'll have to do this part yourself.
 
 Anyway, thanks for taking the time to read this post. I make no claim that my approach for dealing with CSV is superior to all alternatives, but I think you could probably do a lot worse than starting with [my boilerplate](https://github.com/felixge/dump/blob/master/csv-boilerplate/main.go).
 
