@@ -104,7 +104,7 @@ Seems like [`strconv.ParseInt()`](https://pkg.go.dev/strconv#ParseInt) has becom
 
 ## v3: Optimize strconv.ParseInt() ([link to code](https://github.com/felixge/advent-2021/commit/78820f44c1160004861561136ba690aa36221988#diff-0dea3b3585a0c5d048021351232f67a48fde5bce91b1aabedd3d12f49d9191af))
 
-Even so the elves are not stating it explicitly, they are only giving us positive integers. So we could apply the same trick as before and call [`strconv.ParseUint()`](https://pkg.go.dev/strconv#ParseUint) directly instead of going through [`strconv.ParseInt()`](https://pkg.go.dev/strconv#ParseInt).
+Even though the elves are not stating it explicitly, they are only giving us positive integers. So we could apply the same trick as before and call [`strconv.ParseUint()`](https://pkg.go.dev/strconv#ParseUint) directly instead of going through [`strconv.ParseInt()`](https://pkg.go.dev/strconv#ParseInt).
 
 However, looking at the [implementation of ParseUint](https://cs.opensource.google/go/go/+/refs/tags/go1.17.3:src/strconv/atoi.go;l=62) it's clear that it is doing a bunch of stuff to support different bases and bit sizes. We don't need any of this, so let's just implement the subset we actually need:
 
