@@ -12,7 +12,7 @@ You can find all code and profiles in the history of this repository: [github.co
 
 *Disclaimer: I currently work on [Continuous Go Profiling](https://www.datadoghq.com/product/code-profiling/) for Datadog, but I'm not barking on behalf of my employer here.*
 
-## v1: Naive Solution
+## v1: Naive Solution ([link to code](https://github.com/felixge/advent-2021/commit/eba7ded758845dbd7daf3cab6bcf0748e3c1aab3#diff-0dea3b3585a0c5d048021351232f67a48fde5bce91b1aabedd3d12f49d9191af))
 
 The [day 1-1](https://adventofcode.com/2021/day/1) challenge is pretty easy to solve, so I quickly came up with a [naive solution](https://github.com/felixge/advent-2021/commit/eba7ded758845dbd7daf3cab6bcf0748e3c1aab3), see below.
 
@@ -53,7 +53,7 @@ While this may not seem bad to you, it's definitely not Christmas Scale™️, s
 
 Looks like 44% of our time is spend in [`strings.Split()`](https://pkg.go.dev/strings#Split), let's optimize this.
 
-## v2: Optimize strings.Split()
+## v2: Optimize strings.Split() ([link to code](https://github.com/felixge/advent-2021/commit/11ffbb4744b873e8e0043ed0a34323cc90f3916a#diff-0dea3b3585a0c5d048021351232f67a48fde5bce91b1aabedd3d12f49d9191af))
 
 Looking at the FrameGraph above, notice that [`strings.Split()`](https://pkg.go.dev/strings#Split) calls [`strings.IndexByte()`](https://pkg.go.dev/strings#IndexByte) which is [implemented in assembly](https://cs.opensource.google/go/go/+/refs/tags/go1.17.3:src/internal/bytealg/indexbyte_amd64.s). Turns out we can call this directly to do our own newline separation:
 
@@ -102,7 +102,7 @@ A 48% decrease in execution time — looks like we're off to a good start! What'
 
 Seems like [`strconv.ParseInt()`](https://pkg.go.dev/strconv#ParseInt) has become our new bottleneck.
 
-## v3: Optimize strconv.ParseInt()
+## v3: Optimize strconv.ParseInt() ([link to code](https://github.com/felixge/advent-2021/commit/78820f44c1160004861561136ba690aa36221988#diff-0dea3b3585a0c5d048021351232f67a48fde5bce91b1aabedd3d12f49d9191af))
 
 Even so the elves are not stating it explicitly, they are only giving us positive integers. So we could apply the same trick as before and call [`strconv.ParseUint()`](https://pkg.go.dev/strconv#ParseUint) directly instead of going through [`strconv.ParseInt()`](https://pkg.go.dev/strconv#ParseInt).
 
