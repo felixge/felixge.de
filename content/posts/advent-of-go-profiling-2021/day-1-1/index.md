@@ -155,7 +155,7 @@ name      old time/op  new time/op  delta
 Answer-6   325ns ± 1%    92ns ± 3%  -71.68%  (p=0.016 n=5+4)
 ```
 
-However they are willing to offer a special **Go Profiling Star** to anybody who manages to further improve upon v3. This is where you can come in. Just send me a link to your v4 solution in this twitter thread including your `benchstats v3.txt v4.txt` output and I will link to it from here.
+However they are willing to offer a special **Go Profiling Star** to anybody who manages to further improve upon v3. This is where you can come in. Just send me a link to your v4 solution in [this twitter thread](https://twitter.com/felixge/status/1466128436355899395) including your `benchstats v3.txt v4.txt` output and I will link to it from here.
 
 1. Your name could be here
 1. Your name could be here
