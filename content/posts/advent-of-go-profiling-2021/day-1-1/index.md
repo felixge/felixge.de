@@ -157,8 +157,11 @@ Answer-6   325ns ± 1%    92ns ± 3%  -71.68%  (p=0.016 n=5+4)
 
 However they are willing to offer a special **Go Profiling Star** to anybody who manages to further improve upon v3. This is where you can come in. Just send me a link to your v4 solution in [this twitter thread](https://twitter.com/felixge/status/1466128436355899395) including your `benchstats v3.txt v4.txt` output and I will link to it from here.
 
+1. [Valentin Deleplace](https://twitter.com/garethlewin)'s [solution](https://twitter.com/val_deleplace/status/1466442802330488838) with a `-87%` delta against v3
 1. [Gareth Lewin](https://twitter.com/garethlewin)'s [solution](https://twitter.com/garethlewin/status/1466324256287977474) with a `-83%` delta against v3
 1. [Pontus Leitzler](https://twitter.com/PLeitzler)'s [solution](https://twitter.com/PLeitzler/status/1466182715141730311) with a `-74%` delta against v3
 1. [@Fugiman](https://twitter.com/Fugiman)'s [solution](https://twitter.com/felixge/status/1466145367527993345) with a `-50%` delta against v3
+
+**Note:** The perf delta results above are self-reported. In my own testing Valentin's solution achieves a spectacular `14 ns/op` and has `-52%` delta against Gareth's solution.
 
 That's it for today. I'll definitely only find time for doing a few of these posts, but I'll try to keep them coming.
