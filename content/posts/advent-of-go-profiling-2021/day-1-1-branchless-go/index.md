@@ -35,7 +35,7 @@ func Answer(input string) (int, error) {
 }
 ```
 
-I knew that my solution was not ideal, but the magnitude of the improvement still surprised me. So I decided to take a closer look and see how it was done:
+I knew that my solution was not ideal, but the magnitude of the improvement still surprised me. So I decided to take a closer look to see how it was done:
 
 - The call to `strings.IndexByte()` was retired in favor of directly looping over the individual characters of the input. This works well here because the average line length is very short (4 characters) and calling assembly functions from Go has a non-trivial overhead associated with it.
 - Somewhat unexpectedly, the function body fits into Go's inlining budget. Build with `-gcflags='-m'` if you want to verify this yourself. This eliminates the overhead of calling the Answer function in the benchmark.
@@ -49,7 +49,7 @@ Most importantly Valentin's solution is far more compact than my `v3` and remain
 
 ## Branchless Go
 
-In my experience code optimization always involves a lot of trial and error. So I think it's important to acknowledge that optimization ideas often fail and discuss what we can learn from these failures.
+In my experience code optimization always involves a lot of trial and error. So I think it's important to acknowledge that optimization ideas often fail and to discuss what we can learn from these failures.
 
 One such failure was my first attempt to further optimize Valentin's solution by eliminating branches. My inspiration for this came from Daniel Lemire's [Parsing JSON Really Quickly: Lessons Learned](https://www.infoq.com/presentations/simdjson-parser/) presentation as well as Matt Nakama's [Branchless Coding in Go](https://mattnakama.com/blog/go-branchless-coding/).
 
