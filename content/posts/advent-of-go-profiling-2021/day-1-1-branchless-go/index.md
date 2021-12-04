@@ -95,7 +95,7 @@ val = ((val << 8) + int64(c)) * boolToInt64(c != '\n')
 
 This works because we always compute the expression from the first branch and then multiply it by `1` if the first branch should be taken, or `0` for the second branch which is the same as setting `val = 0` directly.
 
-And while the `boolToInt64(c != '\n')` might look like a compilation nightmare, the Go compiler seems to emit something relatively reasonable (see https://godbolt.org/z/Tzr99vqr3):
+And while `boolToInt64(c != '\n')` might look like a compilation nightmare, the Go compiler seems to emit something relatively reasonable (see https://godbolt.org/z/Tzr99vqr3):
 
 ```txt
 CMPB    R8B, $10        ; compare c and '\n' (ASCII 10)
@@ -157,9 +157,9 @@ if c != '\n' {
 ```
 
 
-As you can see, all lines have 3 digits plus one newline, so the chance to end up in the original `else` block is only `1/4`. For bigger input numbers the chance would be even lower. So our unconditional execution of the `increases++` operation doesn't have a very good chance of paying off, and we should probably let the CPU to do its own speculative execution.
+As you can see, all lines have 3 digits plus one newline, so the chance to end up in the original `else` block is only `1/4`. For bigger input numbers the chance would be even lower.  Additionally the `val > prev` predicate has to be `true`, so our unconditional execution of the `increases++` operation doesn't have a very good chance of paying off in most cases.
 
-However, we know that the `increases++` branch is taken 7 out of 10 times, so perhaps we can beat the CPU's branch predictor by limiting ourselves to only eliminating that branch? The code for this is shown below:
+However, we know that the `val > prev` predicate by itself is `true` `7` out of `10` times, so perhaps we can beat the CPU's branch predictor by limiting ourselves to only eliminating that branch? The code for this is shown below:
 
 ```go
 func Answer(input string) (int, error) {
