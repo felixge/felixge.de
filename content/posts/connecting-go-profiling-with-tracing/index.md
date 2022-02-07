@@ -67,7 +67,7 @@ Once our backend receives the tracing and profiling information, we're able to p
 
 As part of implementing these new features, we did a lot of testing, including unit tests, micro-benchmarks, macro-benchmarks and more. As expected, this surfaced problems in our code and allowed us to quickly fix them.
 
-Somewhat less expected, we also discovered several issues in the go runtime that were impacting the accuracy of pprof labels, as well as CPU profiling in general. The good news is that with the help of the community, the go maintainers and contributions from our end – all of these issues have been fixed in the upcoming Go 1.18 release.
+Somewhat less expected, we also discovered several issues in the Go runtime that were impacting the accuracy of pprof labels, as well as CPU profiling in general. The good news is that with the help of the community, the Go maintainers and contributions from our end – all of these issues have been fixed in the upcoming Go 1.18 release.
 
 If you're interested in the full details on this, check out the companion post: [Profiling Improvements in Go 1.18](/2022/02/07/profiling-improvements-in-go-1.18/).
 
