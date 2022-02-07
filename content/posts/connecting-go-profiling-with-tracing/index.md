@@ -20,9 +20,9 @@ This workflow is manageable, but it turns out there is a better way – we can u
 
 Even better, when clicking the "View Profile" button, we can view this On-CPU time as a per-request flame graph. Here we can see that our time was spent on JSON encoding.
 
-And since our HTTP handler functions don't show up in the stack traces, we can also indirectly infer that this work was done in a background goroutine spawned by the goroutine handling the request.
-
 <img width="100%" src="./flamegraph.png"/>
+
+And since our HTTP handler functions don't show up in the stack traces, we can also indirectly infer that this work was done in a background goroutine spawned by the goroutine handling the request.
 
 In addition to breaking down tracing information using profiling, we can also do the opposite and break down a profile [CPU Time by Endpoint](https://docs.datadoghq.com/tracing/profiler/connect_traces_and_profiles/#break-down-code-performance-by-api-endpoints) as shown below. The checkboxes can be used to filter the profile by endpoint.
 
