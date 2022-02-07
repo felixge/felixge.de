@@ -12,7 +12,7 @@ Let's start with the end result. Imagine you have a 100ms trace where 10ms are s
 
 <img width="100%" src="./flamechart.png"/>
 
-When this happens, you usually need to study your code for clues. Did you forget some tracing instrumentation? Time add it, redeploy and wait. Or perhaps you need to optimize your Go code? If yes, how?
+When this happens, you usually need to study your code for clues. Did you forget some tracing instrumentation? Time to add it, redeploy and wait. Or perhaps you need to optimize your Go code? If yes, how?
 
 This workflow is manageable, but it turns out there is a better way – we can use profiling data to fill in the gaps. And that's exactly what our new [Code Hotspots](https://docs.datadoghq.com/tracing/profiler/connect_traces_and_profiles/#identify-code-hotspots-in-slow-traces) feature does. As you can see below, our request used 90ms On-CPU time. This is a strong signal that lets us rule out Off-CPU activity such as uninstrumented service calls, mutex contentions, channel waits, sleeping, etc.
 
