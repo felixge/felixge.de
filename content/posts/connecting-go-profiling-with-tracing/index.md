@@ -8,7 +8,7 @@ Today I'd like to share a few thoughts on a few new [profiling features](https:/
 
 ## Feature Showcase
 
-Let's start with the end result. Imagine you have a 100ms trace where 10ms are spend on a database query, but 90ms remain unexplained.
+Let's start with the end result. Imagine you have a 100ms trace where 10ms are spent on a database query, but 90ms remain unexplained.
 
 <img width="100%" src="./flamechart.png"/>
 
