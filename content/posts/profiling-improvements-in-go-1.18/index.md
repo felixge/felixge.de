@@ -63,10 +63,12 @@ So thanks to all three problems being fixed, profiler labels will become a lot m
 
 ## Stack Trace Bug Fix
 
-Another profiling related bug that we discovered at Datadog is [GH 49171](https://go-review.googlesource.com/c/go/+/366494/). The problem manifested itself in delta allocation profiles with negative allocation counts. Digging deeper, we encountered non-deterministic program counter (pc) symbolization as a root cause. What this means is that the exact same stack trace (same program counters) would contain different symbols (e.g. filenames) in profiles taken at a different time, which should be impossible.
+Another profiling related bug that we discovered at Datadog is [GH 49171](https://github.com/golang/go/issues/49171). The problem manifested itself in delta allocation profiles with negative allocation counts. Digging deeper, we encountered non-deterministic program counter (pc) symbolization as a root cause. What this means is that the exact same stack trace (same program counters) would contain different symbols (e.g. filenames) in profiles taken at a different time, which should be impossible.
 
-The bug was also very hard to reproduce in a standalone fashion, and I spend almost a week before succeeding and reporting it upstream. In the end it turned out to be a compiler regression involving inlined closures in Go 1.17 and was fixed by [Than McIntosh](https://github.com/thanm).
+The bug was also very hard to reproduce in a standalone fashion, and I spend almost a week before succeeding and reporting it upstream. In the end it turned out to be a compiler regression involving inlined closures in Go 1.17 and was [fixed](https://go-review.googlesource.com/c/go/+/366494/) by [Than McIntosh](https://github.com/thanm).
 
 ## Epilog
 
-I hope you enjoyed my summaries of these profiling related improvements in Go 1.18. Please let me know if I missed anything or if you have any questions or feedback. Thank you for reading.
+So as you can see, in addition to being packed with exciting new features, Go 1.18 also contains several important profiling improvements. Please let me know if I missed anything or if you have any questions or feedback.
+
+Thank you for reading.
