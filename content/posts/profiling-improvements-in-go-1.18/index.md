@@ -1,12 +1,12 @@
 ---
 title: "Profiling Improvements in Go 1.18"
-date: 2022-02-10T00:00:00+01:00
+date: 2022-02-11T00:00:00+01:00
 slug: "profiling-improvements-in-go-1.18"
 ---
 
 Without doubt, Go 1.18 is shaping up to be one of the most exciting releases since Go 1. You've probably heard about major features such as generics and fuzzing, but this post is not about that. Instead we'll talk about profiling and highlight a few noteworthy improvements to look forward to.
 
-A point of personal joy for me is that I was able to contribute to several of the improvements as part of my job at Datadog and that they will significantly improve our new [Connecting Go Profiling With Tracing](/2022/02/10/connecting-go-profiling-with-tracing/) functionality.
+A point of personal joy for me is that I was able to contribute to several of the improvements as part of my job at Datadog and that they will significantly improve our new [Connecting Go Profiling With Tracing](/2022/02/11/connecting-go-profiling-with-tracing/) functionality.
 
 If you're new to Go profiling, you might also enjoy our [Guide to Go Profiling](https://github.com/DataDog/go-profiler-notes/blob/main/guide/README.md) before diving into this post.
 
@@ -42,7 +42,7 @@ Anyway, thanks to lots of review and feedback from the Go maintainers, Rhys patc
 
 [Profiler labels](https://github.com/DataDog/go-profiler-notes/blob/main/guide/README.md#cpu-profiler-labels) (aka pprof labels or tags) allow users to associate arbitrary key/value pairs with the currently running goroutine which are inherited by child-goroutines. These labels also end up in CPU and Goroutine profiles, allowing to slice and dice these profiles by label values.
 
-At Datadog we use profiler labels for [Connecting Go Profiling With Tracing](/2022/02/10/connecting-go-profiling-with-tracing/) and as part of working on this feature I did a lot of testing on them. This caused me to observe stack traces in my profiles that should have labels attached, but didn't. I proceeded by reporting the issue as [GH 48577](https://github.com/golang/go/issues/48577) and taking a closer look at the root cause.
+At Datadog we use profiler labels for [Connecting Go Profiling With Tracing](/2022/02/11/connecting-go-profiling-with-tracing/) and as part of working on this feature I did a lot of testing on them. This caused me to observe stack traces in my profiles that should have labels attached, but didn't. I proceeded by reporting the issue as [GH 48577](https://github.com/golang/go/issues/48577) and taking a closer look at the root cause.
 
 Luckily the problem turned out to be really simple. The CPU profiler was sometimes looking at the wrong goroutine when adding the label and required essentially just a one-line fix:
 

@@ -1,6 +1,6 @@
 ---
 title: "Connecting Go Profiling With Tracing"
-date: 2022-02-10T00:00:00+01:00
+date: 2022-02-11T00:00:00+01:00
 slug: "connecting-go-profiling-with-tracing"
 ---
 
@@ -69,7 +69,7 @@ As part of implementing these new features, we did a lot of testing, including u
 
 Somewhat less expected, we also discovered several issues in the Go runtime that were impacting the accuracy of pprof labels, as well as CPU profiling in general. The good news is that with the help of the community, the Go maintainers and contributions from our end – all of these issues have been fixed in the upcoming Go 1.18 release.
 
-If you're interested in the full details on this, check out the companion post: [Profiling Improvements in Go 1.18](/2022/02/10/profiling-improvements-in-go-1.18/).
+If you're interested in the full details on this, check out the companion post: [Profiling Improvements in Go 1.18](/2022/02/11/profiling-improvements-in-go-1.18/).
 
 That being said, unless you use a lot of cgo, the new features should already work great for you in Go 1.17.
 
