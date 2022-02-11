@@ -71,4 +71,4 @@ The bug was also very hard to reproduce in a standalone fashion, and I spend alm
 
 So as you can see, in addition to being packed with exciting new features, Go 1.18 also contains several important profiling improvements. Please let me know if I missed anything or if you have any questions or feedback.
 
-Thank you for reading.
+Thank you for reading and thanks to my colleague [Nick Ripley](https://github.com/nsrip-dd) for reviewing this post.

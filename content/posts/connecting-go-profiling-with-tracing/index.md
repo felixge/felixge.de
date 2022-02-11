@@ -24,7 +24,7 @@ Even better, when clicking the "View Profile" button, we can view this On-CPU ti
 
 And since our HTTP handler functions don't show up in the stack traces, we can also indirectly infer that this work was done in a background goroutine spawned by the goroutine handling the request.
 
-In addition to breaking down tracing information using profiling, we can also do the opposite and break down a profile [CPU Time by Endpoint](https://docs.datadoghq.com/tracing/profiler/connect_traces_and_profiles/#break-down-code-performance-by-api-endpoints) as shown below. The checkboxes can be used to filter the profile by endpoint.
+In addition to breaking down tracing information using profiling, we can also do the opposite and break down a profile's [CPU Time by Endpoint](https://docs.datadoghq.com/tracing/profiler/connect_traces_and_profiles/#break-down-code-performance-by-api-endpoints) as shown below. The checkboxes can be used to filter the profile by endpoint.
 
 <img width="100%" src="./endpoints.png"/>
 
@@ -130,3 +130,5 @@ func main() {
 	// <your application code>
 }
 ```
+
+Thanks to my colleague [Nick Ripley](https://github.com/nsrip-dd) for reviewing this post.
