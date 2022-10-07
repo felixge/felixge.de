@@ -28,7 +28,7 @@ Since alternating between `8ms` and `12ms` still works out to `10ms` on average,
 
 However, given that the man pages explain the jiffy limitations of CPU time related syscalls and the semantics of process-directed signals, it's not entirely clear if this would be recognized as a bug by the kernel maintainers. But even if `setitimer(2)` would be fixed, it would take a long time for people to upgrade their kernels, so Rhys brought up the idea of using [`timer_create(2)`](https://man7.org/linux/man-pages/man2/timer_create.2.html) which offers per-thread accounting of pending signals.
 
-Unfortunately the idea didn't receive feedback from the Go maintainers, so the issue sat dormant until Rhys and I started discussing it again in May 2021 [on twitter](https://twitter.com/felixge/status/1397522130904965120). We decided to collaborate, Rhys working on the [criticial CPU profiler changes](https://go-review.googlesource.com/c/go/+/324129/21), and me on [better test coverage](https://go-review.googlesource.com/c/go/+/334769) for cgo and other edge cases shown in the diagram below.
+Unfortunately the idea didn't receive feedback from the Go maintainers, so the issue sat dormant until Rhys and I started discussing it again in May 2021 [on twitter](https://twitter.com/felixge/status/1397522130904965120). We decided to collaborate, Rhys working on the [critical CPU profiler changes](https://go-review.googlesource.com/c/go/+/324129/21), and me on [better test coverage](https://go-review.googlesource.com/c/go/+/334769) for cgo and other edge cases shown in the diagram below.
 
 <img width="100%" src="./control-flow.png"/>
 
