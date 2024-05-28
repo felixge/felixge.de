@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/antchfx/xmlquery"
+	"github.com/mmcdole/gofeed"
 )
 
 type Post struct {
@@ -41,23 +41,19 @@ func RSSPosts(ctx context.Context, url string) ([]*Post, error) {
 }
 
 func parseRss(r io.Reader) ([]*Post, error) {
-	const timeLayout = "Mon, 02 Jan 2006 15:04:05 MST"
-	doc, err := xmlquery.Parse(r)
+	fp := gofeed.NewParser()
+	feed, err := fp.Parse(r)
 	if err != nil {
 		return nil, err
 	}
-	var posts []*Post
-	for _, item := range xmlquery.Find(doc, "/rss/channel/item") {
-		post := &Post{
-			Title: item.SelectElement("title").InnerText(),
-			URL:   item.SelectElement("link").InnerText(),
-		}
-		pubDateText := item.SelectElement("pubDate").InnerText()
-		post.PubDate, err = time.Parse(timeLayout, pubDateText)
-		if err != nil {
-			return nil, err
-		}
 
+	var posts []*Post
+	for _, item := range feed.Items {
+		post := &Post{
+			Title:   item.Title,
+			URL:     item.Link,
+			PubDate: *item.PublishedParsed,
+		}
 		posts = append(posts, post)
 	}
 	return posts, nil
