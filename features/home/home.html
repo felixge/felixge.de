@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+    {{template "head" "Home"}}
+    <body>
+        <h1>Home</h1>
+        <h2>Posts</h2>
+        <table>
+            <thead>
+                <th>Title</th>
+                <th>Date</th>
+            </thead>
+            <tbody>
+                {{range .Posts}}
+                    <tr>
+                        <td><a href="{{.URL}}">{{ .Title }}</a></td>
+                        <td>{{template "date" .PubDate}}</td>
+                    </tr>
+                {{end}}
+            </tbody>
+        </table>
+    </body>
+</html>

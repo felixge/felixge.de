@@ -1,0 +1,1217 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>About on Felix Geisendörfer</title><link>https://felixge.de/</link><description>Recent content in About on Felix Geisendörfer</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Fri, 11 Feb 2022 00:00:00 +0100</lastBuildDate><atom:link href="https://felixge.de/posts.atom.xml" rel="self" type="application/rss+xml"/><item><title>Connecting Go Profiling With Tracing</title><link>https://felixge.de/2022/02/11/connecting-go-profiling-with-tracing/</link><pubDate>Fri, 11 Feb 2022 00:00:00 +0100</pubDate><guid>https://felixge.de/2022/02/11/connecting-go-profiling-with-tracing/</guid><description>&lt;p>Today I&amp;rsquo;d like to share a few thoughts on a few new &lt;a href="https://docs.datadoghq.com/tracing/profiler/connect_traces_and_profiles/">profiling features&lt;/a> we recently shipped at Datadog. I&amp;rsquo;ll explain what they do, how they work, and which Go 1.18 contributions were needed in order for things to work well.&lt;/p>
+&lt;h2 id="feature-showcase">Feature Showcase&lt;/h2>
+&lt;p>Let&amp;rsquo;s start with the end result. Imagine you have a 100ms trace where 10ms are spent on a database query, but 90ms remain unexplained.&lt;/p>
+&lt;img width="100%" src="./flamechart.png"/>
+&lt;p>When this happens, you usually need to study your code for clues. Did you forget some tracing instrumentation? Time to add it, redeploy and wait. Or perhaps you need to optimize your Go code? If yes, how?&lt;/p>
+&lt;p>This workflow is manageable, but it turns out there is a better way – we can use profiling data to fill in the gaps. And that&amp;rsquo;s exactly what our new &lt;a href="https://docs.datadoghq.com/tracing/profiler/connect_traces_and_profiles/#identify-code-hotspots-in-slow-traces">Code Hotspots&lt;/a> feature does. As you can see below, our request used 90ms On-CPU time. This is a strong signal that lets us rule out Off-CPU activity such as uninstrumented service calls, mutex contentions, channel waits, sleeping, etc.&lt;/p>
+&lt;img width="100%" src="./hotspots.png"/>
+&lt;p>Even better, when clicking the &amp;ldquo;View Profile&amp;rdquo; button, we can view this On-CPU time as a per-request flame graph. Here we can see that our time was spent on JSON encoding.&lt;/p>
+&lt;img width="100%" src="./flamegraph.png"/>
+&lt;p>And since our HTTP handler functions don&amp;rsquo;t show up in the stack traces, we can also indirectly infer that this work was done in a background goroutine spawned by the goroutine handling the request.&lt;/p>
+&lt;p>In addition to breaking down tracing information using profiling, we can also do the opposite and break down a profile&amp;rsquo;s &lt;a href="https://docs.datadoghq.com/tracing/profiler/connect_traces_and_profiles/#break-down-code-performance-by-api-endpoints">CPU Time by Endpoint&lt;/a> as shown below. The checkboxes can be used to filter the profile by endpoint.&lt;/p>
+&lt;img width="100%" src="./endpoints.png"/>
+&lt;p>And to make it easier to understand changes over time, e.g. after a deployment, we can graph this data.&lt;/p>
+&lt;img width="100%" src="./endpoints-graph.png"/>
+&lt;h2 id="how-it-works">How It Works&lt;/h2>
+&lt;p>The features are built on-top of an existing Go feature called &lt;a href="https://github.com/DataDog/go-profiler-notes/blob/main/guide/README.md#cpu-profiler-labels">pprof labels&lt;/a> which allows us to attach arbitrary key/value pairs to the currently running goroutine. These labels are automatically inherited when a new goroutine is spawned, so they reach into all corners of your code. Crucially these labels are also integrated into the CPU profiler, so they automatically end up in the CPU profiles it produces.&lt;/p>
+&lt;p>So to implement this feature, we modified the tracing code in our &lt;a href="https://github.com/DataDog/dd-trace-go">dd-trace-go&lt;/a> library to automatically apply labels such as &lt;code>span id&lt;/code> and &lt;code>endpoint&lt;/code> whenever a new span is created. Additionally we take care of removing the labels when the span is finished. A simplified example of this implementation can be seen below:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#008000;font-weight:bold">func&lt;/span> &lt;span style="color:#00f">StartSpan&lt;/span>(ctx context.Context, endpoint &lt;span style="color:#b00040">string&lt;/span>) &lt;span style="color:#666">*&lt;/span>span {
+span &lt;span style="color:#666">:=&lt;/span> &lt;span style="color:#666">&amp;amp;&lt;/span>span{id: rand.&lt;span style="color:#00f">Uint64&lt;/span>(), restoreCtx: ctx}
+labels &lt;span style="color:#666">:=&lt;/span> pprof.&lt;span style="color:#00f">Labels&lt;/span>(
+&lt;span style="color:#ba2121">&amp;#34;span_id&amp;#34;&lt;/span>, fmt.&lt;span style="color:#00f">Sprintf&lt;/span>(&lt;span style="color:#ba2121">&amp;#34;%d&amp;#34;&lt;/span>, span.id),
+&lt;span style="color:#ba2121">&amp;#34;endpoint&amp;#34;&lt;/span>, endpoint,
+)
+pprof.&lt;span style="color:#00f">SetGoroutineLabels&lt;/span>(pprof.&lt;span style="color:#00f">WithLabels&lt;/span>(ctx, labels))
+&lt;span style="color:#008000;font-weight:bold">return&lt;/span> span
+}
+&lt;span style="color:#008000;font-weight:bold">type&lt;/span> span &lt;span style="color:#008000;font-weight:bold">struct&lt;/span> {
+id &lt;span style="color:#b00040">uint64&lt;/span>
+restoreCtx context.Context
+}
+&lt;span style="color:#008000;font-weight:bold">func&lt;/span> (s &lt;span style="color:#666">*&lt;/span>span) &lt;span style="color:#00f">Finish&lt;/span>() {
+pprof.&lt;span style="color:#00f">SetGoroutineLabels&lt;/span>(s.restoreCtx)
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Our actual implementation is a bit more complex and also reduces the risk of leaking PII (Personally Identifiable Information). It automatically covers the HTTP and gRPC wrappers in our contrib package, as well as any custom traces your application may implement.&lt;/p>
+&lt;p>Once our backend receives the tracing and profiling information, we&amp;rsquo;re able to perform the lookups needed to power the features showcased earlier in this post.&lt;/p>
+&lt;h2 id="profiling-improvements-in-go-118">Profiling Improvements in Go 1.18&lt;/h2>
+&lt;p>As part of implementing these new features, we did a lot of testing, including unit tests, micro-benchmarks, macro-benchmarks and more. As expected, this surfaced problems in our code and allowed us to quickly fix them.&lt;/p>
+&lt;p>Somewhat less expected, we also discovered several issues in the Go runtime that were impacting the accuracy of pprof labels, as well as CPU profiling in general. The good news is that with the help of the community, the Go maintainers and contributions from our end – all of these issues have been fixed in the upcoming Go 1.18 release.&lt;/p>
+&lt;p>If you&amp;rsquo;re interested in the full details on this, check out the companion post: &lt;a href="https://felixge.de/2022/02/11/profiling-improvements-in-go-1.18/">Profiling Improvements in Go 1.18&lt;/a>.&lt;/p>
+&lt;p>That being said, unless you use a lot of cgo, the new features should already work great for you in Go 1.17.&lt;/p>
+&lt;h2 id="feedback-wanted">Feedback Wanted&lt;/h2>
+&lt;p>I&amp;rsquo;m currently looking for people who are interested in taking these new features for a spin in order to get feedback.&lt;/p>
+&lt;p>It doesn&amp;rsquo;t matter if you&amp;rsquo;re an existing or potential customer, just &lt;a href="mailto:felix@datadog.com?subject=Connecting%20Go%20Profiling%20With%20Tracing" target="_new">send me an email&lt;/a> and we can set up a 30 min zoom. To sweeten the deal, I&amp;rsquo;m also happy to answer general Go profiling questions along the way :).&lt;/p>
+&lt;h2 id="appendix-getting-started">Appendix: Getting Started&lt;/h2>
+&lt;p>If you want to get started quickly, you can simply copy the code below into your application.&lt;/p>
+&lt;p>Additionally you can check out this fully working &lt;a href="https://github.com/felixge/dd-trace-go-demo">dd-trace-go-demo&lt;/a> application that shows an integration including HTTP and PostgreSQL.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#008000;font-weight:bold">package&lt;/span> main
+&lt;span style="color:#008000;font-weight:bold">import&lt;/span> (
+&lt;span style="color:#ba2121">&amp;#34;time&amp;#34;&lt;/span>
+&lt;span style="color:#ba2121">&amp;#34;gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer&amp;#34;&lt;/span>
+&lt;span style="color:#ba2121">&amp;#34;gopkg.in/DataDog/dd-trace-go.v1/profiler&amp;#34;&lt;/span>
+)
+&lt;span style="color:#008000;font-weight:bold">func&lt;/span> &lt;span style="color:#00f">main&lt;/span>() {
+&lt;span style="color:#008000;font-weight:bold">const&lt;/span> (
+env = &lt;span style="color:#ba2121">&amp;#34;dev&amp;#34;&lt;/span>
+service = &lt;span style="color:#ba2121">&amp;#34;example&amp;#34;&lt;/span>
+version = &lt;span style="color:#ba2121">&amp;#34;0.1&amp;#34;&lt;/span>
+)
+tracer.&lt;span style="color:#00f">Start&lt;/span>(
+tracer.&lt;span style="color:#00f">WithEnv&lt;/span>(env),
+tracer.&lt;span style="color:#00f">WithService&lt;/span>(service),
+tracer.&lt;span style="color:#00f">WithServiceVersion&lt;/span>(version),
+tracer.&lt;span style="color:#00f">WithProfilerCodeHotspots&lt;/span>(&lt;span style="color:#008000;font-weight:bold">true&lt;/span>),
+tracer.&lt;span style="color:#00f">WithProfilerEndpoints&lt;/span>(&lt;span style="color:#008000;font-weight:bold">true&lt;/span>),
+)
+&lt;span style="color:#008000;font-weight:bold">defer&lt;/span> tracer.&lt;span style="color:#00f">Stop&lt;/span>()
+err &lt;span style="color:#666">:=&lt;/span> profiler.&lt;span style="color:#00f">Start&lt;/span>(
+profiler.&lt;span style="color:#00f">WithService&lt;/span>(service),
+profiler.&lt;span style="color:#00f">WithEnv&lt;/span>(env),
+profiler.&lt;span style="color:#00f">WithVersion&lt;/span>(version),
+&lt;span style="color:#408080;font-style:italic">// Enables CPU profiling 100% of the time to capture hotspot information
+&lt;/span>&lt;span style="color:#408080;font-style:italic">&lt;/span> &lt;span style="color:#408080;font-style:italic">// for all spans. Default is 25% right now, but this might change in the
+&lt;/span>&lt;span style="color:#408080;font-style:italic">&lt;/span> &lt;span style="color:#408080;font-style:italic">// next dd-trace-go release.
+&lt;/span>&lt;span style="color:#408080;font-style:italic">&lt;/span> profiler.&lt;span style="color:#00f">CPUDuration&lt;/span>(&lt;span style="color:#666">60&lt;/span>&lt;span style="color:#666">*&lt;/span>time.Second),
+profiler.&lt;span style="color:#00f">WithPeriod&lt;/span>(&lt;span style="color:#666">60&lt;/span>&lt;span style="color:#666">*&lt;/span>time.Second),
+)
+&lt;span style="color:#008000;font-weight:bold">if&lt;/span> err &lt;span style="color:#666">!=&lt;/span> &lt;span style="color:#008000;font-weight:bold">nil&lt;/span> {
+&lt;span style="color:#008000">panic&lt;/span>(err)
+}
+&lt;span style="color:#008000;font-weight:bold">defer&lt;/span> profiler.&lt;span style="color:#00f">Stop&lt;/span>()
+&lt;span style="color:#408080;font-style:italic">// &amp;lt;your application code&amp;gt;
+&lt;/span>&lt;span style="color:#408080;font-style:italic">&lt;/span>}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Thanks to my colleague &lt;a href="https://github.com/nsrip-dd">Nick Ripley&lt;/a> for reviewing this post.&lt;/p></description></item><item><title>Profiling Improvements in Go 1.18</title><link>https://felixge.de/2022/02/11/profiling-improvements-in-go-1.18/</link><pubDate>Fri, 11 Feb 2022 00:00:00 +0100</pubDate><guid>https://felixge.de/2022/02/11/profiling-improvements-in-go-1.18/</guid><description>&lt;p>Without doubt, Go 1.18 is shaping up to be one of the most exciting releases since Go 1. You&amp;rsquo;ve probably heard about major features such as generics and fuzzing, but this post is not about that. Instead we&amp;rsquo;ll talk about profiling and highlight a few noteworthy improvements to look forward to.&lt;/p>
+&lt;p>A point of personal joy for me is that I was able to contribute to several of the improvements as part of my job at Datadog and that they will significantly improve our new &lt;a href="https://felixge.de/2022/02/11/connecting-go-profiling-with-tracing/">Connecting Go Profiling With Tracing&lt;/a> functionality.&lt;/p>
+&lt;p>If you&amp;rsquo;re new to Go profiling, you might also enjoy our &lt;a href="https://github.com/DataDog/go-profiler-notes/blob/main/guide/README.md">Guide to Go Profiling&lt;/a> before diving into this post.&lt;/p>
+&lt;h2 id="better-cpu-profiling-accuracy">Better CPU Profiling Accuracy&lt;/h2>
+&lt;p>Let&amp;rsquo;s start with the most significant profiling change in Go 1.18 – the CPU profiler for Linux has become a lot more accurate. In particular, CPU bursts on multi-core systems used to be underestimated, which is fixed now.&lt;/p>
+&lt;p>This change goes back to late 2019 (go1.13) when &lt;a href="https://github.com/rhysh">Rhys Hiltner&lt;/a> opened &lt;a href="https://github.com/golang/go/issues/35057">GH 35057&lt;/a> to report that he noticed a Go service that was using &lt;code>20&lt;/code> CPU cores according to &lt;code>top&lt;/code>, but only &lt;code>2.4&lt;/code> cores according to Go&amp;rsquo;s CPU profiler. Digging deeper, Rhys found that this problem was caused by dropped POSIX signals in the kernel.&lt;/p>
+&lt;p>To understand the problem, it&amp;rsquo;s worth knowing that Go 1.17&amp;rsquo;s CPU profiler is built on top the &lt;a href="https://man7.org/linux/man-pages/man2/setitimer.2.html">setitimer(2)&lt;/a> syscall. This allows the Go runtime to ask the Linux kernel to get a notification for every &lt;code>10ms&lt;/code> the program spends running on a CPU. These notifications are delivered as &lt;code>SIGPROF&lt;/code> signals. Each delivery of a signal causes the kernel to stop the program and invoke the runtime&amp;rsquo;s signal handler routine on one of the stopped threads. The signal handler takes a stack trace of the current goroutine and adds it to the CPU profile. All of this takes less than &lt;code>~10usec&lt;/code> after which the kernel resumes the execution of the program.&lt;/p>
+&lt;p>So what was wrong? Well, given Rhys program reporting &lt;code>20&lt;/code> CPU cores being used by &lt;code>top&lt;/code>, the expected signal rate should have been &lt;code>2,000&lt;/code> per second. However, the resulting profile only contained an average of &lt;code>240&lt;/code> stack traces per second. Further investigation using &lt;a href="https://www.kernel.org/doc/html/v5.16/trace/events.html">Linux Event Tracing&lt;/a> revealed that the expected amount of &lt;code>signal:signal_generate&lt;/code> events were observed, but not enough &lt;code>signal:signal_deliver&lt;/code> events. The difference between signal generation and delivery might seem confusing at first, but is due to the fact that standard POSIX signals do not queue, see &lt;a href="https://man7.org/linux/man-pages/man7/signal.7.html">signal(7)&lt;/a>. Only a single signal can be pending delivery at a time. If another signal of the same kind is generated while one is already pending, the new signal gets dropped.&lt;/p>
+&lt;p>However, this still doesn&amp;rsquo;t explain why so many signals would be generated during the exact same &lt;code>&amp;lt; ~10usec&lt;/code> signal handler window so that they would end up on top of each other. So the next piece to this puzzle is the fact that the resolution of syscalls measuring CPU time are limited to the kernel&amp;rsquo;s software clock which measures time in &lt;em>jiffies&lt;/em>, see &lt;a href="https://man7.org/linux/man-pages/man7/time.7.html">time(7)&lt;/a>. The duration of a jiffy depends on &lt;a href="https://github.com/torvalds/linux/blob/master/kernel/Kconfig.hz">kernel configuration&lt;/a>, but the default is &lt;code>4ms&lt;/code> (&lt;code>250Hz&lt;/code>). What this means is that the kernel isn&amp;rsquo;t even able to honor Go&amp;rsquo;s wish of receiving a signal every &lt;code>10ms&lt;/code>. Instead it has to alternate between &lt;code>8ms&lt;/code> and &lt;code>12ms&lt;/code> as can be seen in the histogram below (&lt;a href="https://docs.google.com/spreadsheets/d/12zGfTIfHBivcYTrbbets-dDyg_OLmVP5x1VLbQeUezg/edit#gid=1108138742">details&lt;/a>).&lt;/p>
+&lt;img width="100%" src="./jiffies.png"/>
+&lt;p>Since alternating between &lt;code>8ms&lt;/code> and &lt;code>12ms&lt;/code> still works out to &lt;code>10ms&lt;/code> on average, it is not a problem in and of itself. What is a problem however, is what happens when e.g. &lt;code>10&lt;/code> threads are running on different CPU cores, causing them to use &lt;code>40ms&lt;/code> of CPU time within a &lt;code>4ms&lt;/code> jiffy window. So when the kernel gets around to do its checking, it needs to generate &lt;code>4&lt;/code> &lt;code>SIGPROF&lt;/code> signals at once, causing all except one to be dropped instead of delivered. Or in other words, &lt;code>setitimer(2)&lt;/code> – the kernel&amp;rsquo;s portable API advertised for profiling – turns out to be unsuitable for profiling busy multi-core systems :(.&lt;/p>
+&lt;p>However, given that the man pages explain the jiffy limitations of CPU time related syscalls and the semantics of process-directed signals, it&amp;rsquo;s not entirely clear if this would be recognized as a bug by the kernel maintainers. But even if &lt;code>setitimer(2)&lt;/code> would be fixed, it would take a long time for people to upgrade their kernels, so Rhys brought up the idea of using &lt;a href="https://man7.org/linux/man-pages/man2/timer_create.2.html">&lt;code>timer_create(2)&lt;/code>&lt;/a> which offers per-thread accounting of pending signals.&lt;/p>
+&lt;p>Unfortunately the idea didn&amp;rsquo;t receive feedback from the Go maintainers, so the issue sat dormant until Rhys and I started discussing it again in May 2021 &lt;a href="https://twitter.com/felixge/status/1397522130904965120">on twitter&lt;/a>. We decided to collaborate, Rhys working on the &lt;a href="https://go-review.googlesource.com/c/go/+/324129/21">critical CPU profiler changes&lt;/a>, and me on &lt;a href="https://go-review.googlesource.com/c/go/+/334769">better test coverage&lt;/a> for cgo and other edge cases shown in the diagram below.&lt;/p>
+&lt;img width="100%" src="./control-flow.png"/>
+&lt;p>Another side quest of mine was to create a standalone C program called &lt;a href="https://github.com/felixge/proftest">proftest&lt;/a> to observe the signal generation and delivery behavior of &lt;code>setitimer(2)&lt;/code> and &lt;code>timer_create(2)&lt;/code> which confirmed another &lt;a href="https://github.com/golang/go/issues/14434">bias issue from 2016&lt;/a>: &lt;code>setitimer(2)&lt;/code>&amp;rsquo;s process-directed signals are not fairly distributed among CPU-consuming threads. Instead &lt;a href="https://twitter.com/felixge/status/1400356284285792262">one thread tends to get screwed&lt;/a> and receives less signals than all other threads. Now, to be fair, &lt;a href="https://man7.org/linux/man-pages/man7/signal.7.html">&lt;code>signal(7)&lt;/code>&lt;/a> states that the kernel chooses an arbitrary thread to which to deliver process-directed signals when multiple threads are eligible. But on the other hand macOS doesn&amp;rsquo;t show this kind of bias, and I think that&amp;rsquo;s the point where I need to stop making apologies on behalf of the Linux kernel :).&lt;/p>
+&lt;p>But the good news is that, except for jiffy resolution, &lt;code>timer_create(2)&lt;/code> doesn&amp;rsquo;t appear to suffer from any of the ailments plaguing &lt;code>setitimer(2)&lt;/code>. Thanks to per-thread signal accounting, it reliably delivers the right amount of signals and shows no bias towards any particular threads. The only issue is that &lt;code>timer_create(2)&lt;/code> requires the CPU profiler to be aware of all threads. This is easy for threads created by the Go runtime, but gets tricky when cgo code is spawning its own threads. Rhys patch deals with this by combining &lt;code>timer_create(2)&lt;/code> and &lt;code>setitimer(2)&lt;/code>. When a signal is received, the signal handler checks the origin of the signal and discards it if it&amp;rsquo;s not the best signal source available for the current thread. Additionally the patch also has some clever bits to deal with avoiding bias against short-lived threads and is just a great piece of engineering in general.&lt;/p>
+&lt;p>Anyway, thanks to lots of review and feedback from the Go maintainers, Rhys patch was merged and will ship with Go 1.18, fixing &lt;a href="https://github.com/golang/go/issues/35057">GH 35057&lt;/a> and &lt;a href="https://github.com/golang/go/issues/14434">GH 14434&lt;/a>. My test cases didn&amp;rsquo;t make the cut, partially because it&amp;rsquo;s hard to make non-flaky assertions on profiling data, but mostly because we didn&amp;rsquo;t want to risk those patches taking upstream&amp;rsquo;s attention away from the main changes themselves. Nevertheless this open source community collaboration was one of my favorite computer experiences of 2021!&lt;/p>
+&lt;h2 id="profiler-label-bug-fixes">Profiler Label Bug Fixes&lt;/h2>
+&lt;p>&lt;a href="https://github.com/DataDog/go-profiler-notes/blob/main/guide/README.md#cpu-profiler-labels">Profiler labels&lt;/a> (aka pprof labels or tags) allow users to associate arbitrary key/value pairs with the currently running goroutine which are inherited by child-goroutines. These labels also end up in CPU and Goroutine profiles, allowing to slice and dice these profiles by label values.&lt;/p>
+&lt;p>At Datadog we use profiler labels for &lt;a href="https://felixge.de/2022/02/11/connecting-go-profiling-with-tracing/">Connecting Go Profiling With Tracing&lt;/a> and as part of working on this feature I did a lot of testing on them. This caused me to observe stack traces in my profiles that should have labels attached, but didn&amp;rsquo;t. I proceeded by reporting the issue as &lt;a href="https://github.com/golang/go/issues/48577">GH 48577&lt;/a> and taking a closer look at the root cause.&lt;/p>
+&lt;p>Luckily the problem turned out to be really simple. The CPU profiler was sometimes looking at the wrong goroutine when adding the label and required essentially just a one-line fix:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-diff" data-lang="diff">&lt;span style="color:#a00000">-cpuprof.add(gp, stk[:n])
+&lt;/span>&lt;span style="color:#a00000">&lt;/span>&lt;span style="color:#00a000">+cpuprof.add(gp.m.curg, stk[:n])
+&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>This might be a bit confusing at first since &lt;code>gp&lt;/code> is the current goroutine and usually points to the same place as &lt;code>gp.m.curg&lt;/code> (the current goroutine of the thread &lt;code>gp&lt;/code> is running on). However, the two are not the same when Go has to switch stacks (e.g. during signal handling, or resizing the stack of the current goroutine), so if the signal arrives at an unfortunate moment, &lt;code>gp&lt;/code> points to a purely internal goroutine that is executing on behalf of the user, but lacking the labels belonging to the current stack trace &lt;code>stk&lt;/code>. Apparently this is a common issue, so it is even documented in the &lt;a href="https://github.com/golang/go/blob/master/src/runtime/HACKING.md#getg-and-getgmcurg">runtime/HACKING.md&lt;/a> guide.&lt;/p>
+&lt;p>Considering the simplicity of the problem, I submitted a &lt;a href="https://go-review.googlesource.com/c/go/+/351751/1">one-line patch&lt;/a> for it. However, the patch was greeted by the classic OSS response – &amp;ldquo;Can you please write a test for it?&amp;rdquo; – delivered by &lt;a href="https://github.com/prattmic">Michael Pratt&lt;/a>. I initially doubted the ROI of such a test case, but I couldn&amp;rsquo;t have been more wrong. It was definitely very difficult to write a non-flaky test to demonstrate the issue, and the initial version of the patch had to be reverted because of this. However, the process of implementing and improving the test case helped Michael to identify two additional issues related to labels, both of which he ended up fixing:&lt;/p>
+&lt;p>&lt;a href="https://go-review.googlesource.com/c/go/+/369741">CL 369741&lt;/a> fixed and off-by-one error in the encoding of the first batch of pprof samples causing a small number of samples to be tagged with the wrong labels.&lt;/p>
+&lt;p>&lt;a href="https://go-review.googlesource.com/c/go/+/369983">CL 369983&lt;/a> fixed an issue causing system goroutines (e.g. for GC) to inherit labels when spawned from user goroutines.&lt;/p>
+&lt;p>So thanks to all three problems being fixed, profiler labels will become a lot more accurate in Go 1.18. The biggest impact will be for programs using a lot of cgo since C calls run on a separate stack with &lt;code>gp != gp.m.curg&lt;/code>. However, even regular programs experiencing &lt;code>3-4%&lt;/code> missing labels in Go 1.17 will benefit from this change and achieve full accuracy.&lt;/p>
+&lt;h2 id="stack-trace-bug-fix">Stack Trace Bug Fix&lt;/h2>
+&lt;p>Another profiling related bug that we discovered at Datadog is &lt;a href="https://github.com/golang/go/issues/49171">GH 49171&lt;/a>. The problem manifested itself in delta allocation profiles with negative allocation counts. Digging deeper, we encountered non-deterministic program counter (pc) symbolization as a root cause. What this means is that the exact same stack trace (same program counters) would contain different symbols (e.g. filenames) in profiles taken at a different time, which should be impossible.&lt;/p>
+&lt;p>The bug was also very hard to reproduce in a standalone fashion, and I spend almost a week before succeeding and reporting it upstream. In the end it turned out to be a compiler regression involving inlined closures in Go 1.17 and was &lt;a href="https://go-review.googlesource.com/c/go/+/366494/">fixed&lt;/a> by &lt;a href="https://github.com/thanm">Than McIntosh&lt;/a>.&lt;/p>
+&lt;h2 id="epilog">Epilog&lt;/h2>
+&lt;p>So as you can see, in addition to being packed with exciting new features, Go 1.18 also contains several important profiling improvements. Please let me know if I missed anything or if you have any questions or feedback.&lt;/p>
+&lt;p>Thank you for reading and thanks to my colleague &lt;a href="https://github.com/nsrip-dd">Nick Ripley&lt;/a> for reviewing this post.&lt;/p></description></item><item><title>Advent of Go Profiling: Day 1-1: Branchless Go</title><link>https://felixge.de/2021/12/03/advent-of-go-profiling-2021-day-1-1-branchless-go/</link><pubDate>Fri, 03 Dec 2021 00:00:00 +0100</pubDate><guid>https://felixge.de/2021/12/03/advent-of-go-profiling-2021-day-1-1-branchless-go/</guid><description>&lt;p>It seems like my &lt;a href="https://felixge.de/2021/12/01/advent-of-go-profiling-2021-day-1-1/">previous post&lt;/a> has struck a chord and many of you have sent your own solutions &lt;a href="https://twitter.com/felixge/status/1466128436355899395">via twitter&lt;/a>. Before I move on to pick another day as a challenge, I&amp;rsquo;d like to do a little follow up for day 1-1.&lt;/p>
+&lt;h2 id="valentin-deleplaces-solution">Valentin Deleplace&amp;rsquo;s Solution&lt;/h2>
+&lt;p>Let&amp;rsquo;s start with looking at the winning &lt;a href="https://twitter.com/val_deleplace/status/1466442802330488838">solution&lt;/a> from Valentin Deleplace which achieves a spectacular &lt;code>13.8 ns/op&lt;/code> on my machine. This is &lt;code>6.5x&lt;/code> faster than my &lt;code>v3&lt;/code> solution and &lt;code>23x&lt;/code> faster than my &lt;code>v1&lt;/code> 🤯.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#008000;font-weight:bold">func&lt;/span> &lt;span style="color:#00f">Answer&lt;/span>(input &lt;span style="color:#b00040">string&lt;/span>) (&lt;span style="color:#b00040">int&lt;/span>, &lt;span style="color:#b00040">error&lt;/span>) {
+&lt;span style="color:#008000;font-weight:bold">var&lt;/span> prev &lt;span style="color:#b00040">int64&lt;/span> = &lt;span style="color:#666">-&lt;/span>&lt;span style="color:#666">9999&lt;/span>
+&lt;span style="color:#008000;font-weight:bold">var&lt;/span> increases &lt;span style="color:#b00040">int&lt;/span> = &lt;span style="color:#666">-&lt;/span>&lt;span style="color:#666">1&lt;/span>
+val &lt;span style="color:#666">:=&lt;/span> &lt;span style="color:#008000">int64&lt;/span>(&lt;span style="color:#666">0&lt;/span>)
+&lt;span style="color:#008000;font-weight:bold">for&lt;/span> p, N &lt;span style="color:#666">:=&lt;/span> &lt;span style="color:#666">0&lt;/span>, &lt;span style="color:#008000">len&lt;/span>(input); p &amp;lt; N; p&lt;span style="color:#666">++&lt;/span> {
+c &lt;span style="color:#666">:=&lt;/span> input[p]
+&lt;span style="color:#008000;font-weight:bold">if&lt;/span> c &lt;span style="color:#666">!=&lt;/span> &lt;span style="color:#ba2121">&amp;#39;\n&amp;#39;&lt;/span> {
+val = (val &lt;span style="color:#666">&amp;lt;&amp;lt;&lt;/span> &lt;span style="color:#666">8&lt;/span>) &lt;span style="color:#666">+&lt;/span> &lt;span style="color:#008000">int64&lt;/span>(c)
+} &lt;span style="color:#008000;font-weight:bold">else&lt;/span> {
+&lt;span style="color:#008000;font-weight:bold">if&lt;/span> val &amp;gt; prev {
+increases&lt;span style="color:#666">++&lt;/span>
+}
+prev = val
+val = &lt;span style="color:#666">0&lt;/span>
+}
+}
+&lt;span style="color:#008000;font-weight:bold">if&lt;/span> val &amp;gt; prev {
+increases&lt;span style="color:#666">++&lt;/span>
+}
+&lt;span style="color:#008000;font-weight:bold">return&lt;/span> increases, &lt;span style="color:#008000;font-weight:bold">nil&lt;/span>
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>I knew that my solution was not ideal, but the magnitude of the improvement still surprised me. So I decided to take a closer look to see how it was done:&lt;/p>
+&lt;ul>
+&lt;li>The call to &lt;code>strings.IndexByte()&lt;/code> was retired in favor of directly looping over the individual characters of the input. This works well here because the average line length is very short (4 characters) and calling assembly functions from Go has a non-trivial overhead associated with it.&lt;/li>
+&lt;li>Somewhat unexpectedly, the function body fits into Go&amp;rsquo;s inlining budget. Build with &lt;code>-gcflags='-m'&lt;/code> if you want to verify this yourself. This eliminates the overhead of calling the Answer function in the benchmark.&lt;/li>
+&lt;li>Looping over the input is done without using &lt;code>range&lt;/code> on the input string which avoids unicode overhead.&lt;/li>
+&lt;li>Parsing of the input digits is directly integrated into the for loop and avoids iterating over those chars twice.&lt;/li>
+&lt;li>&lt;code>val &amp;lt;&amp;lt; 8&lt;/code> is used instead of &lt;code>val*10&lt;/code>. This changes &lt;code>val&lt;/code>, but doesn&amp;rsquo;t break the &lt;code>val &amp;gt; prev&lt;/code> comparison.&lt;/li>
+&lt;li>Instead of using a separate &lt;code>bool&lt;/code> to indicate if a previous value has been seen, &lt;code>prev&lt;/code> and &lt;code>increases&lt;/code> are initialized to &lt;code>-9999&lt;/code> and &lt;code>-1&lt;/code> respectively which is fair game since we noticed the elves hesitance to throw negative numbers at us.&lt;/li>
+&lt;li>Error handling such as checking for valid digits has been eliminated.&lt;/li>
+&lt;/ul>
+&lt;p>Most importantly Valentin&amp;rsquo;s solution is far more compact than my &lt;code>v3&lt;/code> and remains pretty readable given the circumstances 👏.&lt;/p>
+&lt;h2 id="branchless-go">Branchless Go&lt;/h2>
+&lt;p>In my experience code optimization always involves a lot of trial and error. So I think it&amp;rsquo;s important to acknowledge that optimization ideas often fail and to discuss what we can learn from these failures.&lt;/p>
+&lt;p>One such failure was my first attempt to further optimize Valentin&amp;rsquo;s solution by eliminating branches. My inspiration for this came from Daniel Lemire&amp;rsquo;s &lt;a href="https://www.infoq.com/presentations/simdjson-parser/">Parsing JSON Really Quickly: Lessons Learned&lt;/a> presentation as well as Matt Nakama&amp;rsquo;s &lt;a href="https://mattnakama.com/blog/go-branchless-coding/">Branchless Coding in Go&lt;/a>.&lt;/p>
+&lt;p>I&amp;rsquo;ve never done this before, so the code below can certainly be improved, but here is what I came up with:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#008000;font-weight:bold">func&lt;/span> &lt;span style="color:#00f">Answer&lt;/span>(input &lt;span style="color:#b00040">string&lt;/span>) (&lt;span style="color:#b00040">int&lt;/span>, &lt;span style="color:#b00040">error&lt;/span>) {
+&lt;span style="color:#008000;font-weight:bold">var&lt;/span> prev &lt;span style="color:#b00040">int64&lt;/span> = &lt;span style="color:#666">-&lt;/span>&lt;span style="color:#666">9999&lt;/span>
+&lt;span style="color:#008000;font-weight:bold">var&lt;/span> increases &lt;span style="color:#b00040">int&lt;/span> = &lt;span style="color:#666">-&lt;/span>&lt;span style="color:#666">1&lt;/span>
+val &lt;span style="color:#666">:=&lt;/span> &lt;span style="color:#008000">int64&lt;/span>(&lt;span style="color:#666">0&lt;/span>)
+&lt;span style="color:#008000;font-weight:bold">for&lt;/span> p, N &lt;span style="color:#666">:=&lt;/span> &lt;span style="color:#666">0&lt;/span>, &lt;span style="color:#008000">len&lt;/span>(input); p &amp;lt; N; p&lt;span style="color:#666">++&lt;/span> {
+c &lt;span style="color:#666">:=&lt;/span> input[p]
+notNl &lt;span style="color:#666">:=&lt;/span> &lt;span style="color:#00f">boolToInt64&lt;/span>(c &lt;span style="color:#666">!=&lt;/span> &lt;span style="color:#ba2121">&amp;#39;\n&amp;#39;&lt;/span>)
+increases &lt;span style="color:#666">+=&lt;/span> &lt;span style="color:#008000">int&lt;/span>((^notNl &lt;span style="color:#666">&amp;amp;&lt;/span> &lt;span style="color:#666">1&lt;/span>) &lt;span style="color:#666">*&lt;/span> &lt;span style="color:#00f">boolToInt64&lt;/span>(val &amp;gt; prev))
+prev = notNl&lt;span style="color:#666">*&lt;/span>prev &lt;span style="color:#666">+&lt;/span> val&lt;span style="color:#666">*&lt;/span>(^notNl&lt;span style="color:#666">&amp;amp;&lt;/span>&lt;span style="color:#666">1&lt;/span>)
+val = notNl &lt;span style="color:#666">*&lt;/span> ((val &lt;span style="color:#666">&amp;lt;&amp;lt;&lt;/span> &lt;span style="color:#666">8&lt;/span>) &lt;span style="color:#666">+&lt;/span> &lt;span style="color:#008000">int64&lt;/span>(c))
+}
+increases &lt;span style="color:#666">+=&lt;/span> &lt;span style="color:#008000">int&lt;/span>(&lt;span style="color:#00f">boolToInt64&lt;/span>(val &amp;gt; prev))
+&lt;span style="color:#008000;font-weight:bold">return&lt;/span> increases, &lt;span style="color:#008000;font-weight:bold">nil&lt;/span>
+}
+&lt;span style="color:#008000;font-weight:bold">func&lt;/span> &lt;span style="color:#00f">boolToInt64&lt;/span>(b &lt;span style="color:#b00040">bool&lt;/span>) &lt;span style="color:#b00040">int64&lt;/span> {
+&lt;span style="color:#008000;font-weight:bold">return&lt;/span> &lt;span style="color:#008000">int64&lt;/span>((&lt;span style="color:#666">*&lt;/span>(&lt;span style="color:#666">*&lt;/span>&lt;span style="color:#b00040">uint8&lt;/span>)(unsafe.&lt;span style="color:#00f">Pointer&lt;/span>(&lt;span style="color:#666">&amp;amp;&lt;/span>b))) &lt;span style="color:#666">&amp;amp;&lt;/span> &lt;span style="color:#666">1&lt;/span>)
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>The core idea is to cast &lt;code>bool&lt;/code> values into &lt;code>0&lt;/code> or &lt;code>1&lt;/code> which allows us to take a branch like this:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#008000;font-weight:bold">if&lt;/span> c &lt;span style="color:#666">!=&lt;/span> &lt;span style="color:#ba2121">&amp;#39;\n&amp;#39;&lt;/span> {
+val = (val &lt;span style="color:#666">&amp;lt;&amp;lt;&lt;/span> &lt;span style="color:#666">8&lt;/span>) &lt;span style="color:#666">+&lt;/span> &lt;span style="color:#008000">int64&lt;/span>(c)
+} &lt;span style="color:#008000;font-weight:bold">else&lt;/span> {
+val = &lt;span style="color:#666">0&lt;/span>
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>And turn it into the equivalent branch-free expression shown below:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">val = ((val &lt;span style="color:#666">&amp;lt;&amp;lt;&lt;/span> &lt;span style="color:#666">8&lt;/span>) &lt;span style="color:#666">+&lt;/span> &lt;span style="color:#008000">int64&lt;/span>(c)) &lt;span style="color:#666">*&lt;/span> &lt;span style="color:#00f">boolToInt64&lt;/span>(c &lt;span style="color:#666">!=&lt;/span> &lt;span style="color:#ba2121">&amp;#39;\n&amp;#39;&lt;/span>)
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>This works because we always compute the expression from the first branch and then multiply it by &lt;code>1&lt;/code> if the first branch should be taken, or &lt;code>0&lt;/code> for the second branch which is the same as setting &lt;code>val = 0&lt;/code> directly.&lt;/p>
+&lt;p>And while &lt;code>boolToInt64(c != '\n')&lt;/code> might look like a compilation nightmare, the Go compiler seems to emit something relatively reasonable (see &lt;a href="https://godbolt.org/z/Tzr99vqr3)">https://godbolt.org/z/Tzr99vqr3)&lt;/a>:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-txt" data-lang="txt">CMPB R8B, $10 ; compare c and &amp;#39;\n&amp;#39; (ASCII 10)
+SETNE &amp;#34;&amp;#34;.b+5(SP) ; store 1 on stack if c != &amp;#39;\n&amp;#39; otherwise 0
+MOVBLZX &amp;#34;&amp;#34;.b+5(SP), R9 ; move result from stack to register R9
+ANDL $1, R9 ; last part of int64((*(*uint8)(unsafe.Pointer(&amp;amp;b))) &amp;amp; 1
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>From my perspective, something like this would be even better:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-txt" data-lang="txt">CMPB R8B, $10 ; compare c and &amp;#39;\n&amp;#39; (ASCII 10)
+SETNE R9 ; store 1 in R9 if c != &amp;#39;\n&amp;#39; otherwise 0
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>But alas — I wasn&amp;rsquo;t able to get the compiler to generate this. Anyway, since we eliminated all branches, our solution should run very quickly now, right? Let&amp;rsquo;s have a look:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-txt" data-lang="txt">$ benchstat v4-valentin.txt v5.txt
+name old time/op new time/op delta
+Answer-6 13.8ns ± 1% 77.1ns ± 0% +460.24% (p=0.008 n=5+5)
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Ouch. Turns out a little knowledge is a dangerous thing 🤕. Initially I was pretty sad about this, as I had put a lot of effort into all this &amp;ldquo;clever&amp;rdquo; code. But knowing that managing your emotions is often the hardest part — and because it was 3am — I decided to call it a night.&lt;/p>
+&lt;p>I ended up guessing the problem while riding my bicycle the next day. However I could have probably also figured it out by looking at the &lt;code>View -&amp;gt; Source&lt;/code> output of the CPU profile shown below:&lt;/p>
+&lt;img width="100%" src="./branch-free.png" />
+&lt;p>As you can see, we&amp;rsquo;re spending quite a lot of time on line &lt;code>36&lt;/code> that performs a conditional &lt;code>increases++&lt;/code> operation.&lt;/p>
+&lt;p>To understand why this is bad, let&amp;rsquo;s recall the input data we are using:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-txt" data-lang="txt">199
+200
+208
+210
+200
+207
+240
+269
+260
+263
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>As well as Valentin&amp;rsquo;s code we are trying to optimize:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#008000;font-weight:bold">if&lt;/span> c &lt;span style="color:#666">!=&lt;/span> &lt;span style="color:#ba2121">&amp;#39;\n&amp;#39;&lt;/span> {
+val = (val &lt;span style="color:#666">&amp;lt;&amp;lt;&lt;/span> &lt;span style="color:#666">8&lt;/span>) &lt;span style="color:#666">+&lt;/span> &lt;span style="color:#008000">int64&lt;/span>(c)
+} &lt;span style="color:#008000;font-weight:bold">else&lt;/span> {
+&lt;span style="color:#008000;font-weight:bold">if&lt;/span> val &amp;gt; prev {
+increases&lt;span style="color:#666">++&lt;/span>
+}
+prev = val
+val = &lt;span style="color:#666">0&lt;/span>
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>As you can see, all lines have 3 digits plus one newline, so the chance to end up in the original &lt;code>else&lt;/code> block is only &lt;code>1/4&lt;/code>. For bigger input numbers the chance would be even lower. Additionally the &lt;code>val &amp;gt; prev&lt;/code> predicate has to be &lt;code>true&lt;/code>, so our unconditional execution of the &lt;code>increases++&lt;/code> operation doesn&amp;rsquo;t have a very good chance of paying off in most cases.&lt;/p>
+&lt;p>However, we know that the &lt;code>val &amp;gt; prev&lt;/code> predicate by itself is &lt;code>true&lt;/code> &lt;code>7&lt;/code> out of &lt;code>10&lt;/code> times, so perhaps we can beat the CPU&amp;rsquo;s branch predictor by limiting ourselves to only eliminating that branch? The code for this is shown below:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#008000;font-weight:bold">func&lt;/span> &lt;span style="color:#00f">Answer&lt;/span>(input &lt;span style="color:#b00040">string&lt;/span>) (&lt;span style="color:#b00040">int&lt;/span>, &lt;span style="color:#b00040">error&lt;/span>) {
+&lt;span style="color:#008000;font-weight:bold">var&lt;/span> prev &lt;span style="color:#b00040">int64&lt;/span> = &lt;span style="color:#666">-&lt;/span>&lt;span style="color:#666">9999&lt;/span>
+&lt;span style="color:#008000;font-weight:bold">var&lt;/span> increases &lt;span style="color:#b00040">int&lt;/span> = &lt;span style="color:#666">-&lt;/span>&lt;span style="color:#666">1&lt;/span>
+val &lt;span style="color:#666">:=&lt;/span> &lt;span style="color:#008000">int64&lt;/span>(&lt;span style="color:#666">0&lt;/span>)
+&lt;span style="color:#008000;font-weight:bold">for&lt;/span> p, N &lt;span style="color:#666">:=&lt;/span> &lt;span style="color:#666">0&lt;/span>, &lt;span style="color:#008000">len&lt;/span>(input); p &amp;lt; N; p&lt;span style="color:#666">++&lt;/span> {
+c &lt;span style="color:#666">:=&lt;/span> input[p]
+&lt;span style="color:#008000;font-weight:bold">if&lt;/span> c &lt;span style="color:#666">!=&lt;/span> &lt;span style="color:#ba2121">&amp;#39;\n&amp;#39;&lt;/span> {
+val = (val &lt;span style="color:#666">&amp;lt;&amp;lt;&lt;/span> &lt;span style="color:#666">8&lt;/span>) &lt;span style="color:#666">+&lt;/span> &lt;span style="color:#008000">int64&lt;/span>(c)
+} &lt;span style="color:#008000;font-weight:bold">else&lt;/span> {
+increases &lt;span style="color:#666">+=&lt;/span> &lt;span style="color:#008000">int&lt;/span>(&lt;span style="color:#00f">boolToInt64&lt;/span>(val &amp;gt; prev))
+prev = val
+val = &lt;span style="color:#666">0&lt;/span>
+}
+}
+&lt;span style="color:#008000;font-weight:bold">if&lt;/span> val &amp;gt; prev {
+increases&lt;span style="color:#666">++&lt;/span>
+}
+&lt;span style="color:#008000;font-weight:bold">return&lt;/span> increases, &lt;span style="color:#008000;font-weight:bold">nil&lt;/span>
+}
+&lt;span style="color:#008000;font-weight:bold">func&lt;/span> &lt;span style="color:#00f">boolToInt64&lt;/span>(b &lt;span style="color:#b00040">bool&lt;/span>) &lt;span style="color:#b00040">int64&lt;/span> {
+&lt;span style="color:#008000;font-weight:bold">return&lt;/span> &lt;span style="color:#008000">int64&lt;/span>((&lt;span style="color:#666">*&lt;/span>(&lt;span style="color:#666">*&lt;/span>&lt;span style="color:#b00040">uint8&lt;/span>)(unsafe.&lt;span style="color:#00f">Pointer&lt;/span>(&lt;span style="color:#666">&amp;amp;&lt;/span>b))) &lt;span style="color:#666">&amp;amp;&lt;/span> &lt;span style="color:#666">1&lt;/span>)
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Let&amp;rsquo;s have a look how this compares to Valentin&amp;rsquo;s original solution:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-txt" data-lang="txt">benchstat v4-valentin.txt v6.txt .txt
+name old time/op new time/op delta
+Answer-6 13.8ns ± 1% 12.7ns ± 2% -7.91% (p=0.008 n=5+5)
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Awesome, looks like we saved another nanosecond which the elves are going to turn into a &lt;a href="https://www.youtube.com/watch?v=9eyFDBPk4Yw">gift for the children&lt;/a>!&lt;/p>
+&lt;p>Alright, that’s it for today. I hope this was fun and that I&amp;rsquo;ll find time to do a post about another AoC challenge soon.&lt;/p>
+&lt;p>Thanks for reading this!&lt;/p>
+&lt;h2 id="appendix-faq">Appendix: FAQ&lt;/h2>
+&lt;p>I&amp;rsquo;d imagine the branch-free code above raises quite a few eye brows. To avoid any misunderstanding, let me try to answer a few questions you may have:&lt;/p>
+&lt;h3 id="are-you-recommending-to-write-go-code-like-this">Are you recommending to write Go code like this?&lt;/h3>
+&lt;p>Absolutely not. I like to use advent of code to explore and learn. Please do not write production code like this unless &amp;ldquo;You know what you are doing&amp;quot;™️. I definitely wouldn&amp;rsquo;t consider myself to belong to this group :).&lt;/p>
+&lt;h3 id="will-this-work-for-different-data-distributions">Will this work for different data distributions?&lt;/h3>
+&lt;p>Probably not! The code is optimized for the small sample input used by AoC to explain the problem.&lt;/p>
+&lt;h3 id="why-dont-you-just-implement-the-algorithm-in-assembly">Why don&amp;rsquo;t you just implement the algorithm in assembly?&lt;/h3>
+&lt;p>That could be fun! But for this year&amp;rsquo;s advent of code, I think I&amp;rsquo;ll only use assembly if it&amp;rsquo;s in Go&amp;rsquo;s stdlib.&lt;/p></description></item><item><title>Advent of Go Profiling: Day 1-1</title><link>https://felixge.de/2021/12/01/advent-of-go-profiling-2021-day-1-1/</link><pubDate>Wed, 01 Dec 2021 10:00:00 +0100</pubDate><guid>https://felixge.de/2021/12/01/advent-of-go-profiling-2021-day-1-1/</guid><description>&lt;p>Tis the season to be geeky, so it&amp;rsquo;s time for &lt;a href="https://adventofcode.com/2021">Advent of Code 2021&lt;/a>. My theme for last year was &lt;a href="https://github.com/felixge/advent-2020">to learn some rust&lt;/a>, but for this year I decided to focus on Go profiling.&lt;/p>
+&lt;p>The idea is to code up naive solutions and use Go profiling tools to optimize them. A few folks &lt;a href="https://twitter.com/felixge/status/1462497895563808775">on twitter&lt;/a> were interested in seeing the results as blog posts, so I&amp;rsquo;m hoping to write a few of these.&lt;/p>
+&lt;p>You can find all code and profiles in the history of this repository: &lt;a href="https://github.com/felixge/advent-2021">github.com/felixge/advent-2021&lt;/a>.&lt;/p>
+&lt;p>&lt;em>Disclaimer: I currently work on &lt;a href="https://www.datadoghq.com/product/code-profiling/">Continuous Go Profiling&lt;/a> for Datadog, but I&amp;rsquo;m not barking on behalf of my employer here.&lt;/em>&lt;/p>
+&lt;h2 id="v1-naive-solution-link-to-codehttpsgithubcomfelixgeadvent-2021commiteba7ded758845dbd7daf3cab6bcf0748e3c1aab3diff-0dea3b3585a0c5d048021351232f67a48fde5bce91b1aabedd3d12f49d9191af">v1: Naive Solution (&lt;a href="https://github.com/felixge/advent-2021/commit/eba7ded758845dbd7daf3cab6bcf0748e3c1aab3#diff-0dea3b3585a0c5d048021351232f67a48fde5bce91b1aabedd3d12f49d9191af">link to code&lt;/a>)&lt;/h2>
+&lt;p>The &lt;a href="https://adventofcode.com/2021/day/1">day 1-1&lt;/a> challenge is pretty easy to solve, so I quickly came up with a &lt;a href="https://github.com/felixge/advent-2021/commit/eba7ded758845dbd7daf3cab6bcf0748e3c1aab3">naive solution&lt;/a>, see below.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#008000;font-weight:bold">func&lt;/span> &lt;span style="color:#00f">Answer&lt;/span>(input &lt;span style="color:#b00040">string&lt;/span>) (&lt;span style="color:#b00040">int&lt;/span>, &lt;span style="color:#b00040">error&lt;/span>) {
+&lt;span style="color:#008000;font-weight:bold">var&lt;/span> prev &lt;span style="color:#008000;font-weight:bold">struct&lt;/span> {
+val &lt;span style="color:#b00040">int64&lt;/span>
+set &lt;span style="color:#b00040">bool&lt;/span>
+}
+&lt;span style="color:#008000;font-weight:bold">var&lt;/span> increases &lt;span style="color:#b00040">int&lt;/span>
+&lt;span style="color:#008000;font-weight:bold">for&lt;/span> _, line &lt;span style="color:#666">:=&lt;/span> &lt;span style="color:#008000;font-weight:bold">range&lt;/span> strings.&lt;span style="color:#00f">Split&lt;/span>(input, &lt;span style="color:#ba2121">&amp;#34;\n&amp;#34;&lt;/span>) {
+val, err &lt;span style="color:#666">:=&lt;/span> strconv.&lt;span style="color:#00f">ParseInt&lt;/span>(line, &lt;span style="color:#666">10&lt;/span>, &lt;span style="color:#666">64&lt;/span>)
+&lt;span style="color:#008000;font-weight:bold">if&lt;/span> err &lt;span style="color:#666">!=&lt;/span> &lt;span style="color:#008000;font-weight:bold">nil&lt;/span> {
+&lt;span style="color:#008000;font-weight:bold">return&lt;/span> &lt;span style="color:#666">0&lt;/span>, err
+}
+&lt;span style="color:#008000;font-weight:bold">if&lt;/span> val &amp;gt; prev.val &lt;span style="color:#666">&amp;amp;&amp;amp;&lt;/span> prev.set {
+increases&lt;span style="color:#666">++&lt;/span>
+}
+prev.set = &lt;span style="color:#008000;font-weight:bold">true&lt;/span>
+prev.val = val
+}
+&lt;span style="color:#008000;font-weight:bold">return&lt;/span> increases, &lt;span style="color:#008000;font-weight:bold">nil&lt;/span>
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>This works, but is it fast enough? Let&amp;rsquo;s run a &lt;a href="https://github.com/felixge/advent-2021/commit/11ffbb4744b873e8e0043ed0a34323cc90f3916a#diff-436569090a9935aee294320a0b795640193e6013e29a1146d97db890d0cfb245">benchmark&lt;/a>.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-txt" data-lang="txt">$ go test -count 5 -run &amp;#39;^$&amp;#39; -bench . -cpuprofile=v1.cpu.pprof &amp;gt; v1.txt
+$ benchstat v1.txt
+name time/op
+Answer-6 325ns ± 1%
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>While this may not seem bad to you, it&amp;rsquo;s definitely not Christmas Scale™️, so let&amp;rsquo;s figure out what we can optimize by looking at our CPU profile as a FlameGraph:&lt;/p>
+&lt;img width="100%" src="./v1.cpu.png"/>
+&lt;p>Looks like 44% of our time is spend in &lt;a href="https://pkg.go.dev/strings#Split">&lt;code>strings.Split()&lt;/code>&lt;/a>, let&amp;rsquo;s optimize this.&lt;/p>
+&lt;h2 id="v2-optimize-stringssplit-link-to-codehttpsgithubcomfelixgeadvent-2021commit11ffbb4744b873e8e0043ed0a34323cc90f3916adiff-0dea3b3585a0c5d048021351232f67a48fde5bce91b1aabedd3d12f49d9191af">v2: Optimize strings.Split() (&lt;a href="https://github.com/felixge/advent-2021/commit/11ffbb4744b873e8e0043ed0a34323cc90f3916a#diff-0dea3b3585a0c5d048021351232f67a48fde5bce91b1aabedd3d12f49d9191af">link to code&lt;/a>)&lt;/h2>
+&lt;p>Looking at the FrameGraph above, notice that &lt;a href="https://pkg.go.dev/strings#Split">&lt;code>strings.Split()&lt;/code>&lt;/a> calls &lt;a href="https://pkg.go.dev/strings#IndexByte">&lt;code>strings.IndexByte()&lt;/code>&lt;/a> which is &lt;a href="https://cs.opensource.google/go/go/+/refs/tags/go1.17.3:src/internal/bytealg/indexbyte_amd64.s">implemented in assembly&lt;/a>. Turns out we can call this directly to do our own newline separation:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#008000;font-weight:bold">func&lt;/span> &lt;span style="color:#00f">Answer&lt;/span>(input &lt;span style="color:#b00040">string&lt;/span>) (&lt;span style="color:#b00040">int&lt;/span>, &lt;span style="color:#b00040">error&lt;/span>) {
+&lt;span style="color:#008000;font-weight:bold">var&lt;/span> prev &lt;span style="color:#008000;font-weight:bold">struct&lt;/span> {
+val &lt;span style="color:#b00040">int64&lt;/span>
+set &lt;span style="color:#b00040">bool&lt;/span>
+}
+&lt;span style="color:#008000;font-weight:bold">var&lt;/span> increases &lt;span style="color:#b00040">int&lt;/span>
+&lt;span style="color:#008000;font-weight:bold">var&lt;/span> line &lt;span style="color:#b00040">string&lt;/span>
+&lt;span style="color:#008000;font-weight:bold">for&lt;/span> &lt;span style="color:#008000">len&lt;/span>(input) &amp;gt; &lt;span style="color:#666">0&lt;/span> {
+i &lt;span style="color:#666">:=&lt;/span> strings.&lt;span style="color:#00f">IndexByte&lt;/span>(input, &lt;span style="color:#ba2121">&amp;#39;\n&amp;#39;&lt;/span>)
+&lt;span style="color:#008000;font-weight:bold">if&lt;/span> i &lt;span style="color:#666">==&lt;/span> &lt;span style="color:#666">-&lt;/span>&lt;span style="color:#666">1&lt;/span> {
+line = input
+input = &lt;span style="color:#ba2121">&amp;#34;&amp;#34;&lt;/span>
+} &lt;span style="color:#008000;font-weight:bold">else&lt;/span> {
+line = input[&lt;span style="color:#666">0&lt;/span>:i]
+input = input[i&lt;span style="color:#666">+&lt;/span>&lt;span style="color:#666">1&lt;/span>:]
+}
+val, err &lt;span style="color:#666">:=&lt;/span> strconv.&lt;span style="color:#00f">ParseInt&lt;/span>(line, &lt;span style="color:#666">10&lt;/span>, &lt;span style="color:#666">64&lt;/span>)
+&lt;span style="color:#008000;font-weight:bold">if&lt;/span> err &lt;span style="color:#666">!=&lt;/span> &lt;span style="color:#008000;font-weight:bold">nil&lt;/span> {
+&lt;span style="color:#008000;font-weight:bold">return&lt;/span> &lt;span style="color:#666">0&lt;/span>, err
+}
+&lt;span style="color:#008000;font-weight:bold">if&lt;/span> val &amp;gt; prev.val &lt;span style="color:#666">&amp;amp;&amp;amp;&lt;/span> prev.set {
+increases&lt;span style="color:#666">++&lt;/span>
+}
+prev.set = &lt;span style="color:#008000;font-weight:bold">true&lt;/span>
+prev.val = val
+}
+&lt;span style="color:#008000;font-weight:bold">return&lt;/span> increases, &lt;span style="color:#008000;font-weight:bold">nil&lt;/span>
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>This is a bit more complicated, but let&amp;rsquo;s see what this gives us:&lt;/p>
+&lt;pre tabindex="0">&lt;code>$ benchstat v1.txt v2.txt
+name old time/op new time/op delta
+Answer-6 325ns ± 1% 168ns ± 2% -48.25% (p=0.008 n=5+5)
+&lt;/code>&lt;/pre>&lt;p>A 48% decrease in execution time — looks like we&amp;rsquo;re off to a good start! What&amp;rsquo;s next?&lt;/p>
+&lt;img width="100%" src="./v2.cpu.png"/>
+&lt;p>Seems like &lt;a href="https://pkg.go.dev/strconv#ParseInt">&lt;code>strconv.ParseInt()&lt;/code>&lt;/a> has become our new bottleneck.&lt;/p>
+&lt;h2 id="v3-optimize-strconvparseint-link-to-codehttpsgithubcomfelixgeadvent-2021commit78820f44c1160004861561136ba690aa36221988diff-0dea3b3585a0c5d048021351232f67a48fde5bce91b1aabedd3d12f49d9191af">v3: Optimize strconv.ParseInt() (&lt;a href="https://github.com/felixge/advent-2021/commit/78820f44c1160004861561136ba690aa36221988#diff-0dea3b3585a0c5d048021351232f67a48fde5bce91b1aabedd3d12f49d9191af">link to code&lt;/a>)&lt;/h2>
+&lt;p>Even though the elves are not stating it explicitly, they are only giving us positive integers. So we could apply the same trick as before and call &lt;a href="https://pkg.go.dev/strconv#ParseUint">&lt;code>strconv.ParseUint()&lt;/code>&lt;/a> directly instead of going through &lt;a href="https://pkg.go.dev/strconv#ParseInt">&lt;code>strconv.ParseInt()&lt;/code>&lt;/a>.&lt;/p>
+&lt;p>However, looking at the &lt;a href="https://cs.opensource.google/go/go/+/refs/tags/go1.17.3:src/strconv/atoi.go;l=62">implementation of ParseUint&lt;/a> it&amp;rsquo;s clear that it is doing a bunch of stuff to support different bases and bit sizes. We don&amp;rsquo;t need any of this, so let&amp;rsquo;s just implement the subset we actually need:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#008000;font-weight:bold">func&lt;/span> &lt;span style="color:#00f">parseInt&lt;/span>(val &lt;span style="color:#b00040">string&lt;/span>) (&lt;span style="color:#b00040">int64&lt;/span>, &lt;span style="color:#b00040">error&lt;/span>) {
+&lt;span style="color:#008000;font-weight:bold">var&lt;/span> intVal &lt;span style="color:#b00040">int64&lt;/span>
+factor &lt;span style="color:#666">:=&lt;/span> &lt;span style="color:#008000">int64&lt;/span>(&lt;span style="color:#666">1&lt;/span>)
+&lt;span style="color:#008000;font-weight:bold">for&lt;/span> i &lt;span style="color:#666">:=&lt;/span> &lt;span style="color:#008000">len&lt;/span>(val) &lt;span style="color:#666">-&lt;/span> &lt;span style="color:#666">1&lt;/span>; i &lt;span style="color:#666">&amp;gt;=&lt;/span> &lt;span style="color:#666">0&lt;/span>; i&lt;span style="color:#666">--&lt;/span> {
+c &lt;span style="color:#666">:=&lt;/span> val[i]
+&lt;span style="color:#008000;font-weight:bold">if&lt;/span> c &lt;span style="color:#666">&amp;gt;=&lt;/span> &lt;span style="color:#ba2121">&amp;#39;0&amp;#39;&lt;/span> &lt;span style="color:#666">&amp;amp;&amp;amp;&lt;/span> c &lt;span style="color:#666">&amp;lt;=&lt;/span> &lt;span style="color:#ba2121">&amp;#39;9&amp;#39;&lt;/span> {
+intVal &lt;span style="color:#666">+=&lt;/span> &lt;span style="color:#008000">int64&lt;/span>(c&lt;span style="color:#666">-&lt;/span>&lt;span style="color:#ba2121">&amp;#39;0&amp;#39;&lt;/span>) &lt;span style="color:#666">*&lt;/span> factor
+} &lt;span style="color:#008000;font-weight:bold">else&lt;/span> {
+&lt;span style="color:#008000;font-weight:bold">return&lt;/span> intVal, fmt.&lt;span style="color:#00f">Errorf&lt;/span>(&lt;span style="color:#ba2121">&amp;#34;bad int: %q&amp;#34;&lt;/span>, val)
+}
+factor &lt;span style="color:#666">*=&lt;/span> &lt;span style="color:#666">10&lt;/span>
+}
+&lt;span style="color:#008000;font-weight:bold">return&lt;/span> intVal, &lt;span style="color:#008000;font-weight:bold">nil&lt;/span>
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Let&amp;rsquo;s see if it was worth it:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-txt" data-lang="txt">$ benchstat v2.txt v3.txt
+name old time/op new time/op delta
+Answer-6 168ns ± 2% 92ns ± 3% -45.29% (p=0.016 n=5+4)
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Another 45% — we might be reaching Christmas Scale™️ here after all.&lt;/p>
+&lt;p>Can we do even better?&lt;/p>
+&lt;img width="100%" src="./v3.cpu.png"/>
+&lt;p>The FlameGraph above doesn&amp;rsquo;t give us any obvious clues for what to try next. But we can dig deeper. For example let&amp;rsquo;s take a look a look &lt;code>View -&amp;gt; Source&lt;/code>:&lt;/p>
+&lt;img width="100%" src="./v3.source.png"/>
+&lt;p>As you can see we&amp;rsquo;re spending quite a bit of time on the sub-slice operation on line &lt;code>41&lt;/code>. Is this our next clue?&lt;/p>
+&lt;h2 id="v4-the-nerd-snipe">v4: The Nerd Snipe&lt;/h2>
+&lt;p>The elves are informing me that the current solution over 3x faster than v1 — which is good enough for now:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-txt" data-lang="txt">$ benchstat v1.txt v3.txt
+name old time/op new time/op delta
+Answer-6 325ns ± 1% 92ns ± 3% -71.68% (p=0.016 n=5+4)
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>However they are willing to offer a special &lt;strong>Go Profiling Star&lt;/strong> to anybody who manages to further improve upon v3. This is where you can come in. Just send me a link to your v4 solution in &lt;a href="https://twitter.com/felixge/status/1466128436355899395">this twitter thread&lt;/a> including your &lt;code>benchstats v3.txt v4.txt&lt;/code> output and I will link to it from here.&lt;/p>
+&lt;ol>
+&lt;li>&lt;a href="https://twitter.com/val_deleplace">Valentin Deleplace&lt;/a>&amp;rsquo;s &lt;a href="https://twitter.com/val_deleplace/status/1466442802330488838">solution&lt;/a> with a &lt;code>-87%&lt;/code> delta against v3&lt;/li>
+&lt;li>&lt;a href="https://twitter.com/garethlewin">Gareth Lewin&lt;/a>&amp;rsquo;s &lt;a href="https://twitter.com/garethlewin/status/1466324256287977474">solution&lt;/a> with a &lt;code>-83%&lt;/code> delta against v3&lt;/li>
+&lt;li>&lt;a href="https://twitter.com/PLeitzler">Pontus Leitzler&lt;/a>&amp;rsquo;s &lt;a href="https://twitter.com/PLeitzler/status/1466182715141730311">solution&lt;/a> with a &lt;code>-74%&lt;/code> delta against v3&lt;/li>
+&lt;li>&lt;a href="https://twitter.com/Fugiman">@Fugiman&lt;/a>&amp;rsquo;s &lt;a href="https://twitter.com/felixge/status/1466145367527993345">solution&lt;/a> with a &lt;code>-50%&lt;/code> delta against v3&lt;/li>
+&lt;/ol>
+&lt;p>&lt;strong>Note:&lt;/strong> The perf delta results above are self-reported. In my own testing Valentin&amp;rsquo;s solution achieves a spectacular &lt;code>14 ns/op&lt;/code> and has &lt;code>-52%&lt;/code> delta against Gareth&amp;rsquo;s solution.&lt;/p>
+&lt;p>That&amp;rsquo;s it for today. I&amp;rsquo;ll definitely only find time for doing a few of these posts, but I&amp;rsquo;ll try to keep them coming.&lt;/p></description></item><item><title>CSV Boilerplate for Go</title><link>https://felixge.de/2020/09/27/csv-boilerplate-for-go/</link><pubDate>Sun, 27 Sep 2020 00:00:00 +0000</pubDate><guid>https://felixge.de/2020/09/27/csv-boilerplate-for-go/</guid><description>&lt;p>&lt;strong>tl;dr:&lt;/strong> Here is &lt;a href="https://github.com/felixge/dump/blob/master/csv-boilerplate/main.go">my boilerplate&lt;/a> for reading and writing CSV files in Go. I hope you&amp;rsquo;ll find it useful.&lt;/p>
+&lt;p>Every once in a while, I have to read and/or write CSV files in Go. In theory that&amp;rsquo;s easy. One just has to include &lt;a href="https://golang.org/pkg/encoding/csv/">encoding/csv&lt;/a> from the standard library, and write a bit of boilerplate to map between a Go struct and the CSV records.&lt;/p>
+&lt;p>However, the resulting code has often left me unsatisifed for a variety of reasons:&lt;/p>
+&lt;ol>
+&lt;li>I spend too much time reinventing the wheel, playing around with different ways to structure the code.&lt;/li>
+&lt;li>The code is annoying to maintain, e.g. changing the output column order often requires modifications in at least 4 places: the struct definition, header writing, record writing, and record reading.&lt;/li>
+&lt;li>The result is not very robust when it comes to bad CSV input and doesn&amp;rsquo;t handle problems such as missing, unexpected, or misordered columns or headers.&lt;/li>
+&lt;li>Error messages often end up missing important information such as row number, column name, etc..&lt;/li>
+&lt;li>How do I write good tests for this that will be easy to maintain in the future?&lt;/li>
+&lt;/ol>
+&lt;p>One way to deal with this is to use a high level library, and you should certainly consider that. But the reality is often an ugly mess. You might find that the library of your choice doesn&amp;rsquo;t handle a particular edge case, e.g. more than one header row being present (my bank loves putting in 6 header lines). Or the error messages you&amp;rsquo;re getting are not helpful enough for your users. Or the error handling is too strict. Or the reflection based mapping is too magic. Or the performance sucks. I could go on and on, but you get the point - dealing with CSV is nasty and calling it a format is a bit of an insult to the idea of a format. From my point of view, writing a library for this problem is simply not possible without creating a horribly overengineered mess or ignoring many edge cases.&lt;/p>
+&lt;p>So in the end it seems like you have to chose between two suboptimal options. You can try out a bunch of libraries and use and/or fork the one closest to your needs. Or you can roll your own boilerplate for the millionth time, only to look back at it with horrible disgust shortly after.&lt;/p>
+&lt;p>Your choice should probably depend on the craziness of your input, and I won&amp;rsquo;t be able to make it for you. But I&amp;rsquo;ve decided that I want to make the boilerplate route a bit less annoying for myself in the future. To accomplish this I&amp;rsquo;ve created a &lt;a href="https://github.com/felixge/dump/blob/master/csv-boilerplate/main.go">boilerplate template&lt;/a> that I&amp;rsquo;ll copy and paste for my future needs, adjusting it as needed. For the rest of the blog post I want to walk you through my thought process in designing it.&lt;/p>
+&lt;p>To begin, I decided to use real world CSV as my example, containing bits of the typical ugliness one has to deal with. I quickly &lt;a href="https://perso.telecom-paristech.fr/eagan/class/igr204/datasets">found&lt;/a> a file called &lt;a href="https://github.com/felixge/dump/blob/master/csv-boilerplate/cars.csv">cars.csv&lt;/a> which looks like this:&lt;/p>
+&lt;pre tabindex="0">&lt;code class="language-csv" data-lang="csv">Car;MPG;Cylinders;Displacement;Horsepower;Weight;Acceleration;Model;Origin
+STRING;DOUBLE;INT;DOUBLE;DOUBLE;DOUBLE;DOUBLE;INT;CAT
+Chevrolet Chevelle Malibu;18.0;8;307.0;130.0;3504.;12.0;70;US
+Buick Skylark 320;15.0;8;350.0;165.0;3693.;11.5;70;US
+Plymouth Satellite;18.0;8;318.0;150.0;3436.;11.0;70;US
+...
+&lt;/code>&lt;/pre>&lt;p>As you can see, there are already two ugly bits to be examined here: semicolons instead of commas as a separator, and a second header line that seems to contain type information for whatever reason. Not great, not terrible, but pretty typical for what&amp;rsquo;s out there.&lt;/p>
+&lt;p>The goals for my boilerplate is to read and write the file format in a way that solves the five problems outlined in the beginning. It should do so without an excessive amount of abstraction, and certainly no reflection, yet as elegantly as possible. There should also be an intermediate Go struct to hold the data in memory as shown below.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#008000;font-weight:bold">type&lt;/span> Car &lt;span style="color:#008000;font-weight:bold">struct&lt;/span> {
+Car &lt;span style="color:#b00040">string&lt;/span>
+MPG &lt;span style="color:#b00040">float64&lt;/span>
+Cylinders &lt;span style="color:#b00040">int64&lt;/span>
+Displacement &lt;span style="color:#b00040">float64&lt;/span>
+Horsepower &lt;span style="color:#b00040">float64&lt;/span>
+Weight &lt;span style="color:#b00040">float64&lt;/span>
+Acceleration &lt;span style="color:#b00040">float64&lt;/span>
+Model &lt;span style="color:#b00040">int64&lt;/span>
+Origin &lt;span style="color:#b00040">string&lt;/span>
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Usually my first naive attempt is to write some code that defines the headers and struct mapping in a way that is separate from the CSV encoding/decoding itself. Here&amp;rsquo;s an example:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#008000;font-weight:bold">var&lt;/span> carHeaders = []&lt;span style="color:#b00040">string&lt;/span>{
+&lt;span style="color:#ba2121">&amp;#34;Car&amp;#34;&lt;/span>,
+&lt;span style="color:#ba2121">&amp;#34;MPG&amp;#34;&lt;/span>,
+&lt;span style="color:#ba2121">&amp;#34;Cylinders&amp;#34;&lt;/span>,
+&lt;span style="color:#408080;font-style:italic">// remaining columns ...
+&lt;/span>&lt;span style="color:#408080;font-style:italic">&lt;/span>}
+&lt;span style="color:#008000;font-weight:bold">func&lt;/span> (c &lt;span style="color:#666">*&lt;/span>Car) &lt;span style="color:#00f">UnmarshalRecord&lt;/span>(record []&lt;span style="color:#b00040">string&lt;/span>) &lt;span style="color:#b00040">error&lt;/span> {
+&lt;span style="color:#008000;font-weight:bold">if&lt;/span> got, want &lt;span style="color:#666">:=&lt;/span> &lt;span style="color:#008000">len&lt;/span>(record), &lt;span style="color:#008000">len&lt;/span>(carHeaders); got &lt;span style="color:#666">!=&lt;/span> want {
+&lt;span style="color:#008000;font-weight:bold">return&lt;/span> fmt.&lt;span style="color:#00f">Errorf&lt;/span>(&lt;span style="color:#ba2121">&amp;#34;bad column number: got=%d want=%d&amp;#34;&lt;/span>, got, want)
+}
+c.Car = record[&lt;span style="color:#666">0&lt;/span>]
+&lt;span style="color:#008000;font-weight:bold">if&lt;/span> c.MPG, err = strconv.&lt;span style="color:#00f">ParseFloat&lt;/span>(record[&lt;span style="color:#666">1&lt;/span>], &lt;span style="color:#666">64&lt;/span>); err &lt;span style="color:#666">!=&lt;/span> &lt;span style="color:#008000;font-weight:bold">nil&lt;/span> {
+&lt;span style="color:#008000;font-weight:bold">return&lt;/span> fmt.&lt;span style="color:#00f">Errorf&lt;/span>(&lt;span style="color:#ba2121">&amp;#34;column=%q: %w&amp;#34;&lt;/span>, carHeaders[&lt;span style="color:#666">1&lt;/span>], err)
+} &lt;span style="color:#008000;font-weight:bold">else&lt;/span> &lt;span style="color:#008000;font-weight:bold">if&lt;/span> c.Cylinders, err = strconv.&lt;span style="color:#00f">ParseInt&lt;/span>(record[&lt;span style="color:#666">2&lt;/span>], &lt;span style="color:#666">10&lt;/span>, &lt;span style="color:#666">64&lt;/span>); err &lt;span style="color:#666">!=&lt;/span> &lt;span style="color:#008000;font-weight:bold">nil&lt;/span> {
+&lt;span style="color:#008000;font-weight:bold">return&lt;/span> fmt.&lt;span style="color:#00f">Errorf&lt;/span>(&lt;span style="color:#ba2121">&amp;#34;column=%q: %w&amp;#34;&lt;/span>, carHeaders[&lt;span style="color:#666">2&lt;/span>], err)
+}
+&lt;span style="color:#408080;font-style:italic">// remaining columns ...
+&lt;/span>&lt;span style="color:#408080;font-style:italic">&lt;/span> &lt;span style="color:#008000;font-weight:bold">return&lt;/span> &lt;span style="color:#008000;font-weight:bold">nil&lt;/span>
+}
+&lt;span style="color:#008000;font-weight:bold">func&lt;/span> (c &lt;span style="color:#666">*&lt;/span>Car) &lt;span style="color:#00f">MarshalRecord&lt;/span>() ([]&lt;span style="color:#b00040">string&lt;/span>, &lt;span style="color:#b00040">error&lt;/span>) {
+&lt;span style="color:#008000;font-weight:bold">return&lt;/span> []&lt;span style="color:#b00040">string&lt;/span>{
+c.Car,
+fmt.&lt;span style="color:#00f">Sprintf&lt;/span>(&lt;span style="color:#ba2121">&amp;#34;%f&amp;#34;&lt;/span>, c.MPG),
+fmt.&lt;span style="color:#00f">Sprintf&lt;/span>(&lt;span style="color:#ba2121">&amp;#34;%d&amp;#34;&lt;/span>, c.Cylinders),
+&lt;span style="color:#408080;font-style:italic">// remaining columns ...
+&lt;/span>&lt;span style="color:#408080;font-style:italic">&lt;/span> }, &lt;span style="color:#008000;font-weight:bold">nil&lt;/span>
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>This works, but adding, removing, or reordering any of the columns requires us to modify our code in 4 to 5 different places, and as I mentioned in the beginning, we want to avoid that. So let&amp;rsquo;s try some abstraction that allows us to declaratively specify our columns and how to marshal/unmarshal them:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#008000;font-weight:bold">type&lt;/span> carColumn &lt;span style="color:#008000;font-weight:bold">struct&lt;/span> {
+Name &lt;span style="color:#b00040">string&lt;/span>
+Type &lt;span style="color:#b00040">string&lt;/span>
+UnmarshalValue &lt;span style="color:#008000;font-weight:bold">func&lt;/span>(&lt;span style="color:#666">*&lt;/span>Car, &lt;span style="color:#b00040">string&lt;/span>) &lt;span style="color:#b00040">error&lt;/span>
+MarshalValue &lt;span style="color:#008000;font-weight:bold">func&lt;/span>(&lt;span style="color:#666">*&lt;/span>Car) (&lt;span style="color:#b00040">string&lt;/span>, &lt;span style="color:#b00040">error&lt;/span>)
+}
+&lt;span style="color:#008000;font-weight:bold">var&lt;/span> carColumns = []carColumn{
+{
+&lt;span style="color:#ba2121">&amp;#34;Car&amp;#34;&lt;/span>,
+&lt;span style="color:#ba2121">&amp;#34;STRING&amp;#34;&lt;/span>,
+&lt;span style="color:#008000;font-weight:bold">func&lt;/span>(c &lt;span style="color:#666">*&lt;/span>Car, val &lt;span style="color:#b00040">string&lt;/span>) &lt;span style="color:#b00040">error&lt;/span> {
+c.Car = val
+&lt;span style="color:#008000;font-weight:bold">return&lt;/span> &lt;span style="color:#008000;font-weight:bold">nil&lt;/span>
+},
+&lt;span style="color:#008000;font-weight:bold">func&lt;/span>(c &lt;span style="color:#666">*&lt;/span>Car) (&lt;span style="color:#b00040">string&lt;/span>, &lt;span style="color:#b00040">error&lt;/span>) {
+&lt;span style="color:#008000;font-weight:bold">return&lt;/span> c.Car, &lt;span style="color:#008000;font-weight:bold">nil&lt;/span>
+},
+},
+{
+&lt;span style="color:#ba2121">&amp;#34;MPG&amp;#34;&lt;/span>,
+&lt;span style="color:#ba2121">&amp;#34;DOUBLE&amp;#34;&lt;/span>,
+&lt;span style="color:#008000;font-weight:bold">func&lt;/span>(c &lt;span style="color:#666">*&lt;/span>Car, val &lt;span style="color:#b00040">string&lt;/span>) (err &lt;span style="color:#b00040">error&lt;/span>) {
+c.MPG, err = strconv.&lt;span style="color:#00f">ParseFloat&lt;/span>(val, &lt;span style="color:#666">64&lt;/span>)
+&lt;span style="color:#008000;font-weight:bold">return&lt;/span>
+},
+&lt;span style="color:#008000;font-weight:bold">func&lt;/span>(c &lt;span style="color:#666">*&lt;/span>Car) (&lt;span style="color:#b00040">string&lt;/span>, &lt;span style="color:#b00040">error&lt;/span>) {
+&lt;span style="color:#008000;font-weight:bold">return&lt;/span> fmt.&lt;span style="color:#00f">Sprintf&lt;/span>(&lt;span style="color:#ba2121">&amp;#34;%f&amp;#34;&lt;/span>, c.MPG), &lt;span style="color:#008000;font-weight:bold">nil&lt;/span>
+},
+},
+{
+&lt;span style="color:#ba2121">&amp;#34;Cylinders&amp;#34;&lt;/span>,
+&lt;span style="color:#ba2121">&amp;#34;INT&amp;#34;&lt;/span>,
+&lt;span style="color:#008000;font-weight:bold">func&lt;/span>(c &lt;span style="color:#666">*&lt;/span>Car, val &lt;span style="color:#b00040">string&lt;/span>) (err &lt;span style="color:#b00040">error&lt;/span>) {
+c.Cylinders, err = strconv.&lt;span style="color:#00f">ParseInt&lt;/span>(val, &lt;span style="color:#666">10&lt;/span>, &lt;span style="color:#666">64&lt;/span>)
+&lt;span style="color:#008000;font-weight:bold">return&lt;/span>
+},
+&lt;span style="color:#008000;font-weight:bold">func&lt;/span>(c &lt;span style="color:#666">*&lt;/span>Car) (&lt;span style="color:#b00040">string&lt;/span>, &lt;span style="color:#b00040">error&lt;/span>) {
+&lt;span style="color:#008000;font-weight:bold">return&lt;/span> fmt.&lt;span style="color:#00f">Sprintf&lt;/span>(&lt;span style="color:#ba2121">&amp;#34;%d&amp;#34;&lt;/span>, c.Cylinders), &lt;span style="color:#008000;font-weight:bold">nil&lt;/span>
+},
+},
+&lt;span style="color:#408080;font-style:italic">// remaining columns ...
+&lt;/span>&lt;span style="color:#408080;font-style:italic">&lt;/span>}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>This is of course a bit verbose, but it solves our problem. Reordering our columns is now a single cut &amp;amp; paste operation, and adding or removing a column has gotten a lot easier as well. This approach even gives us a convenient way to put the &lt;code>Type&lt;/code> information found in the second line of the CSV file, so we can easily duplicate this quirk when writing our own CSV files later on.&lt;/p>
+&lt;p>We still need to update our &lt;code>UnmarshalRecord&lt;/code> and &lt;code>MarshalRecord&lt;/code> from earlier. The good news is that we&amp;rsquo;re unlikely to ever have to modify this code again:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#008000;font-weight:bold">func&lt;/span> (c &lt;span style="color:#666">*&lt;/span>Car) &lt;span style="color:#00f">UnmarshalRecord&lt;/span>(record []&lt;span style="color:#b00040">string&lt;/span>) &lt;span style="color:#b00040">error&lt;/span> {
+&lt;span style="color:#008000;font-weight:bold">if&lt;/span> got, want &lt;span style="color:#666">:=&lt;/span> &lt;span style="color:#008000">len&lt;/span>(record), &lt;span style="color:#008000">len&lt;/span>(carColumns); got &lt;span style="color:#666">!=&lt;/span> want {
+&lt;span style="color:#008000;font-weight:bold">return&lt;/span> fmt.&lt;span style="color:#00f">Errorf&lt;/span>(&lt;span style="color:#ba2121">&amp;#34;bad number of columns: got=%d want=%d&amp;#34;&lt;/span>, got, want)
+}
+&lt;span style="color:#008000;font-weight:bold">for&lt;/span> i, col &lt;span style="color:#666">:=&lt;/span> &lt;span style="color:#008000;font-weight:bold">range&lt;/span> carColumns {
+&lt;span style="color:#008000;font-weight:bold">if&lt;/span> err &lt;span style="color:#666">:=&lt;/span> col.&lt;span style="color:#00f">UnmarshalValue&lt;/span>(c, record[i]); err &lt;span style="color:#666">!=&lt;/span> &lt;span style="color:#008000;font-weight:bold">nil&lt;/span> {
+&lt;span style="color:#008000;font-weight:bold">return&lt;/span> fmt.&lt;span style="color:#00f">Errorf&lt;/span>(&lt;span style="color:#ba2121">&amp;#34;column=%q: %w&amp;#34;&lt;/span>, col.Name, err)
+}
+}
+&lt;span style="color:#008000;font-weight:bold">return&lt;/span> &lt;span style="color:#008000;font-weight:bold">nil&lt;/span>
+}
+&lt;span style="color:#008000;font-weight:bold">func&lt;/span> (c &lt;span style="color:#666">*&lt;/span>Car) &lt;span style="color:#00f">MarshalRecord&lt;/span>() ([]&lt;span style="color:#b00040">string&lt;/span>, &lt;span style="color:#b00040">error&lt;/span>) {
+record &lt;span style="color:#666">:=&lt;/span> &lt;span style="color:#008000">make&lt;/span>([]&lt;span style="color:#b00040">string&lt;/span>, &lt;span style="color:#008000">len&lt;/span>(carColumns))
+&lt;span style="color:#008000;font-weight:bold">for&lt;/span> i, col &lt;span style="color:#666">:=&lt;/span> &lt;span style="color:#008000;font-weight:bold">range&lt;/span> carColumns {
+val, err &lt;span style="color:#666">:=&lt;/span> col.&lt;span style="color:#00f">MarshalValue&lt;/span>(c)
+&lt;span style="color:#008000;font-weight:bold">if&lt;/span> err &lt;span style="color:#666">!=&lt;/span> &lt;span style="color:#008000;font-weight:bold">nil&lt;/span> {
+&lt;span style="color:#008000;font-weight:bold">return&lt;/span> &lt;span style="color:#008000;font-weight:bold">nil&lt;/span>, err
+}
+record[i] = val
+}
+&lt;span style="color:#008000;font-weight:bold">return&lt;/span> record, &lt;span style="color:#008000;font-weight:bold">nil&lt;/span>
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Now it&amp;rsquo;s time to implement the CSV decoding itself. My boilerplate implements this via the &lt;code>ReadCarsCSV&lt;/code> function that can be seen below.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#008000;font-weight:bold">const&lt;/span> carComma = &lt;span style="color:#ba2121">&amp;#39;;&amp;#39;&lt;/span>
+&lt;span style="color:#008000;font-weight:bold">func&lt;/span> &lt;span style="color:#00f">ReadCarsCSV&lt;/span>(r io.Reader) ([]&lt;span style="color:#666">*&lt;/span>Car, &lt;span style="color:#b00040">error&lt;/span>) {
+cr &lt;span style="color:#666">:=&lt;/span> csv.&lt;span style="color:#00f">NewReader&lt;/span>(r)
+cr.Comma = carComma
+records, err &lt;span style="color:#666">:=&lt;/span> cr.&lt;span style="color:#00f">ReadAll&lt;/span>()
+&lt;span style="color:#008000;font-weight:bold">if&lt;/span> err &lt;span style="color:#666">!=&lt;/span> &lt;span style="color:#008000;font-weight:bold">nil&lt;/span> {
+&lt;span style="color:#008000;font-weight:bold">return&lt;/span> &lt;span style="color:#008000;font-weight:bold">nil&lt;/span>, err
+}
+cars &lt;span style="color:#666">:=&lt;/span> &lt;span style="color:#008000">make&lt;/span>([]&lt;span style="color:#666">*&lt;/span>Car, &lt;span style="color:#666">0&lt;/span>, &lt;span style="color:#008000">len&lt;/span>(records))
+&lt;span style="color:#008000;font-weight:bold">for&lt;/span> i, record &lt;span style="color:#666">:=&lt;/span> &lt;span style="color:#008000;font-weight:bold">range&lt;/span> records {
+&lt;span style="color:#008000;font-weight:bold">if&lt;/span> got, want &lt;span style="color:#666">:=&lt;/span> &lt;span style="color:#008000">len&lt;/span>(record), &lt;span style="color:#008000">len&lt;/span>(carColumns); got &lt;span style="color:#666">!=&lt;/span> want {
+&lt;span style="color:#008000;font-weight:bold">return&lt;/span> &lt;span style="color:#008000;font-weight:bold">nil&lt;/span>, fmt.&lt;span style="color:#00f">Errorf&lt;/span>(&lt;span style="color:#ba2121">&amp;#34;row=%d: bad number of columns: got=%d want=%d&amp;#34;&lt;/span>, i&lt;span style="color:#666">+&lt;/span>&lt;span style="color:#666">1&lt;/span>, got, want)
+}
+&lt;span style="color:#008000;font-weight:bold">switch&lt;/span> i {
+&lt;span style="color:#008000;font-weight:bold">case&lt;/span> &lt;span style="color:#666">0&lt;/span>:
+&lt;span style="color:#008000;font-weight:bold">for&lt;/span> i, got &lt;span style="color:#666">:=&lt;/span> &lt;span style="color:#008000;font-weight:bold">range&lt;/span> record {
+&lt;span style="color:#008000;font-weight:bold">if&lt;/span> want &lt;span style="color:#666">:=&lt;/span> carColumns[i].Name; got &lt;span style="color:#666">!=&lt;/span> want {
+&lt;span style="color:#008000;font-weight:bold">return&lt;/span> &lt;span style="color:#008000;font-weight:bold">nil&lt;/span>, fmt.&lt;span style="color:#00f">Errorf&lt;/span>(&lt;span style="color:#ba2121">&amp;#34;unexpected header column %d: got=%q want=%q&amp;#34;&lt;/span>, i, got, want)
+}
+}
+&lt;span style="color:#008000;font-weight:bold">case&lt;/span> &lt;span style="color:#666">1&lt;/span>:
+&lt;span style="color:#008000;font-weight:bold">for&lt;/span> i, got &lt;span style="color:#666">:=&lt;/span> &lt;span style="color:#008000;font-weight:bold">range&lt;/span> record {
+&lt;span style="color:#008000;font-weight:bold">if&lt;/span> want &lt;span style="color:#666">:=&lt;/span> carColumns[i].Type; got &lt;span style="color:#666">!=&lt;/span> want {
+&lt;span style="color:#008000;font-weight:bold">return&lt;/span> &lt;span style="color:#008000;font-weight:bold">nil&lt;/span>, fmt.&lt;span style="color:#00f">Errorf&lt;/span>(&lt;span style="color:#ba2121">&amp;#34;unexpected type column %d: got=%q want=%q&amp;#34;&lt;/span>, i, got, want)
+}
+}
+&lt;span style="color:#008000;font-weight:bold">default&lt;/span>:
+car &lt;span style="color:#666">:=&lt;/span> &lt;span style="color:#666">&amp;amp;&lt;/span>Car{}
+&lt;span style="color:#008000;font-weight:bold">if&lt;/span> err &lt;span style="color:#666">:=&lt;/span> car.&lt;span style="color:#00f">UnmarshalRecord&lt;/span>(record); err &lt;span style="color:#666">!=&lt;/span> &lt;span style="color:#008000;font-weight:bold">nil&lt;/span> {
+&lt;span style="color:#008000;font-weight:bold">return&lt;/span> &lt;span style="color:#008000;font-weight:bold">nil&lt;/span>, fmt.&lt;span style="color:#00f">Errorf&lt;/span>(&lt;span style="color:#ba2121">&amp;#34;row=%d: %w&amp;#34;&lt;/span>, i&lt;span style="color:#666">+&lt;/span>&lt;span style="color:#666">1&lt;/span>, err)
+}
+cars = &lt;span style="color:#008000">append&lt;/span>(cars, car)
+}
+}
+&lt;span style="color:#008000;font-weight:bold">return&lt;/span> cars, &lt;span style="color:#008000;font-weight:bold">nil&lt;/span>
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>The code above accomplishes the main task of returning all cars read from the given &lt;code>io.Reader&lt;/code>, but it also validates the number of columns, as well as the header and type names found in the first two rows. Error messages should also be good, including both the row number as well the the offending column name in case something goes wrong for one of the records.&lt;/p>
+&lt;p>It should also be easy to modify. For example if you want to ignore the second header line during reading, just remove the code. Or instead of requiring all headers to have a fixed position, you could dynamically discover their position from the input by matching their names against the names in the &lt;code>carColumns&lt;/code> slice and then reorder the elements in the record accordingly.&lt;/p>
+&lt;p>Or you might decide you need a streaming interface to lower memory usage and GC pressure like this:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#008000;font-weight:bold">type&lt;/span> CarReader &lt;span style="color:#008000;font-weight:bold">struct&lt;/span> {
+r io.Reader
+&lt;span style="color:#408080;font-style:italic">// ...
+&lt;/span>&lt;span style="color:#408080;font-style:italic">&lt;/span>}
+&lt;span style="color:#008000;font-weight:bold">func&lt;/span> (r &lt;span style="color:#666">*&lt;/span>CarReader) &lt;span style="color:#00f">Read&lt;/span>(c &lt;span style="color:#666">*&lt;/span>Car) &lt;span style="color:#b00040">error&lt;/span> {
+&lt;span style="color:#408080;font-style:italic">// ...
+&lt;/span>&lt;span style="color:#408080;font-style:italic">&lt;/span>}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>The possibilities are endless, and you won&amp;rsquo;t find yourself backed into a corner by the choice of your library.&lt;/p>
+&lt;p>Next up is converting our data back to CSV. My solution to that looks like this:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#008000;font-weight:bold">func&lt;/span> &lt;span style="color:#00f">WriteCarsCSV&lt;/span>(w io.Writer, cars []&lt;span style="color:#666">*&lt;/span>Car) &lt;span style="color:#b00040">error&lt;/span> {
+cw &lt;span style="color:#666">:=&lt;/span> csv.&lt;span style="color:#00f">NewWriter&lt;/span>(w)
+cw.Comma = carComma
+header &lt;span style="color:#666">:=&lt;/span> &lt;span style="color:#008000">make&lt;/span>([]&lt;span style="color:#b00040">string&lt;/span>, &lt;span style="color:#008000">len&lt;/span>(carColumns))
+types &lt;span style="color:#666">:=&lt;/span> &lt;span style="color:#008000">make&lt;/span>([]&lt;span style="color:#b00040">string&lt;/span>, &lt;span style="color:#008000">len&lt;/span>(carColumns))
+&lt;span style="color:#008000;font-weight:bold">for&lt;/span> i, col &lt;span style="color:#666">:=&lt;/span> &lt;span style="color:#008000;font-weight:bold">range&lt;/span> carColumns {
+header[i] = col.Name
+types[i] = col.Type
+}
+cw.&lt;span style="color:#00f">Write&lt;/span>(header)
+cw.&lt;span style="color:#00f">Write&lt;/span>(types)
+&lt;span style="color:#008000;font-weight:bold">for&lt;/span> _, car &lt;span style="color:#666">:=&lt;/span> &lt;span style="color:#008000;font-weight:bold">range&lt;/span> cars {
+record, err &lt;span style="color:#666">:=&lt;/span> car.&lt;span style="color:#00f">MarshalRecord&lt;/span>()
+&lt;span style="color:#008000;font-weight:bold">if&lt;/span> err &lt;span style="color:#666">!=&lt;/span> &lt;span style="color:#008000;font-weight:bold">nil&lt;/span> {
+&lt;span style="color:#008000;font-weight:bold">return&lt;/span> err
+}
+cw.&lt;span style="color:#00f">Write&lt;/span>(record)
+}
+cw.&lt;span style="color:#00f">Flush&lt;/span>()
+&lt;span style="color:#008000;font-weight:bold">return&lt;/span> cw.&lt;span style="color:#00f">Error&lt;/span>()
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>As you can see, we take care of writing out the quirky second header line. We also save some code by not checking the errors for every &lt;code>cw.Write()&lt;/code> call and handle them by returning &lt;code>cw.Error()&lt;/code> at the end instead.&lt;/p>
+&lt;p>Now we should think about testing. I&amp;rsquo;m a big fan of the &lt;a href="https://en.wikipedia.org/wiki/Pareto_principle">80/20 rule&lt;/a> when it comes to testing, so below is a test that covers the happy path very efficiently.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#008000;font-weight:bold">func&lt;/span> &lt;span style="color:#00f">TestCSVReadWriteCycle&lt;/span>(t &lt;span style="color:#666">*&lt;/span>testing.T) {
+in &lt;span style="color:#666">:=&lt;/span> strings.&lt;span style="color:#00f">TrimSpace&lt;/span>(&lt;span style="color:#ba2121">`
+&lt;/span>&lt;span style="color:#ba2121">Car;MPG;Cylinders;Displacement;Horsepower;Weight;Acceleration;Model;Origin
+&lt;/span>&lt;span style="color:#ba2121">STRING;DOUBLE;INT;DOUBLE;DOUBLE;DOUBLE;DOUBLE;INT;CAT
+&lt;/span>&lt;span style="color:#ba2121">Chevrolet Chevelle Malibu;18.0;8;307.0;130.0;3504.;12.0;70;US
+&lt;/span>&lt;span style="color:#ba2121">Buick Skylark 320;15.0;8;350.0;165.0;3693.;11.5;70;US
+&lt;/span>&lt;span style="color:#ba2121">Plymouth Satellite;18.0;8;318.0;150.0;3436.;11.0;70;US
+&lt;/span>&lt;span style="color:#ba2121">`&lt;/span>)
+wantOut &lt;span style="color:#666">:=&lt;/span> strings.&lt;span style="color:#00f">TrimSpace&lt;/span>(&lt;span style="color:#ba2121">`
+&lt;/span>&lt;span style="color:#ba2121">Car;MPG;Cylinders;Displacement;Horsepower;Weight;Acceleration;Model;Origin
+&lt;/span>&lt;span style="color:#ba2121">STRING;DOUBLE;INT;DOUBLE;DOUBLE;DOUBLE;DOUBLE;INT;CAT
+&lt;/span>&lt;span style="color:#ba2121">Chevrolet Chevelle Malibu;18.000000;8;307.000000;130.000000;3504.000000;12.000000;70;US
+&lt;/span>&lt;span style="color:#ba2121">Buick Skylark 320;15.000000;8;350.000000;165.000000;3693.000000;11.500000;70;US
+&lt;/span>&lt;span style="color:#ba2121">Plymouth Satellite;18.000000;8;318.000000;150.000000;3436.000000;11.000000;70;US
+&lt;/span>&lt;span style="color:#ba2121">`&lt;/span>)
+&lt;span style="color:#008000;font-weight:bold">for&lt;/span> i &lt;span style="color:#666">:=&lt;/span> &lt;span style="color:#666">0&lt;/span>; i &amp;lt; &lt;span style="color:#666">2&lt;/span>; i&lt;span style="color:#666">++&lt;/span> {
+cars, err &lt;span style="color:#666">:=&lt;/span> &lt;span style="color:#00f">ReadCarsCSV&lt;/span>(strings.&lt;span style="color:#00f">NewReader&lt;/span>(in))
+&lt;span style="color:#008000;font-weight:bold">if&lt;/span> err &lt;span style="color:#666">!=&lt;/span> &lt;span style="color:#008000;font-weight:bold">nil&lt;/span> {
+t.&lt;span style="color:#00f">Fatal&lt;/span>(err)
+}
+buf &lt;span style="color:#666">:=&lt;/span> &lt;span style="color:#666">&amp;amp;&lt;/span>bytes.Buffer{}
+&lt;span style="color:#008000;font-weight:bold">if&lt;/span> err &lt;span style="color:#666">:=&lt;/span> &lt;span style="color:#00f">WriteCarsCSV&lt;/span>(buf, cars); err &lt;span style="color:#666">!=&lt;/span> &lt;span style="color:#008000;font-weight:bold">nil&lt;/span> {
+t.&lt;span style="color:#00f">Fatal&lt;/span>(err)
+}
+gotOut &lt;span style="color:#666">:=&lt;/span> strings.&lt;span style="color:#00f">TrimSpace&lt;/span>(buf.&lt;span style="color:#00f">String&lt;/span>())
+&lt;span style="color:#008000;font-weight:bold">if&lt;/span> gotOut &lt;span style="color:#666">!=&lt;/span> wantOut {
+t.&lt;span style="color:#00f">Fatalf&lt;/span>(&lt;span style="color:#ba2121">&amp;#34;\ngot:\n%s\nwant:\n%s&amp;#34;&lt;/span>, gotOut, wantOut)
+}
+in = gotOut
+}
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>The test first reads the provided &lt;code>in&lt;/code> CSV, and makes sure that converting it back to CSV results in &lt;code>wantOut&lt;/code> which is a little different because of the way Go formats our floating point numbers. The test then proceeds to treat the output from the first iteration as the input for the second one. This makes sure that our implementation can read the original format, as well as the slightly different output it produces itself.&lt;/p>
+&lt;p>Of course we could also aim to reproduce the float formatting quirks from the original file. At first glance it seems like all floats are formatted with one digit after the period. However, a closer look reveals that the &lt;code>Weight&lt;/code> column has a period, but skips the following digit, e.g. &lt;code>3504.&lt;/code>. I&amp;rsquo;ve decided to not go down this rabbit hole, but it should be clear that our boilerplate approach puts us in a great position for dealing with CSV quirks like this.&lt;/p>
+&lt;p>Depending on how serious you are about parsing CSVs, you probably also want to test a few error cases and maybe even throw some fuzzing at this. But I&amp;rsquo;ve decided the test above is good enough for my boilerplate, so you&amp;rsquo;ll have to do this part yourself.&lt;/p>
+&lt;p>Ok, that&amp;rsquo;s it. I&amp;rsquo;d love to hear your thoughts, especially if you have ideas for improving it further. Or let me know if you see good alternatives to the idea of copy &amp;amp; pasting a bunch of boilerplate. It&amp;rsquo;s not like I love it, but as far as I can tell it hits a sweet spot for working with Go in this case.&lt;/p>
+&lt;p>&lt;small>Thanks to &lt;a href="https://twitter.com/thorstenball">Thorsten Ball&lt;/a> and &lt;a href="https://twitter.com/tsenart">Tomás Senart&lt;/a> for &lt;a href="https://github.com/felixge/felixge.de/pull/6">reviewing&lt;/a> this post and making many valuable suggestions.&lt;/small>&lt;/p></description></item><item><title>Implementing State Machines in PostgreSQL</title><link>https://felixge.de/2017/07/27/implementing-state-machines-in-postgresql/</link><pubDate>Thu, 27 Jul 2017 00:00:00 +0000</pubDate><guid>https://felixge.de/2017/07/27/implementing-state-machines-in-postgresql/</guid><description>&lt;p>&lt;a href="https://en.wikipedia.org/wiki/Finite-state_machine">Finite-state machine&lt;/a>
+(FSM) is a wonderful model of computation that has many practical
+applications. One of my favorites is turning business logic into simple FSMs.
+For example consider the following requirements for an order management system:&lt;/p>
+&lt;ul>
+&lt;li>Orders must not ship before they are paid.&lt;/li>
+&lt;li>Orders can be canceled, but only if they haven&amp;rsquo;t shipped yet.&lt;/li>
+&lt;li>An order that has already been paid, needs to be refunded after canceling.&lt;/li>
+&lt;/ul>
+&lt;p>Informally, turning such a list of requirements into an FSM is simply the
+process of coming up with: a set of states an order can be in, a set of events,
+a transition function that maps the combination of each state and event to a
+new state, and an initial state.&lt;/p>
+&lt;p>In practice this is usually done by drawing up a directed graph that shows how
+the different states are connected to each other via events:&lt;/p>
+&lt;img src="./orders.svg" alt="Finite-state machine for an order management system in PostgreSQL" />
+&lt;p>Besides guiding our implementation, these graphs can be very useful for
+discussions and analysis. For example you can immediately see how there is no
+way for a customer to return an order after it has shipped. Additionally the
+process of naming the involved states and events automatically creates a
+precise language that can be adopted by all stakeholders.&lt;/p>
+&lt;p>You might have noticed that the graph above does not show all possible
+combinations of all states and all events. The reason is that the missing
+combinations implicitly lead to an error state. The &lt;a href="./orders-full.svg">complete FSM&lt;/a>
+can be shown as a graph as well, but I don&amp;rsquo;t think it&amp;rsquo;s very useful in practice.&lt;/p>
+&lt;p>Anyway, as promised in the title of this article we&amp;rsquo;re going to implement this
+FSM in PostgreSQL. This may not be everybody&amp;rsquo;s cup of tea, but you might like
+how this approach us gives advanced analytical powers as a free by-product.
+Embedding this kind of logic into the database can also help protect against
+race conditions, but this will perhaps be the topic of a future post &lt;sup id="fnref:1">&lt;a href="#fn:1" class="footnote-ref" role="doc-noteref">1&lt;/a>&lt;/sup>.&lt;/p>
+&lt;p>Let&amp;rsquo;s begin by creating an &lt;code>order_events&lt;/code> table which keeps track of all events
+for a given &lt;code>order_id&lt;/code>.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-sql" data-lang="sql">&lt;span style="color:#008000;font-weight:bold">CREATE&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">TABLE&lt;/span>&lt;span style="color:#bbb"> &lt;/span>order_events&lt;span style="color:#bbb"> &lt;/span>(&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>id&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000">serial&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">PRIMARY&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">KEY&lt;/span>,&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>order_id&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000">int&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">NOT&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">NULL&lt;/span>,&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>event&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000">text&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">NOT&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">NULL&lt;/span>,&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>time&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">timestamp&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">DEFAULT&lt;/span>&lt;span style="color:#bbb"> &lt;/span>now()&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">NOT&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">NULL&lt;/span>&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb">&lt;/span>);&lt;span style="color:#bbb">
+&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Next, let&amp;rsquo;s implement the transition function, which is the heart of every
+FSM:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-sql" data-lang="sql">&lt;span style="color:#008000;font-weight:bold">CREATE&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">FUNCTION&lt;/span>&lt;span style="color:#bbb"> &lt;/span>order_events_transition(&lt;span style="color:#008000;font-weight:bold">state&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000">text&lt;/span>,&lt;span style="color:#bbb"> &lt;/span>event&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000">text&lt;/span>)&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">RETURNS&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000">text&lt;/span>&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb">&lt;/span>&lt;span style="color:#008000;font-weight:bold">LANGUAGE&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">sql&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">AS&lt;/span>&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb">&lt;/span>&lt;span style="">$$&lt;/span>&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">SELECT&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">CASE&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">state&lt;/span>&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">WHEN&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;start&amp;#39;&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">THEN&lt;/span>&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">CASE&lt;/span>&lt;span style="color:#bbb"> &lt;/span>event&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">WHEN&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;create&amp;#39;&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">THEN&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;awaiting_payment&amp;#39;&lt;/span>&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">ELSE&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;error&amp;#39;&lt;/span>&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">END&lt;/span>&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">WHEN&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;awaiting_payment&amp;#39;&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">THEN&lt;/span>&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">CASE&lt;/span>&lt;span style="color:#bbb"> &lt;/span>event&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">WHEN&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;pay&amp;#39;&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">THEN&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;awaiting_shipment&amp;#39;&lt;/span>&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">WHEN&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;cancel&amp;#39;&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">THEN&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;canceled&amp;#39;&lt;/span>&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">ELSE&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;error&amp;#39;&lt;/span>&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">END&lt;/span>&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">WHEN&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;awaiting_shipment&amp;#39;&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">THEN&lt;/span>&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">CASE&lt;/span>&lt;span style="color:#bbb"> &lt;/span>event&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">WHEN&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;cancel&amp;#39;&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">THEN&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;awaiting_refund&amp;#39;&lt;/span>&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">WHEN&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;ship&amp;#39;&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">THEN&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;shipped&amp;#39;&lt;/span>&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">ELSE&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;error&amp;#39;&lt;/span>&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">END&lt;/span>&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">WHEN&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;awaiting_refund&amp;#39;&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">THEN&lt;/span>&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">CASE&lt;/span>&lt;span style="color:#bbb"> &lt;/span>event&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">WHEN&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;refund&amp;#39;&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">THEN&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;canceled&amp;#39;&lt;/span>&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">ELSE&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;error&amp;#39;&lt;/span>&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">END&lt;/span>&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">ELSE&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;error&amp;#39;&lt;/span>&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">END&lt;/span>&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb">&lt;/span>&lt;span style="">$$&lt;/span>;&lt;span style="color:#bbb">
+&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>And before we proceed, let&amp;rsquo;s test with a few examples to make sure the function
+is working:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-sql" data-lang="sql">&lt;span style="color:#008000;font-weight:bold">SELECT&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">state&lt;/span>,&lt;span style="color:#bbb"> &lt;/span>event,&lt;span style="color:#bbb"> &lt;/span>order_events_transition(&lt;span style="color:#008000;font-weight:bold">state&lt;/span>,&lt;span style="color:#bbb"> &lt;/span>event)&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb">&lt;/span>&lt;span style="color:#008000;font-weight:bold">FROM&lt;/span>&lt;span style="color:#bbb"> &lt;/span>(&lt;span style="color:#008000;font-weight:bold">VALUES&lt;/span>&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>(&lt;span style="color:#ba2121">&amp;#39;start&amp;#39;&lt;/span>,&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;create&amp;#39;&lt;/span>),&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>(&lt;span style="color:#ba2121">&amp;#39;awaiting_payment&amp;#39;&lt;/span>,&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;pay&amp;#39;&lt;/span>),&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>(&lt;span style="color:#ba2121">&amp;#39;awaiting_payment&amp;#39;&lt;/span>,&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;cancel&amp;#39;&lt;/span>),&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>(&lt;span style="color:#ba2121">&amp;#39;awaiting_payment&amp;#39;&lt;/span>,&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;ship&amp;#39;&lt;/span>)&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb">&lt;/span>)&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">AS&lt;/span>&lt;span style="color:#bbb"> &lt;/span>examples(&lt;span style="color:#008000;font-weight:bold">state&lt;/span>,&lt;span style="color:#bbb"> &lt;/span>event);&lt;span style="color:#bbb">
+&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;pre tabindex="0">&lt;code> state | event | order_events_transition
+------------------+--------+-------------------------
+start | create | awaiting_payment
+awaiting_payment | pay | awaiting_shipment
+awaiting_payment | cancel | canceled
+awaiting_payment | ship | error
+&lt;/code>&lt;/pre>&lt;p>The above looks correct, but it&amp;rsquo;s not immediately clear how we could use this
+function to enforce our FSM on all rows for the same &lt;code>order_id&lt;/code> in the
+&lt;code>order_events&lt;/code> table.&lt;/p>
+&lt;p>The first thing we need is a good way to take a list of events and call our
+transition function on them recursively to determine the resulting state. There
+are multiple ways to accomplish this in PostgreSQL, but perhaps the most
+elegant is a &lt;a href="https://www.postgresql.org/docs/current/static/xaggr.html">user-defined aggregate&lt;/a>.&lt;/p>
+&lt;p>In a nutshell, a user defined aggregate is a function that has an internal
+value (state) that is updated for each input value that is being passed into it
+using a state transition function. This means it fits our FSM model like a
+glove:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-sql" data-lang="sql">&lt;span style="color:#008000;font-weight:bold">CREATE&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">AGGREGATE&lt;/span>&lt;span style="color:#bbb"> &lt;/span>order_events_fsm(&lt;span style="color:#008000">text&lt;/span>)&lt;span style="color:#bbb"> &lt;/span>(&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>SFUNC&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#666">=&lt;/span>&lt;span style="color:#bbb"> &lt;/span>order_events_transition,&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">STYPE&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#666">=&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000">text&lt;/span>,&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>INITCOND&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#666">=&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;start&amp;#39;&lt;/span>&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb">&lt;/span>);&lt;span style="color:#bbb">
+&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The above defines a new aggregate called &lt;code>order_events_fsm&lt;/code> which takes a
+&lt;code>text&lt;/code> input (one of our events) and calls the &lt;code>order_events_transition&lt;/code> state
+transition function (&lt;code>FSUNC&lt;/code>) for each input along with the current state
+(&lt;code>STYPE&lt;/code>) which is also of type &lt;code>text&lt;/code>. The initial state is &lt;code>start&lt;/code>
+(&lt;code>INITCOND&lt;/code>).&lt;/p>
+&lt;p>A quick test shows that it works as expected:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-sql" data-lang="sql">&lt;span style="color:#008000;font-weight:bold">SELECT&lt;/span>&lt;span style="color:#bbb"> &lt;/span>order_events_fsm(event&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">ORDER&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">BY&lt;/span>&lt;span style="color:#bbb"> &lt;/span>id)&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb">&lt;/span>&lt;span style="color:#008000;font-weight:bold">FROM&lt;/span>&lt;span style="color:#bbb"> &lt;/span>(&lt;span style="color:#008000;font-weight:bold">VALUES&lt;/span>&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>(&lt;span style="color:#666">1&lt;/span>,&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;create&amp;#39;&lt;/span>),&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>(&lt;span style="color:#666">2&lt;/span>,&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;pay&amp;#39;&lt;/span>),&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>(&lt;span style="color:#666">3&lt;/span>,&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;cancel&amp;#39;&lt;/span>)&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb">&lt;/span>)&lt;span style="color:#bbb"> &lt;/span>examples(id,&lt;span style="color:#bbb"> &lt;/span>event);&lt;span style="color:#bbb">
+&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;pre tabindex="0">&lt;code> order_events_fsm
+------------------
+awaiting_refund
+&lt;/code>&lt;/pre>&lt;p>Now let&amp;rsquo;s use our &lt;code>order_events_fsm&lt;/code> to create a &lt;code>BEFORE INSERT&lt;/code> trigger for
+our &lt;code>order_events&lt;/code> table that makes sure all events of a given &lt;code>order_id&lt;/code>
+are valid and don&amp;rsquo;t lead to an error state. We do this using a simple &lt;code>plpgsql&lt;/code>
+function that executes our &lt;code>order_events_fsm&lt;/code> against all existing events
+of the current &lt;code>order_id&lt;/code> plus the new event. If the final state is &lt;code>error&lt;/code>,
+we raise an exception which causes the current transaction to roll back. It
+looks like this:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-sql" data-lang="sql">&lt;span style="color:#008000;font-weight:bold">CREATE&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">FUNCTION&lt;/span>&lt;span style="color:#bbb"> &lt;/span>order_events_tigger_func()&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">RETURNS&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">trigger&lt;/span>&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb">&lt;/span>&lt;span style="color:#008000;font-weight:bold">LANGUAGE&lt;/span>&lt;span style="color:#bbb"> &lt;/span>plpgsql&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">AS&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="">$$&lt;/span>&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb">&lt;/span>&lt;span style="color:#008000;font-weight:bold">DECLARE&lt;/span>&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>new_state&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000">text&lt;/span>;&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb">&lt;/span>&lt;span style="color:#008000;font-weight:bold">BEGIN&lt;/span>&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">SELECT&lt;/span>&lt;span style="color:#bbb"> &lt;/span>order_events_fsm(event&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">ORDER&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">BY&lt;/span>&lt;span style="color:#bbb"> &lt;/span>id)&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">FROM&lt;/span>&lt;span style="color:#bbb"> &lt;/span>(&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">SELECT&lt;/span>&lt;span style="color:#bbb"> &lt;/span>id,&lt;span style="color:#bbb"> &lt;/span>event&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">FROM&lt;/span>&lt;span style="color:#bbb"> &lt;/span>order_events&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">WHERE&lt;/span>&lt;span style="color:#bbb"> &lt;/span>order_id&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#666">=&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">new&lt;/span>.order_id&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">UNION&lt;/span>&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">SELECT&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">new&lt;/span>.id,&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">new&lt;/span>.event&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>)&lt;span style="color:#bbb"> &lt;/span>s&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">INTO&lt;/span>&lt;span style="color:#bbb"> &lt;/span>new_state;&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">IF&lt;/span>&lt;span style="color:#bbb"> &lt;/span>new_state&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#666">=&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;error&amp;#39;&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">THEN&lt;/span>&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>RAISE&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">EXCEPTION&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;invalid event&amp;#39;&lt;/span>;&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">END&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">IF&lt;/span>;&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">RETURN&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">new&lt;/span>;&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb">&lt;/span>&lt;span style="color:#008000;font-weight:bold">END&lt;/span>&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb">&lt;/span>&lt;span style="">$$&lt;/span>;&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb">&lt;/span>&lt;span style="color:#008000;font-weight:bold">CREATE&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">TRIGGER&lt;/span>&lt;span style="color:#bbb"> &lt;/span>order_events_trigger&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">BEFORE&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">INSERT&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">ON&lt;/span>&lt;span style="color:#bbb"> &lt;/span>order_events&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb">&lt;/span>&lt;span style="color:#008000;font-weight:bold">FOR&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">EACH&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">ROW&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">EXECUTE&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">PROCEDURE&lt;/span>&lt;span style="color:#bbb"> &lt;/span>order_events_tigger_func();&lt;span style="color:#bbb">
+&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>We can verify that this works by inserting a valid sequence of order events:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-sql" data-lang="sql">&lt;span style="color:#008000;font-weight:bold">INSERT&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">INTO&lt;/span>&lt;span style="color:#bbb"> &lt;/span>order_events&lt;span style="color:#bbb"> &lt;/span>(order_id,&lt;span style="color:#bbb"> &lt;/span>event)&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">VALUES&lt;/span>&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>(&lt;span style="color:#666">1&lt;/span>,&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;create&amp;#39;&lt;/span>),&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>(&lt;span style="color:#666">1&lt;/span>,&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;pay&amp;#39;&lt;/span>),&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>(&lt;span style="color:#666">1&lt;/span>,&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;ship&amp;#39;&lt;/span>);&lt;span style="color:#bbb">
+&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;pre tabindex="0">&lt;code>INSERT 0 3
+&lt;/code>&lt;/pre>&lt;p>As well as an invalid sequence of events:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-sql" data-lang="sql">&lt;span style="color:#008000;font-weight:bold">INSERT&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">INTO&lt;/span>&lt;span style="color:#bbb"> &lt;/span>order_events&lt;span style="color:#bbb"> &lt;/span>(order_id,&lt;span style="color:#bbb"> &lt;/span>event)&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">VALUES&lt;/span>&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>(&lt;span style="color:#666">2&lt;/span>,&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;create&amp;#39;&lt;/span>),&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>(&lt;span style="color:#666">2&lt;/span>,&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;ship&amp;#39;&lt;/span>);&lt;span style="color:#bbb">
+&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;pre tabindex="0">&lt;code>psql:orders.sql:95: ERROR: invalid event
+CONTEXT: PL/pgSQL function order_events_tigger_func() line 14 at RAISE
+&lt;/code>&lt;/pre>&lt;p>As expected, only the first series of inserts made it into our table:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-sql" data-lang="sql">&lt;span style="color:#008000;font-weight:bold">SELECT&lt;/span>&lt;span style="color:#bbb"> &lt;/span>id,&lt;span style="color:#bbb"> &lt;/span>order_id,&lt;span style="color:#bbb"> &lt;/span>event&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">FROM&lt;/span>&lt;span style="color:#bbb"> &lt;/span>order_events;&lt;span style="color:#bbb">
+&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;pre tabindex="0">&lt;code> id | order_id | event
+----+----------+--------
+1 | 1 | create
+2 | 1 | pay
+3 | 1 | ship
+&lt;/code>&lt;/pre>&lt;p>If you&amp;rsquo;re still on the fence about embedding this kind of logic into your
+database, let&amp;rsquo;s see how our approach gives us advanced analytical powers as a
+free by-product. Let&amp;rsquo;s consider a new data set of 3 orders:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-sql" data-lang="sql">&lt;span style="color:#008000;font-weight:bold">TRUNCATE&lt;/span>&lt;span style="color:#bbb"> &lt;/span>order_events;&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb">&lt;/span>&lt;span style="color:#008000;font-weight:bold">INSERT&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">INTO&lt;/span>&lt;span style="color:#bbb"> &lt;/span>order_events&lt;span style="color:#bbb"> &lt;/span>(order_id,&lt;span style="color:#bbb"> &lt;/span>event,&lt;span style="color:#bbb"> &lt;/span>time)&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">VALUES&lt;/span>&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>(&lt;span style="color:#666">1&lt;/span>,&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;create&amp;#39;&lt;/span>,&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;2017-07-23 00:00:00&amp;#39;&lt;/span>),&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>(&lt;span style="color:#666">1&lt;/span>,&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;pay&amp;#39;&lt;/span>,&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;2017-07-23 12:00:00&amp;#39;&lt;/span>),&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>(&lt;span style="color:#666">1&lt;/span>,&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;ship&amp;#39;&lt;/span>,&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;2017-07-24 00:00:00&amp;#39;&lt;/span>),&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>(&lt;span style="color:#666">2&lt;/span>,&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;create&amp;#39;&lt;/span>,&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;2017-07-23 00:00:00&amp;#39;&lt;/span>),&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>(&lt;span style="color:#666">2&lt;/span>,&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;cancel&amp;#39;&lt;/span>,&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;2017-07-24 00:00:00&amp;#39;&lt;/span>),&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>(&lt;span style="color:#666">3&lt;/span>,&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;create&amp;#39;&lt;/span>,&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;2017-07-23 00:00:00&amp;#39;&lt;/span>),&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>(&lt;span style="color:#666">3&lt;/span>,&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;pay&amp;#39;&lt;/span>,&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;2017-07-24 00:00:00&amp;#39;&lt;/span>),&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>(&lt;span style="color:#666">3&lt;/span>,&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;cancel&amp;#39;&lt;/span>,&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;2017-07-25 00:00:00&amp;#39;&lt;/span>),&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>(&lt;span style="color:#666">3&lt;/span>,&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;refund&amp;#39;&lt;/span>,&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;2017-07-26 00:00:00&amp;#39;&lt;/span>);&lt;span style="color:#bbb">
+&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Using our &lt;code>order_events_fsm&lt;/code> as a &lt;a href="https://www.postgresql.org/docs/current/static/tutorial-window.html">window
+function&lt;/a>, we
+can easily get the state history of a given order:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-sql" data-lang="sql">&lt;span style="color:#008000;font-weight:bold">SELECT&lt;/span>&lt;span style="color:#bbb"> &lt;/span>time,&lt;span style="color:#bbb"> &lt;/span>order_events_fsm(event)&lt;span style="color:#bbb"> &lt;/span>OVER&lt;span style="color:#bbb"> &lt;/span>(&lt;span style="color:#008000;font-weight:bold">ORDER&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">BY&lt;/span>&lt;span style="color:#bbb"> &lt;/span>id)&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb">&lt;/span>&lt;span style="color:#008000;font-weight:bold">FROM&lt;/span>&lt;span style="color:#bbb"> &lt;/span>order_events&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb">&lt;/span>&lt;span style="color:#008000;font-weight:bold">WHERE&lt;/span>&lt;span style="color:#bbb"> &lt;/span>order_id&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#666">=&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#666">3&lt;/span>;&lt;span style="color:#bbb">
+&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;pre tabindex="0">&lt;code> time | order_events_fsm
+---------------------+-------------------
+2017-07-23 00:00:00 | awaiting_payment
+2017-07-24 00:00:00 | awaiting_shipment
+2017-07-25 00:00:00 | awaiting_refund
+2017-07-26 00:00:00 | canceled
+&lt;/code>&lt;/pre>&lt;p>But we can go even further and apply our state machines to multiple orders,
+e.g. by using the
+&lt;a href="https://www.postgresql.org/docs/current/static/functions-srf.html">generate_series&lt;/a>
+function and a
+&lt;a href="https://www.postgresql.org/docs/current/static/queries-table-expressions.html#QUERIES-LATERAL">Lateral&lt;/a>
+sub-query to break down the number of orders per state for each day of a given
+date range:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-sql" data-lang="sql">&lt;span style="color:#008000;font-weight:bold">SELECT&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000">date&lt;/span>::&lt;span style="color:#008000">date&lt;/span>,&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">state&lt;/span>,&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">count&lt;/span>(&lt;span style="color:#666">1&lt;/span>)&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb">&lt;/span>&lt;span style="color:#008000;font-weight:bold">FROM&lt;/span>&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>generate_series(&lt;span style="color:#ba2121">&amp;#39;2017-07-23&amp;#39;&lt;/span>::&lt;span style="color:#008000">date&lt;/span>,&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;2017-07-26&amp;#39;&lt;/span>,&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;1 day&amp;#39;&lt;/span>)&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000">date&lt;/span>,&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">LATERAL&lt;/span>&lt;span style="color:#bbb"> &lt;/span>(&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">SELECT&lt;/span>&lt;span style="color:#bbb"> &lt;/span>order_id,&lt;span style="color:#bbb"> &lt;/span>order_events_fsm(event&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">ORDER&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">BY&lt;/span>&lt;span style="color:#bbb"> &lt;/span>id)&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">AS&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">state&lt;/span>&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">FROM&lt;/span>&lt;span style="color:#bbb"> &lt;/span>order_events&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">WHERE&lt;/span>&lt;span style="color:#bbb"> &lt;/span>time&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#666">&amp;lt;&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000">date&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#666">+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#ba2121">&amp;#39;1 day&amp;#39;&lt;/span>::&lt;span style="color:#008000">interval&lt;/span>&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">GROUP&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">BY&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#666">1&lt;/span>&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb"> &lt;/span>)&lt;span style="color:#bbb"> &lt;/span>orders&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb">&lt;/span>&lt;span style="color:#008000;font-weight:bold">GROUP&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">BY&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#666">1&lt;/span>,&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#666">2&lt;/span>&lt;span style="color:#bbb">
+&lt;/span>&lt;span style="color:#bbb">&lt;/span>&lt;span style="color:#008000;font-weight:bold">ORDER&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#008000;font-weight:bold">BY&lt;/span>&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#666">1&lt;/span>,&lt;span style="color:#bbb"> &lt;/span>&lt;span style="color:#666">2&lt;/span>;&lt;span style="color:#bbb">
+&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;pre tabindex="0">&lt;code> date | state | count
+------------+-------------------+-------
+2017-07-23 | awaiting_payment | 2
+2017-07-23 | awaiting_shipment | 1
+2017-07-24 | awaiting_shipment | 1
+2017-07-24 | canceled | 1
+2017-07-24 | shipped | 1
+2017-07-25 | awaiting_refund | 1
+2017-07-25 | canceled | 1
+2017-07-25 | shipped | 1
+2017-07-26 | canceled | 2
+2017-07-26 | shipped | 1
+&lt;/code>&lt;/pre>&lt;p>There you have it, a FSM implemented as a user defined aggregate in PostgreSQL
+providing both data integrity and advanced analytics.&lt;/p>
+&lt;p>That being said, your milage may vary, and embedding your business logic into
+your database is always a tradeoff. But if you want some reassurance: I&amp;rsquo;ve had
+great success in applying this approach in combination with &lt;a href="https://hashrocket.com/blog/posts/materialized-view-strategies-using-postgresql#eager-materialized-view">eager
+materialization&lt;/a>
+to implement a realtime analytics dashboard for an application with over a
+billion event rows.&lt;/p>
+&lt;p>Anyway, I&amp;rsquo;m really looking forward to feedback on this, and am more than happy
+to answer any questions, so please comment.&lt;/p>
+&lt;p>&lt;strong>Join me at Apple&lt;/strong>: If the article above has you excited, come and join my
+team at Apple. We&amp;rsquo;re hiring Go and PostgreSQL developers in Shanghai, China
+right now. Relocation is possible, just &lt;a href="mailto:felixge_jobs@apple.com?subject=PostgreSQL/Go Developer Role">send me an e-mail&lt;/a> to find out more about
+this role.&lt;/p>
+&lt;p>&lt;small>Thanks to Thorsten Ball and Johannes Boyne for reviewing.&lt;/small>&lt;/p>
+&lt;section class="footnotes" role="doc-endnotes">
+&lt;hr>
+&lt;ol>
+&lt;li id="fn:1" role="doc-endnote">
+&lt;p>The code in this article is immune to concurrency anomalies when using the &lt;code>SERIALIZABLE&lt;/code> transaction isolation level. Alternative you could modify the trigger to aquire an exclusive lock on the &lt;code>order_events&lt;/code> table. But as mentioned, this topic deserves a separate post.&amp;#160;&lt;a href="#fnref:1" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;/section></description></item><item><title>PostgreSQL operations that you can't EXPLAIN</title><link>https://felixge.de/2017/05/23/postgresql-operations-that-you-cant-explain/</link><pubDate>Tue, 23 May 2017 16:25:00 +0200</pubDate><guid>https://felixge.de/2017/05/23/postgresql-operations-that-you-cant-explain/</guid><description>&lt;p>I am currently dabbling in PostgreSQL internals in my spare time, including
+trying to understand the query planner and executor. It&amp;rsquo;s a deeply humbling
+experience, but occasionally I&amp;rsquo;m delighted to be able to answer simple
+questions I&amp;rsquo;m researching.&lt;/p>
+&lt;p>One of these questions is how PostgreSQL is executing &lt;code>ORDER BY&lt;/code> clauses inside
+of aggregate expressions.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text"># CREATE TABLE foo AS
+SELECT * FROM generate_series(1, 3) i;
+SELECT 3
+# SELECT * FROM foo;
+i
+---
+1
+2
+3
+(3 rows)
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Consider a simple table that holds 3 rows of an int column ranging from 1 to 3:&lt;/p>
+&lt;p>Now let&amp;rsquo;s assume we want to convert those rows into a json array. This can
+be accomplished using the &lt;a href="https://www.postgresql.org/docs/9.6/static/functions-aggregate.html#FUNCTIONS-AGGREGATE-TABLE">json_agg&lt;/a>
+aggregate function:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text"># SELECT json_agg(i) FROM foo;
+json_agg
+-----------
+[1, 2, 3]
+(1 row)
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>But what if we want to order the array elements in descending order? No
+problem, we can simply use the order-by-clause support available to all
+&lt;a href="https://www.postgresql.org/docs/9.6/static/sql-expressions.html#SYNTAX-AGGREGATES">aggregate expressions&lt;/a>:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text"># SELECT json_agg(i ORDER BY i DESC) FROM foo;
+json_agg
+-----------
+[3, 2, 1]
+(1 row)
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>If you&amp;rsquo;re like me, you&amp;rsquo;d probably imagine the &lt;code>EXPLAIN&lt;/code> output for this query
+to contain three nodes: a &lt;code>Seq Scan&lt;/code>, a &lt;code>Sort&lt;/code>, and an &lt;code>Aggregate&lt;/code>. However,
+when we run &lt;code>EXPLAIN&lt;/code>, it turns out there is no &lt;code>Sort&lt;/code> node.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text"># EXPLAIN SELECT json_agg(i ORDER BY i DESC) FROM foo;
+QUERY PLAN
+-------------------------------------------------------------
+Aggregate (cost=41.88..41.89 rows=1 width=32)
+-&amp;gt; Seq Scan on foo (cost=0.00..35.50 rows=2550 width=4)
+(2 rows)
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>In fact, the plan even remains unchanged even if we change the sort order or
+remove the clause entirely:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text"># EXPLAIN SELECT json_agg(i ORDER BY i ASC) FROM foo;
+QUERY PLAN
+-------------------------------------------------------------
+Aggregate (cost=41.88..41.89 rows=1 width=32)
+-&amp;gt; Seq Scan on foo (cost=0.00..35.50 rows=2550 width=4)
+(2 rows)
+# EXPLAIN SELECT json_agg(i) FROM foo;
+QUERY PLAN
+-------------------------------------------------------------
+Aggregate (cost=41.88..41.89 rows=1 width=32)
+-&amp;gt; Seq Scan on foo (cost=0.00..35.50 rows=2550 width=4)
+(2 rows)
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>But how is this possible? If there is no &lt;code>Sort&lt;/code> node, how does the aggregate
+perform its sorting?&lt;/p>
+&lt;p>Well, it turns out that aggregate plan nodes can &lt;a href="https://github.com/postgres/postgres/blob/aa3bcba08d466bc6fd2558f8f0bf0e6d6c89b58b/src/backend/executor/nodeAgg.c#L520-L541">perform their own
+sorting&lt;/a>.
+These sorts do not explicitly show up in &lt;code>EXPLAIN&lt;/code>, but we can trace them using
+the
+&lt;a href="https://www.postgresql.org/docs/9.6/static/runtime-config-developer.html#GUC-TRACE-SORT">trace_sort&lt;/a>
+developer option:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text"># SET trace_sort=true;
+SET
+# SET client_min_messages=&amp;#39;log&amp;#39;;
+SET
+# SELECT json_agg(i ORDER BY i DESC) FROM foo;
+LOG: begin datum sort: workMem = 4096, randomAccess = f
+LOG: performsort starting: CPU 0.00s/0.00u sec elapsed 0.00 sec
+LOG: performsort done: CPU 0.00s/0.00u sec elapsed 0.00 sec
+LOG: internal sort ended, 25 KB used: CPU 0.00s/0.00u sec elapsed 0.00 sec
+json_agg
+-----------
+[3, 2, 1]
+(1 row)
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Another way to see that the sort is part of the plan is to use
+&lt;a href="https://www.postgresql.org/docs/9.6/static/runtime-config-logging.html#RUNTIME-CONFIG-LOGGING-WHAT">debug_print_plan&lt;/a>
+option, but the output is not for the faint of heart. Specifically you need to
+look for the &lt;code>:aggorder&lt;/code> field below:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text"># SET debug_print_plan=true;
+SET
+# SELECT json_agg(i ORDER BY i DESC) FROM foo;
+LOG: plan:
+DETAIL: {PLANNEDSTMT
+:commandType 1
+:queryId 0
+:hasReturning false
+:hasModifyingCTE false
+:canSetTag true
+:transientPlan false
+:dependsOnRole false
+:parallelModeNeeded false
+:planTree
+{AGG
+:startup_cost 41.88
+:total_cost 41.89
+:plan_rows 1
+:plan_width 32
+:parallel_aware false
+:plan_node_id 0
+:targetlist (
+{TARGETENTRY
+:expr
+{AGGREF
+:aggfnoid 3175
+:aggtype 114
+:aggcollid 0
+:inputcollid 0
+:aggtranstype 2281
+:aggargtypes (o 23)
+:aggdirectargs &amp;lt;&amp;gt;
+:args (
+{TARGETENTRY
+:expr
+{VAR
+:varno 65001
+:varattno 1
+:vartype 23
+:vartypmod -1
+:varcollid 0
+:varlevelsup 0
+:varnoold 1
+:varoattno 1
+:location 16
+}
+:resno 1
+:resname &amp;lt;&amp;gt;
+:ressortgroupref 1
+:resorigtbl 0
+:resorigcol 0
+:resjunk false
+}
+)
+:aggorder (
+{SORTGROUPCLAUSE
+:tleSortGroupRef 1
+:eqop 96
+:sortop 521
+:nulls_first true
+:hashable true
+}
+)
+:aggdistinct &amp;lt;&amp;gt;
+:aggfilter &amp;lt;&amp;gt;
+:aggstar false
+:aggvariadic false
+:aggkind n
+:agglevelsup 0
+:aggsplit 0
+:location 7
+}
+:resno 1
+:resname json_agg
+:ressortgroupref 0
+:resorigtbl 0
+:resorigcol 0
+:resjunk false
+}
+)
+:qual &amp;lt;&amp;gt;
+:lefttree
+{SEQSCAN
+:startup_cost 0.00
+:total_cost 35.50
+:plan_rows 2550
+:plan_width 4
+:parallel_aware false
+:plan_node_id 1
+:targetlist (
+{TARGETENTRY
+:expr
+{VAR
+:varno 1
+:varattno 1
+:vartype 23
+:vartypmod -1
+:varcollid 0
+:varlevelsup 0
+:varnoold 1
+:varoattno 1
+:location -1
+}
+:resno 1
+:resname &amp;lt;&amp;gt;
+:ressortgroupref 0
+:resorigtbl 0
+:resorigcol 0
+:resjunk false
+}
+)
+:qual &amp;lt;&amp;gt;
+:lefttree &amp;lt;&amp;gt;
+:righttree &amp;lt;&amp;gt;
+:initPlan &amp;lt;&amp;gt;
+:extParam (b)
+:allParam (b)
+:scanrelid 1
+}
+:righttree &amp;lt;&amp;gt;
+:initPlan &amp;lt;&amp;gt;
+:extParam (b)
+:allParam (b)
+:aggstrategy 0
+:aggsplit 0
+:numCols 0
+:grpColIdx
+:grpOperators
+:numGroups 1
+:aggParams (b)
+:groupingSets &amp;lt;&amp;gt;
+:chain &amp;lt;&amp;gt;
+}
+:rtable (
+{RTE
+:alias &amp;lt;&amp;gt;
+:eref
+{ALIAS
+:aliasname foo
+:colnames (&amp;#34;i&amp;#34;)
+}
+:rtekind 0
+:relid 404407
+:relkind r
+:tablesample &amp;lt;&amp;gt;
+:lateral false
+:inh false
+:inFromCl true
+:requiredPerms 2
+:checkAsUser 0
+:selectedCols (b 9)
+:insertedCols (b)
+:updatedCols (b)
+:securityQuals &amp;lt;&amp;gt;
+}
+)
+:resultRelations &amp;lt;&amp;gt;
+:utilityStmt &amp;lt;&amp;gt;
+:subplans &amp;lt;&amp;gt;
+:rewindPlanIDs (b)
+:rowMarks &amp;lt;&amp;gt;
+:relationOids (o 404407)
+:invalItems &amp;lt;&amp;gt;
+:nParamExec 0
+}
+LOG: begin datum sort: workMem = 4096, randomAccess = f
+LOG: performsort starting: CPU 0.00s/0.00u sec elapsed 0.00 sec
+LOG: performsort done: CPU 0.00s/0.00u sec elapsed 0.00 sec
+LOG: internal sort ended, 25 KB used: CPU 0.00s/0.00u sec elapsed 0.00 sec
+json_agg
+-----------
+[3, 2, 1]
+(1 row)
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>In conlusion: While &lt;code>EXPLAIN&lt;/code> is a powerful weapon for those seeking to
+understand query performance, you should be aware of the fact that there are
+things that you can&amp;rsquo;t &lt;code>EXPLAIN&lt;/code> :).&lt;/p>
+&lt;p>The research for this article was done using PostgreSQL 9.6.3 and LLDB, but
+should also apply to recent versions as well as the upcoming PostgreSQL 10.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text"># SELECT version();
+version
+--------------------------------------------------------------------------------------------------------------
+PostgreSQL 9.6.3 on x86_64-apple-darwin14.5.0, compiled by Apple LLVM version 7.0.0 (clang-700.1.76), 64-bit
+(1 row)
+&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Go + Raspberry Pi powered Alarm Clock</title><link>https://felixge.de/2015/03/05/go-raspberry-pi-powered-alarm-clock/</link><pubDate>Thu, 05 Mar 2015 16:30:00 +0100</pubDate><guid>https://felixge.de/2015/03/05/go-raspberry-pi-powered-alarm-clock/</guid><description>&lt;p>Invented in 1959, the &lt;a href="http://clockhistory.com/westclox/products/electric/drowse/">snooze
+button&lt;/a> is the
+worst invention in the world. Not only does it defeat the point of setting an
+alarm, it may actually &lt;a href="http://news.health.com/2012/09/21/snooze-button-better-sleep/">leave you more
+tired&lt;/a>.
+Unfortunately however, my zombie morning brain doesn&amp;rsquo;t care about this, and any
+alarm within reach has a very poor chance of actually getting me out of bed,
+trapping me into an open-end snooze fest.&lt;/p>
+&lt;p>For this reason I usually set an alarm below my loft bed, so I&amp;rsquo;m forced to
+climb down the stairs to disable it. This works, but sometimes I forget to set
+this alarm before getting into bed, and my sleepy evening brain convinces
+itself that setting the alarm on the phone next to me will do just fine.&lt;/p>
+&lt;p>And this is exactly how I missed an important early morning conference call
+this week.&lt;/p>
+&lt;p>To avoid this from happening again, I finally implement an idea I had a while
+ago for for turning my raspberry pi into a smartphone controlled alarm clock
+that I can set from my bed, but only disable by getting up. I&amp;rsquo;ve published the
+Go code as &lt;a href="http://github.com/felixge/rise">Rise 1.0&lt;/a> on GitHub, and you can
+see the result below:&lt;/p>
+&lt;div style="text-align: center;">
+&lt;a href="./webapp-big.jpg">&lt;img src="./webapp-small.jpg" />&lt;/a>
+&lt;a href="./setup-big.jpg">&lt;img src="./setup-small.jpg" />&lt;/a>
+&lt;/div>
+&lt;p>In a way, this is latest incarnation of a previous &lt;a href="http://www.slideshare.net/the_undefined/building-an-alarm-clock-with-nodejs">AirPlay based
+project&lt;/a>
+of mine, which unfortunatley suffered from a few issues causing me to abondon
+it. However, I feel pretty good about this implementation, and already woke up
+successfully with it this morning.&lt;/p>
+&lt;p>Given enough interest, I&amp;rsquo;d be happy to polish this up a bit further and make it
+easy to install on any Raspberry Pi or other Linux machine you have laying
+around. Just let me know what you think!&lt;/p></description></item><item><title>Using TCP keepalive with Go</title><link>https://felixge.de/2014/08/26/using-tcp-keepalive-with-go/</link><pubDate>Tue, 26 Aug 2014 15:40:00 +0100</pubDate><guid>https://felixge.de/2014/08/26/using-tcp-keepalive-with-go/</guid><description>&lt;p>If you have ever written some TCP socket code, you may have wondered: &amp;ldquo;What
+will happen to my connection if the network cable is unplugged or the remote
+machine crashes?&amp;rdquo;.&lt;/p>
+&lt;p>The short answer is: nothing. The remote end of the connection won&amp;rsquo;t be able to
+send a FIN packet, and the local OS will not detect that the connection is
+lost. So it&amp;rsquo;s up to you as the developer to address this scenario.&lt;/p>
+&lt;p>In Go you have several methods available to you that can help with this.
+Perhaps the first one to consider is the &lt;code>SetReadDeadline&lt;/code> method of the
+&lt;a href="http://golang.org/pkg/net/#Conn">net.Conn&lt;/a> interface. Assuming that your connection is expected to receive
+data at a regular interval, you can simply treat a timed out read as equivalent
+to an &lt;code>io.EOF&lt;/code> error and &lt;code>Close&lt;/code> the connection. Many existing TCP protocols
+support this way of error handling by defining some sort of heartbeat mechanism
+that requires each endpoint to send PING/PONG probes at a regular interval in
+order to detect both networking problems, as well as service
+health&lt;sup>1&lt;/sup>. Additionally such heartbeats may also help dealing with
+proxy servers that look for network activity to determine the health of a
+connection.&lt;/p>
+&lt;p>So if your protocol supports heartbeats, or you have the ability to add
+heartbeats to your own protocol, that should be your first choice for
+addressing the unplugged network cable scenario.&lt;/p>
+&lt;p>However, what happens if you have no control over the protocol, and heartbeats
+are not supported?&lt;/p>
+&lt;p>Now it&amp;rsquo;s time to learn about TCP keepalive and how to use it with Go. TCP
+keepalive is defined in &lt;a href="http://tools.ietf.org/html/rfc1122#page-101">RFC 1122&lt;/a>, and is not part of the TCP specification
+itself. It can be enabled for individual connections, but MUST be turned off by
+default. Enabling it will cause the network stack to probe the health of an
+idle connection after a default duration that must be no less than two hours.
+The probe packet will contain no data&lt;sup>2&lt;/sup>, and failure to reply to an individual
+probe MUST NOT be interpreted as a dead connection, as individual probe packets
+are not reliably transmitted.&lt;/p>
+&lt;p>Go allows you to enable TCP keepalive using &lt;code>net.TCPConn&lt;/code>&amp;rsquo;s &lt;code>SetKeepAlive&lt;/code>. On
+OSX and Linux this will cause up to 8 TCP keepalive probes to be sent at an
+interval of 75 seconds after a connection has been idle for 2 hours. Or in
+other words, &lt;code>Read&lt;/code> will return an &lt;code>io.EOF&lt;/code> error after 2 hours and 10 minutes
+(7200 + 8 * 75).&lt;/p>
+&lt;p>Depending on your application, that may be too long of a timeout. In this case
+you can call &lt;code>SetKeepAlivePeriod&lt;/code>. However, this method currently behaves
+different for different operating systems. On OSX, it will modify the idle time
+before probes are being sent. On Linux however, it will modify both the idle
+time, as well as the interval that probes are sent at. So calling
+&lt;code>SetKeepAlivePeriod&lt;/code> with an argument of 30 seconds will cause a total timeout
+of 10 minutes and 30 seconds for OSX (30 + 8 * 75), but 4 minutes and 30
+seconds on Linux (30 + 8 * 30).&lt;/p>
+&lt;p>I found that situation rather unsatisfying, so I ended up creating a small
+package called &lt;a href="https://github.com/felixge/tcpkeepalive">tcpkeepalive&lt;/a> that gives you more control:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">kaConn, _ &lt;span style="color:#666">:=&lt;/span> tcpkeepalive.&lt;span style="color:#00f">EnableKeepAlive&lt;/span>(conn)
+kaConn.&lt;span style="color:#00f">SetKeepAliveIdle&lt;/span>(&lt;span style="color:#666">30&lt;/span>&lt;span style="color:#666">*&lt;/span>time.Second)
+kaConn.&lt;span style="color:#00f">SetKeepAliveCount&lt;/span>(&lt;span style="color:#666">4&lt;/span>)
+kaConn.&lt;span style="color:#00f">SetKeepAliveInterval&lt;/span>(&lt;span style="color:#666">5&lt;/span>&lt;span style="color:#666">*&lt;/span>time.Second)
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Currently only Linux and OSX are supported, but I&amp;rsquo;d be happy to merge pull
+requests for other platforms. If there is interest from the Go core team, I&amp;rsquo;ll
+also try to contribute these new methods to Go itself.&lt;/p>
+&lt;p>Please let me know if you found this article useful, have any questions, or
+spotted any errors so I can correct them.&lt;/p>
+&lt;h2 id="appendix">Appendix&lt;/h2>
+&lt;ol>
+&lt;li>
+&lt;p>Tuning a heartbeat mechanism to detect failures early with a low false
+positive rate is tricky business. Checkout the &lt;a href="http://ddg.jaist.ac.jp/pub/HDY+04.pdf">ϕ Accrual Failure Detector&lt;/a> for a
+statistically sound model, as well as Damian Gryski&amp;rsquo;s &lt;a href="https://github.com/dgryski/go-failure">go-failure&lt;/a>
+implementation. Unfortunately there is no way to use it with TCP keepalive that
+I can think of.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>According to RFC 1122 keepalive probes may contain a single garbage octet
+for compatibility with broken implementations. However, I&amp;rsquo;m not sure if this is
+filtered out by the OS network stack or not, please comment if you know.&lt;/p>
+&lt;/li>
+&lt;/ol></description></item><item><title>GoDrone - A Parrot AR Drone 2.0 Firmware written in Go</title><link>https://felixge.de/2013/12/25/godrone-a-parrot-ar-drone-2.0-firmware-written-in-go/</link><pubDate>Wed, 25 Dec 2013 20:24:00 +0100</pubDate><guid>https://felixge.de/2013/12/25/godrone-a-parrot-ar-drone-2.0-firmware-written-in-go/</guid><description>&lt;p>Merry Christmas (or &lt;a href="http://www.youtube.com/watch?v=EqiiCOFR0Y8">Newtonmas&lt;/a> if you prefer) everybody.&lt;/p>
+&lt;p>Today I&amp;rsquo;m very happy to release the first version of my favorite side project, GoDrone.&lt;/p>
+&lt;p>GoDrone is a free software alternative firmware for the &lt;a href="http://en.wikipedia.org/wiki/Parrot_AR.Drone#Version_2.0">Parrot AR Drone
+2.0&lt;/a>. And yes, this hopefully makes it the first robotic visualizer for Go&amp;rsquo;s
+&lt;a href="http://www.godrone.io/en/latest/user/faq.html#isn-t-go-unsuitable-for-real-time-applications-like-this">garbage collector&lt;/a> : ).&lt;/p>
+&lt;p>At this point the firmware is good enough to fly and provide basic attitude stabilization (using a simple complementary filter + pid controllers), so I&amp;rsquo;d really love to get feedback from any adventurous AR Drone owners. I&amp;rsquo;m providing binary installers for OSX/Linux/Windows:&lt;/p>
+&lt;p>&lt;a href="http://www.godrone.io/en/latest/index.html">http://www.godrone.io/en/latest/index.html&lt;/a>&lt;/p>
+&lt;p>But you may also choose to install from &lt;a href="http://www.godrone.io/en/latest/contributor/install_from_source.html">source&lt;/a>.&lt;/p>
+&lt;p>Depending on initial feedback, I&amp;rsquo;d love to turn GoDrone into a viable alternative to the official firmware, and breathe some fresh air into the development of robotics software. In particular I&amp;rsquo;d like to show that web technologies can rival native mobile/desktop apps in costs and UX for providing user interfaces to robots, and I&amp;rsquo;d also like to promote the idea of using high level languages for firmware development in linux powered robots.&lt;/p>
+&lt;p>If you&amp;rsquo;re interested, please make sure to join the mailing list / come and say hello in IRC:&lt;/p>
+&lt;p>&lt;a href="http://www.godrone.io/en/latest/user/community_support.html">http://www.godrone.io/en/latest/user/community_support.html&lt;/a>&lt;/p></description></item></channel></rss>

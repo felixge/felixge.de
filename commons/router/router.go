@@ -3,7 +3,7 @@ package router
 import (
 	"net/http"
 
-	"github.com/felixge/felixge.de/common/deps"
+	"github.com/felixge/felixge.de/commons/deps"
 	"github.com/felixge/felixge.de/features/home"
 )
 
