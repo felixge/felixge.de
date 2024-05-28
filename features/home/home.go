@@ -13,7 +13,7 @@ type templateData struct {
 
 func HomeHandler(d *deps.Deps) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		posts, err := posts.Posts(r.Context())
+		posts, err := posts.Posts(r.Context(), d.Log)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

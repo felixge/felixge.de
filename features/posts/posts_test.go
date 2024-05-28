@@ -28,7 +28,7 @@ func Test_parseRSS(t *testing.T) {
 		{
 			Fixture: "felixge.de.atom.xml",
 			Verify: func(t *testing.T, posts []*Post) {
-				require.Len(t, posts, 10)
+				require.Len(t, posts, 15)
 				blazing := posts[0]
 				assert.Equal(t, "Connecting Go Profiling With Tracing", blazing.Title)
 				assert.Equal(t, "2022-02-10 23:00:00 +0000 UTC", blazing.PubDate.String())
