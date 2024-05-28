@@ -25,7 +25,7 @@
     {{- with .OutputFormats.Get "RSS" -}}
     {{ printf "<atom:link href=%q rel=\"self\" type=%q />" .Permalink .MediaType | safeHTML }}
     {{- end -}}
-    {{- range first 10 (where .Site.RegularPages "Type" "not in" "pages" ) -}}
+    {{- range first 100 (where .Site.RegularPages "Type" "not in" "pages" ) -}}
     <item>
       <title>{{ .Title }}</title>
       <link>{{ .Permalink }}</link>
