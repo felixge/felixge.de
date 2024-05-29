@@ -9,13 +9,11 @@ primary_region = 'ams'
 [env]
   PORT = '8080'
   DD_AGENT_HOST = 'felixge-datadog.internal'
+  DD_ENV = 'prod'
 
 [http_service]
   internal_port = 8080
   force_https = true
-  auto_stop_machines = true
-  auto_start_machines = true
-  min_machines_running = 0
   processes = ['app']
 
 [[vm]]
