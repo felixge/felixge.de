@@ -3,7 +3,7 @@ package home
 import (
 	"net/http"
 
-	"github.com/felixge/felixge.de/commons/deps"
+	"github.com/felixge/felixge.de/commons/appcontext"
 	"github.com/felixge/felixge.de/features/posts"
 )
 
@@ -11,7 +11,7 @@ type templateData struct {
 	Posts []*posts.Post
 }
 
-func HomeHandler(d *deps.Deps) http.HandlerFunc {
+func HomeHandler(d *appcontext.AppContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		posts, err := posts.Posts(r.Context(), d.Log)
 		if err != nil {

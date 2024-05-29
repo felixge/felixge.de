@@ -1,6 +1,23 @@
+# https://taskfile.dev/usage/
 version: '3'
 
 tasks:
   default:
     cmds:
       - air
+
+  create:
+    cmds:
+      - fly apps list | grep -E 'felixge ' || fly apps create felixge
+      - fly apps list | grep -E 'felixge-datadog ' || fly apps create felixge-datadog
+
+  deploy:
+    deps: [deploy-felixge, deploy-datadog]
+
+  deploy-felixge:
+    cmds:
+      - fly deploy
+
+  deploy-datadog:
+    cmds:
+      - fly deploy --config ./datadog.fly.toml

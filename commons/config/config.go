@@ -4,14 +4,29 @@ import "os"
 
 func EnvConfig() *Config {
 	c := &Config{
-		Addr: ":" + os.Getenv("PORT"),
+		Addr:    "localhost:8080",
+		Service: "felixge.de",
+		Env:     "dev",
+		Version: "n/a",
 	}
-	if c.Addr == ":" {
-		c.Addr = "localhost:8080"
+	if v := os.Getenv("PORT"); v != "" {
+		c.Addr = ":" + v
+	}
+	if v := os.Getenv("DD_SERVICE"); v != "" {
+		c.Service = v
+	}
+	if v := os.Getenv("DD_ENV"); v != "" {
+		c.Env = v
+	}
+	if v := os.Getenv("DD_VERSION"); v != "" {
+		c.Version = v
 	}
 	return c
 }
 
 type Config struct {
-	Addr string
+	Service string
+	Env     string
+	Version string
+	Addr    string
 }
