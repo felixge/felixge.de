@@ -30,6 +30,6 @@ kill_timeout = 5
     timeout = "10s"
 
 [[vm]]
-  memory = '256mb'
+  memory = '512mb'
   cpu_kind = 'shared'
   cpus = 1

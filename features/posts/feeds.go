@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/felixge/felixge.de/commons/appcontext"
+	"github.com/felixge/felixge.de/commons/datadog"
 	"github.com/mmcdole/gofeed"
 )
 
@@ -71,7 +72,7 @@ func fetchRSS(ctx context.Context, url string) ([]*Post, error) {
 	if err != nil {
 		return nil, err
 	}
-	res, err := http.DefaultClient.Do(req)
+	res, err := datadog.HttpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}

@@ -1,3 +1,4 @@
 # flyctl launch added from .gitignore
-tmp
-fly.toml
+/.git
+/tmp
+/*.toml
