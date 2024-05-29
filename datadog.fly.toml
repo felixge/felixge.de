@@ -1,0 +1,35 @@
+app = "felixge-datadog"
+
+kill_signal = "SIGINT"
+kill_timeout = 5 
+
+[env]
+  DD_SITE = "datadoghq.com"
+  DD_APM_NON_LOCAL_TRAFFIC = true
+
+[build]
+  image = "datadog/agent:7"
+
+[[services]]
+  internal_port = 8126
+  protocol = "tcp"
+
+  [[services.ports]]
+    force_https = true
+    handlers = ["http"]
+    port = 8126
+
+  [[services.ports]]
+    handlers = ["tls", "http"]
+    port = 8126
+
+  [[services.tcp_checks]]
+    grace_period = "30s"
+    interval = "15s"
+    restart_limit = 0 
+    timeout = "10s"
+
+[[vm]]
+  memory = '256mb'
+  cpu_kind = 'shared'
+  cpus = 1
