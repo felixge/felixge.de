@@ -13,7 +13,7 @@ func EnvConfig() *Config {
 	if v := os.Getenv("PORT"); v != "" {
 		c.Addr = ":" + v
 	}
-	if v := os.Getenv("DATADOG"); v != "false" {
+	if v := os.Getenv("DATADOG"); v == "false" {
 		c.EnableDatadog = false
 	}
 	if c.EnableDatadog {
