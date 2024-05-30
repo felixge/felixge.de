@@ -11,29 +11,6 @@ kill_timeout = 5
 [build]
   image = "datadog/agent:7"
 
-
-# APM
-[[services]]
-  internal_port = 8126
-  protocol = "tcp"
-
-  [[services.ports]]
-    port = 8126
-
-  [[services.tcp_checks]]
-    grace_period = "30s"
-    interval = "15s"
-    restart_limit = 0 
-    timeout = "10s"
-
-# Metrics
-[[services]]
-  internal_port = 8125
-  protocol = "udp"
-
-  [[services.ports]]
-    port = 8125
-
 [[vm]]
   memory = '512mb'
   cpu_kind = 'shared'
