@@ -43,12 +43,10 @@ func run(log *slog.Logger) error {
 	flag.Parse()
 	switch flag.Arg(0) {
 	default:
-		if a.Config.EnableDatadog {
-			if err := datadog.Start(a); err != nil {
-				return err
-			}
-			defer datadog.Stop()
+		if err := datadog.Start(a); err != nil {
+			return err
 		}
+		defer datadog.Stop()
 
 		router := router.NewRouter(a)
 		a.Log.Info("listening", "url", "http://"+a.Config.Addr)
