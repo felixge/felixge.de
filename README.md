@@ -2,8 +2,10 @@
 
 ## Local Development
 
+Requires [task](https://github.com/go-task/task) and [air](https://github.com/cosmtrek/air).
+
 ```bash
-$ air
+$ task
 ```
 
 ## Credits
