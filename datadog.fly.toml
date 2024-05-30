@@ -6,21 +6,18 @@ kill_timeout = 5
 [env]
   DD_SITE = "datadoghq.com"
   DD_APM_NON_LOCAL_TRAFFIC = true
+  DD_DOGSTATSD_NON_LOCAL_TRAFFIC = true
 
 [build]
   image = "datadog/agent:7"
 
+
+# APM
 [[services]]
   internal_port = 8126
   protocol = "tcp"
 
   [[services.ports]]
-    force_https = true
-    handlers = ["http"]
-    port = 8126
-
-  [[services.ports]]
-    handlers = ["tls", "http"]
     port = 8126
 
   [[services.tcp_checks]]
@@ -28,6 +25,14 @@ kill_timeout = 5
     interval = "15s"
     restart_limit = 0 
     timeout = "10s"
+
+# Metrics
+[[services]]
+  internal_port = 8125
+  protocol = "udp"
+
+  [[services.ports]]
+    port = 8125
 
 [[vm]]
   memory = '512mb'
