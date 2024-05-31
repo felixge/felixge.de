@@ -1,7 +1,7 @@
 package appcontext
 
 import (
-	"embed"
+	"io/fs"
 	"log/slog"
 
 	"github.com/felixge/felixge.de/commons/config"
@@ -14,5 +14,5 @@ type AppContext struct {
 	Log       *slog.Logger
 	Templates *templates.Templates
 	Markdown  *markdown.Markdown
-	FS        embed.FS
+	FS        fs.FS
 }

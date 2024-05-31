@@ -4,8 +4,8 @@ Hello. This is my website.
 
 ## Links
 
-* [Blog Posts](/blog)
+* [Blog](/blog)
 * [Twitter](https://twitter.com/felixge)
-* [LinkedIn](https://www.linkedin.com/in/felixg2/)
 * [GitHub](https://github.com/felixge)
+* [LinkedIn](https://www.linkedin.com/in/felixg2/)
 * [YouTube](https://www.youtube.com/@felix.geisendoerfer)

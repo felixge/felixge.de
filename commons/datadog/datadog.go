@@ -15,7 +15,7 @@ var HttpClient = http.DefaultClient
 var started bool
 
 func Start(a *appcontext.AppContext) error {
-	if !a.Config.EnableDatadog {
+	if !a.Config.Datadog {
 		return nil
 	}
 	started = true

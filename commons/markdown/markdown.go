@@ -2,7 +2,7 @@ package markdown
 
 import (
 	"bytes"
-	"embed"
+	"io/fs"
 
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/ast"
@@ -11,16 +11,16 @@ import (
 	"github.com/yuin/goldmark/text"
 )
 
-func NewMarkdown(fs embed.FS) *Markdown {
+func NewMarkdown(fs fs.FS) *Markdown {
 	return &Markdown{fs: fs}
 }
 
 type Markdown struct {
-	fs embed.FS
+	fs fs.FS
 }
 
 func (r *Markdown) Render(path string) (*RenderResult, error) {
-	data, err := r.fs.ReadFile(path)
+	data, err := fs.ReadFile(r.fs, path)
 	if err != nil {
 		return nil, err
 	}

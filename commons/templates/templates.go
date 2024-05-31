@@ -2,14 +2,13 @@ package templates
 
 import (
 	"bytes"
-	"embed"
 	"html/template"
 	"io/fs"
 	"net/http"
 	"strings"
 )
 
-func NewTemplates(resources embed.FS) *Templates {
+func NewTemplates(resources fs.FS) *Templates {
 	var paths []string
 	fs.WalkDir(resources, ".", func(path string, d fs.DirEntry, err error) error {
 		if strings.Contains(d.Name(), ".html") {

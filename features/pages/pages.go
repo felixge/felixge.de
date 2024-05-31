@@ -14,7 +14,7 @@ type templateData struct {
 	HTML  template.HTML
 }
 
-func PageHandler(d *appcontext.AppContext, path string) http.HandlerFunc {
+func Handler(d *appcontext.AppContext, path string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		result, err := d.Markdown.Render(path)
 		if err != nil {

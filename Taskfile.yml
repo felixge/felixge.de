@@ -5,21 +5,22 @@ tasks:
   default:
     env:
       DATADOG: false
+      EMBEDFS: false
     cmds:
       - air
 
-  create:
+  deploy:
+    desc: Deploy the main Go application.
     cmds:
       - fly apps list | grep -E 'felixge ' || fly apps create felixge
-      - fly apps list | grep -E 'felixge-datadog ' || fly apps create felixge-datadog
+      - fly deploy -e DD_VERSION="$(git describe --dirty --always)"
 
-  deploy:
-    deps: [deploy-felixge, deploy-datadog]
-
-  deploy-felixge:
-    cmds:
-      - fly deploy
+  deploy-all:
+    desc: Deploy everything.
+    deps: [deploy, deploy-datadog]
 
   deploy-datadog:
+    desc: Deploy the datadog agent.
     cmds:
+      - fly apps list | grep -E 'felixge-datadog ' || fly apps create felixge-datadog
       - fly deploy --config ./datadog.fly.toml

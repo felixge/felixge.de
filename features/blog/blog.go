@@ -1,4 +1,4 @@
-package home
+package blog
 
 import (
 	"net/http"
@@ -11,7 +11,7 @@ type templateData struct {
 	Posts []*posts.Post
 }
 
-func HomeHandler(d *appcontext.AppContext) http.HandlerFunc {
+func Handler(d *appcontext.AppContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		posts, err := posts.Posts(r.Context(), d.Log)
 		if err != nil {
@@ -19,6 +19,6 @@ func HomeHandler(d *appcontext.AppContext) http.HandlerFunc {
 			return
 		}
 		tmplData := &templateData{Posts: posts}
-		d.Templates.Render(w, "home.html", tmplData)
+		d.Templates.Render(w, "blog.html", tmplData)
 	}
 }

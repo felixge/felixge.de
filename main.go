@@ -12,6 +12,7 @@ import (
 	"github.com/felixge/felixge.de/commons/appcontext"
 	"github.com/felixge/felixge.de/commons/config"
 	"github.com/felixge/felixge.de/commons/datadog"
+	"github.com/felixge/felixge.de/commons/fs"
 	"github.com/felixge/felixge.de/commons/logger"
 	"github.com/felixge/felixge.de/commons/markdown"
 	"github.com/felixge/felixge.de/commons/router"
@@ -20,7 +21,7 @@ import (
 )
 
 //go:embed features/*/*.html commons/*/*.html content/*/*.md
-var fs embed.FS
+var embedFS embed.FS
 
 func main() {
 	log := logger.NewLogger()
@@ -33,8 +34,10 @@ func main() {
 
 func run(log *slog.Logger) error {
 	ctx := context.Background()
+	config := config.EnvConfig()
+	fs := fs.New(embedFS, os.DirFS("."), config)
 	a := &appcontext.AppContext{
-		Config:    config.EnvConfig(),
+		Config:    config,
 		Log:       log,
 		Templates: templates.NewTemplates(fs),
 		Markdown:  markdown.NewMarkdown(fs),
