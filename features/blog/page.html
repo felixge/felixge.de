@@ -3,5 +3,9 @@
     {{template "head" .Title}}
     <body>
         {{ .HTML }}
+        {{ if .Reload }}
+        <script>new EventSource("/reload").onmessage = () => { location.reload() }</script>
+        {{ end }}
     </body>
+
 </html>

@@ -10,8 +10,9 @@ import (
 )
 
 type templateData struct {
-	Title string
-	HTML  template.HTML
+	Title  string
+	HTML   template.HTML
+	Reload bool
 }
 
 func Handler(d *appcontext.AppContext, path string) http.HandlerFunc {
@@ -22,8 +23,9 @@ func Handler(d *appcontext.AppContext, path string) http.HandlerFunc {
 		}
 		// string(data).pri
 		tmplData := &templateData{
-			Title: result.Title,
-			HTML:  template.HTML(result.HTML),
+			Title:  result.Title,
+			HTML:   template.HTML(result.HTML),
+			Reload: !d.Config.EmbedFS,
 		}
 		d.Templates.Render(w, "page.html", tmplData)
 	}

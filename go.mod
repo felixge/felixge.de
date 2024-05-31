@@ -3,10 +3,12 @@ module github.com/felixge/felixge.de
 go 1.22.2
 
 require (
+	github.com/fsnotify/fsnotify v1.7.0
 	github.com/lmittmann/tint v1.0.4
 	github.com/mmcdole/gofeed v1.3.0
 	github.com/sourcegraph/conc v0.3.0
 	github.com/stretchr/testify v1.9.0
+	github.com/yuin/goldmark v1.7.1
 	gopkg.in/DataDog/dd-trace-go.v1 v1.39.0-alpha.1.0.20240529181757-ffa874a7df9c
 )
 
@@ -47,7 +49,6 @@ require (
 	github.com/secure-systems-lab/go-securesystemslib v0.7.0 // indirect
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
 	github.com/tinylib/msgp v1.1.8 // indirect
-	github.com/yuin/goldmark v1.7.1 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect
 	golang.org/x/mod v0.16.0 // indirect
