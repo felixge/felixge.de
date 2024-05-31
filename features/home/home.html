@@ -6,14 +6,14 @@
         <h2>Posts</h2>
         <table>
             <thead>
-                <th>Title</th>
                 <th>Date</th>
+                <th>Title</th>
             </thead>
             <tbody>
                 {{range .Posts}}
                     <tr>
-                        <td><a href="{{.URL}}">{{ .Title }}</a></td>
                         <td>{{template "date" .PubDate}}</td>
+                        <td><a href="{{.URL}}">{{ .Title }}</a></td>
                     </tr>
                 {{end}}
             </tbody>

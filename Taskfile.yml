@@ -3,6 +3,8 @@ version: '3'
 
 tasks:
   default:
+    env:
+      DATADOG: false
     cmds:
       - air
 

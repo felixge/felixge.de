@@ -13,13 +13,14 @@ import (
 	"github.com/felixge/felixge.de/commons/config"
 	"github.com/felixge/felixge.de/commons/datadog"
 	"github.com/felixge/felixge.de/commons/logger"
+	"github.com/felixge/felixge.de/commons/markdown"
 	"github.com/felixge/felixge.de/commons/router"
 	"github.com/felixge/felixge.de/commons/templates"
 	"github.com/felixge/felixge.de/features/posts"
 )
 
-//go:embed features/*/*.html commons/*/*.html
-var html embed.FS
+//go:embed features/*/*.html commons/*/*.html content/*/*.md
+var fs embed.FS
 
 func main() {
 	log := logger.NewLogger()
@@ -35,7 +36,9 @@ func run(log *slog.Logger) error {
 	a := &appcontext.AppContext{
 		Config:    config.EnvConfig(),
 		Log:       log,
-		Templates: templates.NewTemplates(html),
+		Templates: templates.NewTemplates(fs),
+		Markdown:  markdown.NewMarkdown(fs),
+		FS:        fs,
 	}
 
 	a.Log.Info("starting", "config", a.Config)
@@ -48,7 +51,10 @@ func run(log *slog.Logger) error {
 		}
 		defer datadog.Stop()
 
-		router := router.NewRouter(a)
+		router, err := router.NewRouter(a)
+		if err != nil {
+			return err
+		}
 		a.Log.Info("listening", "url", "http://"+a.Config.Addr)
 		if err := http.ListenAndServe(a.Config.Addr, router); err != nil {
 			return fmt.Errorf("failed to listen: %w", err)
