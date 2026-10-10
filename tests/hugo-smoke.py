@@ -31,6 +31,9 @@ class HTML(HTMLParser):
         self.in_footer = False
         self.lang = None
         self.navigation = []
+        self.current_pages = []
+        self.navigation_text = ""
+        self.nav_labels = []
         self.in_nav = False
         self.tables = []
         self.in_table = None
@@ -51,6 +54,7 @@ class HTML(HTMLParser):
                 self.in_table["headers"].append(attrs)
         if tag == "nav":
             self.in_nav = True
+            self.nav_labels.append(attrs.get("aria-label"))
         if tag == "html":
             self.lang = attrs.get("lang")
         if tag == "img":
@@ -63,6 +67,8 @@ class HTML(HTMLParser):
             self.links.append(attrs["href"])
             if self.in_nav:
                 self.navigation.append(attrs["href"])
+                if attrs.get("aria-current") == "page":
+                    self.current_pages.append(attrs["href"])
         if tag in ("img", "script") and "src" in attrs:
             self.assets.append(attrs["src"])
         if tag == "link" and attrs.get("rel") == "stylesheet":
@@ -70,6 +76,10 @@ class HTML(HTMLParser):
             self.stylesheets.append(attrs["href"])
         if tag == "meta":
             self.meta[attrs.get("name", attrs.get("http-equiv"))] = attrs.get("content")
+
+    def handle_data(self, data):
+        if self.in_nav:
+            self.navigation_text += data
 
     def handle_endtag(self, tag):
         if tag == "footer":
@@ -83,9 +93,21 @@ class HTML(HTMLParser):
 def check(output, base, preview):
     expected = set(ROUTES) | ({DRAFT} if preview else set())
     home = HTML(output / "index.html")
-    home_posts = [urlsplit(link).path.lstrip("/") for link in home.links
+    sections = ["blog/", "speaking/", "about/", "contact/"]
+    assert [link for link in home.links if link in ["/" + section for section in sections]] == [
+        "/" + section for section in sections]
+    assert not home.tables, "Homepage should only link to the main sections"
+    assert not any(urlsplit(link).path.lstrip("/") in expected for link in home.links)
+    blog = HTML(output / "blog/index.html")
+    speaking = HTML(output / "speaking/index.html")
+    blog_posts = [urlsplit(link).path.lstrip("/") for link in blog.links
                   if urlsplit(link).path.lstrip("/") in expected]
-    assert set(home_posts) == expected, "Homepage post list changed"
+    assert set(blog_posts) == expected, "Blog post list changed"
+    for section in sections:
+        text = (output / section / "index.html").read_text()
+        assert "Published:" not in text and "disqus.com/embed.js" not in text
+    assert "/contact/" in HTML(output / "about/index.html").links
+    assert "/contact/" in speaking.links
     for route in expected:
         page = output / route / "index.html"
         assert page.is_file(), f"Missing route: {route}"
@@ -101,7 +123,7 @@ def check(output, base, preview):
         assert channel is not None
         items = channel.findall("item")
         links = [item.findtext("link") for item in items]
-        assert links == [base + route for route in home_posts], f"Feed order changed: {feed}"
+        assert links == [base + route for route in blog_posts], f"Feed order changed: {feed}"
         assert all(item.findtext("guid") == item.findtext("link") for item in items)
         assert all(item.findtext("pubDate") and item.findtext("description") for item in items)
         assert channel.findtext("language") == "en-US"
@@ -125,14 +147,30 @@ def check(output, base, preview):
     assert len(home.stylesheets) == 1, "Expected one plain CSS stylesheet"
     stylesheet = output / urlsplit(home.stylesheets[0]).path.lstrip("/")
     assert 0 < stylesheet.stat().st_size < 6000, "Keep theme CSS small"
-    for route in ["", "404.html", *expected]:
+    for route in ["", "404.html", *sections, *expected]:
         page = output / (route if route == "404.html" else route + "index.html")
         html = HTML(page)
         assert html.lang == "en"
         assert {"head", "header", "nav", "main", "footer"} <= html.tags
         assert html.meta.get("viewport", "").replace(" ", "") == "width=device-width,initial-scale=1"
         assert "#main" in html.links and "main" in html.ids
-        assert html.navigation == ["/", "mailto:hi@felixge.de"]
+        current = "/" + route
+        breadcrumbs = ["/"]
+        if route in expected:
+            breadcrumbs.append("/blog/")
+        if route:
+            breadcrumbs.append(current)
+        assert html.nav_labels == ["Breadcrumb"]
+        assert html.navigation == breadcrumbs, f"Incorrect breadcrumbs: {route}"
+        assert html.current_pages == [current]
+        assert "Home" in html.navigation_text
+        if route:
+            assert "›" in html.navigation_text
+        for link in breadcrumbs:
+            target = output / link.lstrip("/")
+            if not link.endswith(".html"):
+                target /= "index.html"
+            assert target.is_file(), f"Missing breadcrumb target: {link}"
         logos = [img for img in html.images if img.get("src") ==
                  "/img/get-on-the-squirrel.png"]
         assert len(logos) == 1 and logos[0] in html.footer_images
@@ -141,12 +179,14 @@ def check(output, base, preview):
         assert logo.get("loading") == "lazy" and logo.get("decoding") == "async"
     assert (output / "img/get-on-the-squirrel.png").read_bytes() == (
         ROOT / "themes/felixge/static/img/get-on-the-squirrel.png").read_bytes()
-    assert {"blog", "speaking", "contact"} <= home.ids
-    assert [table["label"] for table in home.tables] == ["blog", "speaking"]
+    assert {"blog", "speaking", "about", "contact"} <= home.ids
+    assert [table["label"] for table in blog.tables] == ["blog"]
+    assert [table["label"] for table in speaking.tables] == ["speaking"]
     talk_count = sum(line.startswith("- title:") for line in
                      (ROOT / "data/talks.yml").read_text().splitlines())
-    assert [table["rows"] for table in home.tables] == [len(expected) + 1, talk_count + 1]
-    for table in home.tables:
+    tables = blog.tables + speaking.tables
+    assert [table["rows"] for table in tables] == [len(expected) + 1, talk_count + 1]
+    for table in tables:
         assert len(table["headers"]) == 2
         assert all(header.get("scope") == "col" for header in table["headers"])
     alias = HTML(output / ALIAS)
