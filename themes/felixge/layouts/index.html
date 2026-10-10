@@ -1,8 +1,10 @@
 {{ define "main" -}}
 <h1>{{ .Site.Title }}</h1>
-<ul>
-  {{ range (where .Site.RegularPages "Type" "pages").ByWeight }}
-  <li><a id="{{ .File.ContentBaseName }}" href="{{ .RelPermalink }}">{{ .Title }}</a></li>
-  {{ end }}
-</ul>
+<nav aria-label="Main navigation">
+  <ul>
+    {{ range (where .Site.RegularPages "Type" "pages").ByWeight }}
+    <li><a id="{{ .File.ContentBaseName }}" href="{{ .RelPermalink }}">{{ .Title }}</a></li>
+    {{ end }}
+  </ul>
+</nav>
 {{- end }}

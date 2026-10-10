@@ -34,6 +34,7 @@ class HTML(HTMLParser):
         self.current_pages = []
         self.navigation_text = ""
         self.nav_labels = []
+        self.navigation_by_label = {}
         self.in_nav = False
         self.tables = []
         self.in_table = None
@@ -55,6 +56,7 @@ class HTML(HTMLParser):
         if tag == "nav":
             self.in_nav = True
             self.nav_labels.append(attrs.get("aria-label"))
+            self.navigation_by_label[self.nav_labels[-1]] = []
         if tag == "html":
             self.lang = attrs.get("lang")
         if tag == "img":
@@ -67,6 +69,7 @@ class HTML(HTMLParser):
             self.links.append(attrs["href"])
             if self.in_nav:
                 self.navigation.append(attrs["href"])
+                self.navigation_by_label[self.nav_labels[-1]].append(attrs["href"])
                 if attrs.get("aria-current") == "page":
                     self.current_pages.append(attrs["href"])
         if tag in ("img", "script") and "src" in attrs:
@@ -160,8 +163,10 @@ def check(output, base, preview):
             breadcrumbs.append("/blog/")
         if route:
             breadcrumbs.append(current)
-        assert html.nav_labels == ["Breadcrumb"]
-        assert html.navigation == breadcrumbs, f"Incorrect breadcrumbs: {route}"
+        assert html.nav_labels == (["Breadcrumb"] if route else ["Breadcrumb", "Main navigation"])
+        assert html.navigation_by_label["Breadcrumb"] == breadcrumbs, f"Incorrect breadcrumbs: {route}"
+        if not route:
+            assert html.navigation_by_label["Main navigation"] == ["/" + section for section in sections]
         assert html.current_pages == [current]
         assert "Home" in html.navigation_text
         if route:
