@@ -4,7 +4,7 @@
 <title>{{ .Title }} &middot; {{ .Site.Title }}</title>
 
 {{ $options := (dict "targetPath" "css/main.css" "outputStyle" "compressed" "enableSourceMap" false ) -}}
-{{ $main := resources.Get "sass/main.scss" | resources.ToCSS $options }}
+{{ $main := resources.Get "sass/main.scss" | css.Sass $options }}
 <link rel="stylesheet" href="{{ $main.RelPermalink }}" />
 
 <link href="https://feeds.feedburner.com/{{ .Site.Params.feedburnerShortname }}" type="application/rss+xml" rel="alternate" title="Posts">

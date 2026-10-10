@@ -1,5 +1,6 @@
 ---
 title: "Go + Raspberry Pi powered Alarm Clock"
+slug: go-raspberry-pi-powered-alarm-clock
 date: 2015-03-05T16:30:00+01:00
 ---
 

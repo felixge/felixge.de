@@ -8,7 +8,7 @@
   You can subscribe to updates via <a href="https://feeds.feedburner.com/{{ .Site.Params.feedburnerShortname }}">RSS</a> or <a href="https://feedburner.google.com/fb/a/mailverify?uri={{ .Site.Params.feedburnerShortname }}">E-Mail</a>.
 </p>
 
-{{- $pages := where .Site.RegularPages "Type" "in" .Site.Params.MainSections -}}
+{{- $pages := where .Site.RegularPages "Type" "in" .Site.MainSections -}}
 <table class="toc">
   <tbody>
   {{ range $pages }}
@@ -36,7 +36,7 @@
 
 <table class="toc">
   <tbody>
-  {{ range $.Site.Data.talks }}
+  {{ range hugo.Data.talks }}
     <tr>
       <td class="title">
         <span>

@@ -1,15 +1,22 @@
 baseURL: "https://felixge.de/"
-languageCode: "en-us"
+locale: "en-US"
 title: "Felix Geisendörfer"
-googleAnalytics: "UA-3306079-13"
-disqusShortname: felixge
+services:
+  disqus:
+    shortname: felixge
 permalinks:
   posts: /:year/:month/:day/:slug/
+
+# The homepage lists all posts; archive pages only need feeds.
+outputs:
+  section: [RSS]
+  taxonomy: [RSS]
+  term: [RSS]
 
 # Keep old jekyll URL for RSS: /posts.atom.xml
 outputFormats:
   RSS:
-    mediatype: "application/rss"
+    mediatype: "application/rss+xml"
     baseName: "posts.atom"
 
 theme: "felixge"
