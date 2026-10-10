@@ -1,13 +1,13 @@
+{{ if not .IsHome -}}
 <header class="site-header">
   <nav aria-label="Breadcrumb">
     <ol class="breadcrumbs">
-      <li><a href="/"{{ if .IsHome }} aria-current="page"{{ end }}>{{ .Site.Title }}</a></li>
-      {{ if not .IsHome }}
-        {{ if eq .Type "posts" }}
-          <li><span aria-hidden="true">&rsaquo;</span><a href="{{ (.Site.GetPage "/blog").RelPermalink }}">Blog</a></li>
-        {{ end }}
-        <li><span aria-hidden="true">&rsaquo;</span><a href="{{ .RelPermalink }}" aria-current="page">{{ if eq .Kind "404" }}Page not found{{ else }}{{ .Title }}{{ end }}</a></li>
+      <li><a href="/">{{ .Site.Title }}</a></li>
+      {{ if eq .Type "posts" }}
+        <li><span aria-hidden="true">&rsaquo;</span><a href="{{ (.Site.GetPage "/blog").RelPermalink }}">Blog</a></li>
       {{ end }}
+      <li><span aria-hidden="true">&rsaquo;</span><a href="{{ .RelPermalink }}" aria-current="page">{{ if eq .Kind "404" }}Page not found{{ else }}{{ .Title }}{{ end }}</a></li>
     </ol>
   </nav>
 </header>
+{{- end }}

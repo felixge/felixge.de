@@ -96,9 +96,9 @@ class HTML(HTMLParser):
 def check(output, base, preview):
     expected = set(ROUTES) | ({DRAFT} if preview else set())
     home = HTML(output / "index.html")
-    sections = ["blog/", "about/", "speaking/", "contact/"]
-    assert home.navigation_by_label["Main navigation"] == [
-        "/" + section for section in sections]
+    sections = ["about/", "blog/", "speaking/", "contact/"]
+    menu_links = ["/", "/blog/", "/speaking/", "/contact/"]
+    assert home.navigation_by_label["Main navigation"] == menu_links
     blog = HTML(output / "blog/index.html")
     speaking = HTML(output / "speaking/index.html")
     post_links = [link for link in blog.links if urlsplit(link).path.lstrip("/") in expected]
@@ -106,14 +106,16 @@ def check(output, base, preview):
     assert set(blog_posts) == expected, "Blog post list changed"
     assert post_links == ["/" + route for route in blog_posts], "Blog links must be site-relative"
     home_post_links = [link for link in home.links if urlsplit(link).path.lstrip("/") in expected]
-    assert home_post_links == post_links, "Homepage must show the same posts as Blog"
+    assert not home_post_links, "Homepage should show About content, not the post list"
     local = "http://localhost:1313/"
     assert [urljoin(local + "blog/", link) for link in post_links] == [
         local + route for route in blog_posts], "Blog links must stay on localhost during development"
     for section in sections:
         text = (output / section / "index.html").read_text()
         assert "Published:" not in text and "disqus.com/embed.js" not in text
-    assert "/contact/" in HTML(output / "about/index.html").links
+    about = HTML(output / "about/index.html")
+    assert "/contact/" in about.links
+    assert set(about.links) - {"/about/"} <= set(home.links), "Homepage must include the About page links"
     assert "/contact/" in speaking.links
     for route in expected:
         page = output / route / "index.html"
@@ -162,15 +164,17 @@ def check(output, base, preview):
         assert html.meta.get("viewport", "").replace(" ", "") == "width=device-width,initial-scale=1"
         assert "#main" in html.links and "main" in html.ids
         current = "/" + route
-        breadcrumbs = ["/"]
+        breadcrumbs = ["/"] if route else []
         if route in expected:
             breadcrumbs.append("/blog/")
         if route:
             breadcrumbs.append(current)
-        assert html.nav_labels == (["Breadcrumb"] if route else ["Breadcrumb", "Main navigation"])
-        assert html.navigation_by_label["Breadcrumb"] == breadcrumbs, f"Incorrect breadcrumbs: {route}"
-        if not route:
-            assert html.navigation_by_label["Main navigation"] == ["/" + section for section in sections]
+        assert html.nav_labels == (["Breadcrumb"] if route else ["Main navigation"])
+        if route:
+            assert html.navigation_by_label["Breadcrumb"] == breadcrumbs, f"Incorrect breadcrumbs: {route}"
+        else:
+            assert "Breadcrumb" not in html.navigation_by_label
+            assert html.navigation_by_label["Main navigation"] == menu_links
         assert html.current_pages == [current]
         assert "Felix Geisendörfer" in html.navigation_text
         if route:
@@ -189,13 +193,13 @@ def check(output, base, preview):
     assert (output / "img/get-on-the-squirrel.png").read_bytes() == (
         ROOT / "themes/felixge/static/img/get-on-the-squirrel.png").read_bytes()
     assert {"blog", "speaking", "about", "contact"} <= home.ids
-    assert [table["label"] for table in home.tables] == ["blog-posts"]
+    assert not home.tables, "Homepage should show the biography, not tables"
     assert [table["label"] for table in blog.tables] == ["blog"]
     assert [table["label"] for table in speaking.tables] == ["speaking"]
     talk_count = sum(line.startswith("- title:") for line in
                      (ROOT / "data/talks.yml").read_text().splitlines())
-    tables = home.tables + blog.tables + speaking.tables
-    assert [table["rows"] for table in tables] == [len(expected) + 1, len(expected) + 1, talk_count + 1]
+    tables = blog.tables + speaking.tables
+    assert [table["rows"] for table in tables] == [len(expected) + 1, talk_count + 1]
     for table in tables:
         assert len(table["headers"]) == 2
         assert all(header.get("scope") == "col" for header in table["headers"])

@@ -4,14 +4,14 @@
     <nav class="home-navigation" aria-label="Main navigation">
       <ul>
         {{ range (where .Site.RegularPages "Type" "pages").ByWeight }}
-        <li><a id="{{ .File.ContentBaseName }}" href="{{ .RelPermalink }}">{{ .Title }}</a></li>
+        {{ $homeLink := eq .File.ContentBaseName "about" }}
+        <li><a id="{{ .File.ContentBaseName }}" href="{{ if $homeLink }}{{ $.Site.Home.RelPermalink }}{{ else }}{{ .RelPermalink }}{{ end }}"{{ if $homeLink }} aria-current="page"{{ end }}>{{ .Title }}</a></li>
         {{ end }}
       </ul>
     </nav>
   </header>
-  <section aria-labelledby="blog-posts">
-    <h1 id="blog-posts">Blog</h1>
-    {{ partial "blog-content.html" (dict "Page" (.Site.GetPage "/blog") "Label" "blog-posts") }}
-  </section>
+  <div class="home-biography">
+    {{ (.Site.GetPage "/about").Content }}
+  </div>
 </article>
 {{- end }}
