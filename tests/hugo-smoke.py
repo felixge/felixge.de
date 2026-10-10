@@ -1,4 +1,4 @@
-"""Build and check production and preview output with Python standard libraries."""
+"""Build and check production, preview, and local output with Python standard libraries."""
 
 import os
 from pathlib import Path
@@ -103,9 +103,13 @@ def check(output, base, preview):
     assert not any(urlsplit(link).path.lstrip("/") in expected for link in home.links)
     blog = HTML(output / "blog/index.html")
     speaking = HTML(output / "speaking/index.html")
-    blog_posts = [urlsplit(link).path.lstrip("/") for link in blog.links
-                  if urlsplit(link).path.lstrip("/") in expected]
+    post_links = [link for link in blog.links if urlsplit(link).path.lstrip("/") in expected]
+    blog_posts = [urlsplit(link).path.lstrip("/") for link in post_links]
     assert set(blog_posts) == expected, "Blog post list changed"
+    assert post_links == ["/" + route for route in blog_posts], "Blog links must be site-relative"
+    local = "http://localhost:1313/"
+    assert [urljoin(local + "blog/", link) for link in post_links] == [
+        local + route for route in blog_posts], "Blog links must stay on localhost during development"
     for section in sections:
         text = (output / section / "index.html").read_text()
         assert "Published:" not in text and "disqus.com/embed.js" not in text
@@ -217,6 +221,7 @@ def main():
         for name, base, preview in [
             ("production", "https://felixge.de/", False),
             ("preview", "https://preview.example.com/", True),
+            ("local", "http://localhost:1313/", True),
         ]:
             output = temp / name
             command = ["hugo", "--gc", "--minify", "--panicOnWarning", "--noBuildLock",
