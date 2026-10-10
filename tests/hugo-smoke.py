@@ -27,6 +27,8 @@ class HTML(HTMLParser):
         self.tags = set()
         self.stylesheets = []
         self.images = []
+        self.footer_images = []
+        self.in_footer = False
         self.lang = None
         self.navigation = []
         self.in_nav = False
@@ -37,6 +39,8 @@ class HTML(HTMLParser):
     def handle_starttag(self, tag, attrs):
         attrs = dict(attrs)
         self.tags.add(tag)
+        if tag == "footer":
+            self.in_footer = True
         if tag == "table":
             self.in_table = {"label": attrs.get("aria-labelledby"), "rows": 0, "headers": []}
             self.tables.append(self.in_table)
@@ -51,6 +55,8 @@ class HTML(HTMLParser):
             self.lang = attrs.get("lang")
         if tag == "img":
             self.images.append(attrs)
+            if self.in_footer:
+                self.footer_images.append(attrs)
         if "id" in attrs:
             self.ids.add(attrs["id"])
         if tag == "a" and "href" in attrs:
@@ -66,6 +72,8 @@ class HTML(HTMLParser):
             self.meta[attrs.get("name", attrs.get("http-equiv"))] = attrs.get("content")
 
     def handle_endtag(self, tag):
+        if tag == "footer":
+            self.in_footer = False
         if tag == "table":
             self.in_table = None
         if tag == "nav":
@@ -121,13 +129,18 @@ def check(output, base, preview):
         page = output / (route if route == "404.html" else route + "index.html")
         html = HTML(page)
         assert html.lang == "en"
-        assert {"head", "header", "nav", "main"} <= html.tags
+        assert {"head", "header", "nav", "main", "footer"} <= html.tags
         assert html.meta.get("viewport", "").replace(" ", "") == "width=device-width,initial-scale=1"
         assert "#main" in html.links and "main" in html.ids
         assert html.navigation == ["/", "mailto:hi@felixge.de"]
-        assert "logo" not in html.ids
-        assert "/img/get-on-the-squirrel.png" not in html.assets
-    assert not (output / "img/get-on-the-squirrel.png").exists()
+        logos = [img for img in html.images if img.get("src") ==
+                 "/img/get-on-the-squirrel.png"]
+        assert len(logos) == 1 and logos[0] in html.footer_images
+        logo = logos[0]
+        assert logo.get("alt") and logo.get("width") == "939" and logo.get("height") == "600"
+        assert logo.get("loading") == "lazy" and logo.get("decoding") == "async"
+    assert (output / "img/get-on-the-squirrel.png").read_bytes() == (
+        ROOT / "themes/felixge/static/img/get-on-the-squirrel.png").read_bytes()
     assert {"blog", "speaking", "contact"} <= home.ids
     assert [table["label"] for table in home.tables] == ["blog", "speaking"]
     talk_count = sum(line.startswith("- title:") for line in
