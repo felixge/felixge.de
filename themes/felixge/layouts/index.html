@@ -1,5 +1,4 @@
 {{ define "main" -}}
-{{ $about := .Site.GetPage "/about" }}
 <article class="home-document">
   <header class="home-introduction">
     <h1>{{ .Site.Title }}</h1>
@@ -11,8 +10,9 @@
       </ul>
     </nav>
   </header>
-  <div class="home-biography">
-    {{ $about.Content }}
-  </div>
+  <section aria-labelledby="blog-posts">
+    <h2 id="blog-posts">Blog</h2>
+    {{ partial "blog-content.html" (dict "Page" (.Site.GetPage "/blog") "Label" "blog-posts") }}
+  </section>
 </article>
 {{- end }}

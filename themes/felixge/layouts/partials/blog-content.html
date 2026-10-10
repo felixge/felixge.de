@@ -1,0 +1,19 @@
+{{ $page := .Page }}
+{{ $page.Content }}
+<p>You can subscribe to updates via <a href="https://feeds.feedburner.com/{{ $page.Site.Params.feedburnerShortname }}">RSS</a> or <a href="https://feedburner.google.com/fb/a/mailverify?uri={{ $page.Site.Params.feedburnerShortname }}">E-Mail</a>.</p>
+
+<table class="entries" aria-labelledby="{{ .Label }}">
+  <thead>
+    <tr><th scope="col">Post</th><th scope="col" class="date">Published</th></tr>
+  </thead>
+  <tbody>
+  {{ range where $page.Site.RegularPages "Type" "posts" }}
+    <tr>
+      <td><a href="{{ .RelPermalink }}">{{ .Title }}</a></td>
+      <td class="date"><time datetime="{{ .Date.Format "2006-01-02T15:04:05Z0700" }}">{{ .Date.Format "Jan 02, 2006" }}</time></td>
+    </tr>
+  {{ end }}
+  </tbody>
+</table>
+
+<p>I have been blogging since 2006, my older posts can be found <a href="http://debuggable.com/posts/archive">here</a>.</p>

@@ -1,21 +1,4 @@
 {{ define "main" -}}
 <h1 id="blog">{{ .Title }}</h1>
-{{ .Content }}
-<p>You can subscribe to updates via <a href="https://feeds.feedburner.com/{{ .Site.Params.feedburnerShortname }}">RSS</a> or <a href="https://feedburner.google.com/fb/a/mailverify?uri={{ .Site.Params.feedburnerShortname }}">E-Mail</a>.</p>
-
-<table class="entries" aria-labelledby="blog">
-  <thead>
-    <tr><th scope="col">Post</th><th scope="col" class="date">Published</th></tr>
-  </thead>
-  <tbody>
-  {{ range where .Site.RegularPages "Type" "posts" }}
-    <tr>
-      <td><a href="{{ .RelPermalink }}">{{ .Title }}</a></td>
-      <td class="date"><time datetime="{{ .Date.Format "2006-01-02T15:04:05Z0700" }}">{{ .Date.Format "Jan 02, 2006" }}</time></td>
-    </tr>
-  {{ end }}
-  </tbody>
-</table>
-
-<p>I have been blogging since 2006, my older posts can be found <a href="http://debuggable.com/posts/archive">here</a>.</p>
+{{ partial "blog-content.html" (dict "Page" . "Label" "blog") }}
 {{- end }}

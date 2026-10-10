@@ -96,17 +96,17 @@ class HTML(HTMLParser):
 def check(output, base, preview):
     expected = set(ROUTES) | ({DRAFT} if preview else set())
     home = HTML(output / "index.html")
-    sections = ["about/", "blog/", "speaking/", "contact/"]
+    sections = ["blog/", "about/", "speaking/", "contact/"]
     assert home.navigation_by_label["Main navigation"] == [
         "/" + section for section in sections]
-    assert not home.tables, "Homepage should only link to the main sections"
-    assert not any(urlsplit(link).path.lstrip("/") in expected for link in home.links)
     blog = HTML(output / "blog/index.html")
     speaking = HTML(output / "speaking/index.html")
     post_links = [link for link in blog.links if urlsplit(link).path.lstrip("/") in expected]
     blog_posts = [urlsplit(link).path.lstrip("/") for link in post_links]
     assert set(blog_posts) == expected, "Blog post list changed"
     assert post_links == ["/" + route for route in blog_posts], "Blog links must be site-relative"
+    home_post_links = [link for link in home.links if urlsplit(link).path.lstrip("/") in expected]
+    assert home_post_links == post_links, "Homepage must show the same posts as Blog"
     local = "http://localhost:1313/"
     assert [urljoin(local + "blog/", link) for link in post_links] == [
         local + route for route in blog_posts], "Blog links must stay on localhost during development"
@@ -189,12 +189,13 @@ def check(output, base, preview):
     assert (output / "img/get-on-the-squirrel.png").read_bytes() == (
         ROOT / "themes/felixge/static/img/get-on-the-squirrel.png").read_bytes()
     assert {"blog", "speaking", "about", "contact"} <= home.ids
+    assert [table["label"] for table in home.tables] == ["blog-posts"]
     assert [table["label"] for table in blog.tables] == ["blog"]
     assert [table["label"] for table in speaking.tables] == ["speaking"]
     talk_count = sum(line.startswith("- title:") for line in
                      (ROOT / "data/talks.yml").read_text().splitlines())
-    tables = blog.tables + speaking.tables
-    assert [table["rows"] for table in tables] == [len(expected) + 1, talk_count + 1]
+    tables = home.tables + blog.tables + speaking.tables
+    assert [table["rows"] for table in tables] == [len(expected) + 1, len(expected) + 1, talk_count + 1]
     for table in tables:
         assert len(table["headers"]) == 2
         assert all(header.get("scope") == "col" for header in table["headers"])
