@@ -30,11 +30,21 @@ class HTML(HTMLParser):
         self.lang = None
         self.navigation = []
         self.in_nav = False
+        self.tables = []
+        self.in_table = None
         self.feed(path.read_text())
 
     def handle_starttag(self, tag, attrs):
         attrs = dict(attrs)
         self.tags.add(tag)
+        if tag == "table":
+            self.in_table = {"label": attrs.get("aria-labelledby"), "rows": 0, "headers": []}
+            self.tables.append(self.in_table)
+        if self.in_table is not None:
+            if tag == "tr":
+                self.in_table["rows"] += 1
+            if tag == "th":
+                self.in_table["headers"].append(attrs)
         if tag == "nav":
             self.in_nav = True
         if tag == "html":
@@ -56,6 +66,8 @@ class HTML(HTMLParser):
             self.meta[attrs.get("name", attrs.get("http-equiv"))] = attrs.get("content")
 
     def handle_endtag(self, tag):
+        if tag == "table":
+            self.in_table = None
         if tag == "nav":
             self.in_nav = False
 
@@ -117,7 +129,13 @@ def check(output, base, preview):
         assert "/img/get-on-the-squirrel.png" not in html.assets
     assert not (output / "img/get-on-the-squirrel.png").exists()
     assert {"blog", "speaking", "contact"} <= home.ids
-    assert "table" not in home.tags, "Homepage entries should use lists"
+    assert [table["label"] for table in home.tables] == ["blog", "speaking"]
+    talk_count = sum(line.startswith("- title:") for line in
+                     (ROOT / "data/talks.yml").read_text().splitlines())
+    assert [table["rows"] for table in home.tables] == [len(expected) + 1, talk_count + 1]
+    for table in home.tables:
+        assert len(table["headers"]) == 2
+        assert all(header.get("scope") == "col" for header in table["headers"])
     alias = HTML(output / ALIAS)
     assert alias.meta.get("robots") == "noindex"
     assert alias.meta.get("refresh") == (
