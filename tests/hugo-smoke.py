@@ -114,6 +114,8 @@ def check(output, base, preview):
         text = (output / section / "index.html").read_text()
         assert "Published:" not in text and "disqus.com/embed.js" not in text
     about = HTML(output / "about/index.html")
+    for route in ["index.html", "about/index.html"]:
+        assert "<h1>About</h1>" in (output / route).read_text(), "About heading missing"
     assert "/contact/" in about.links
     assert set(about.links) - {"/about/"} <= set(home.links), "Homepage must include the About page links"
     assert "/contact/" in speaking.links

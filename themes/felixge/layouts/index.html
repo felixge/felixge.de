@@ -1,4 +1,5 @@
 {{ define "main" -}}
+{{ $about := .Site.GetPage "/about" }}
 <article class="home-document">
   <header class="home-introduction">
     <nav class="home-navigation" aria-label="Main navigation">
@@ -11,7 +12,8 @@
     </nav>
   </header>
   <div class="home-biography">
-    {{ (.Site.GetPage "/about").Content }}
+    <h1>{{ $about.Params.heading | default $about.Title }}</h1>
+    {{ $about.Content }}
   </div>
 </article>
 {{- end }}
