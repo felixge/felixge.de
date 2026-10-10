@@ -1,13 +1,13 @@
 <!doctype html>
-<html>
-    {{- partial "head.html" . -}}
+<html lang="en">
+    <head>
+        {{- partial "head.html" . -}}
+    </head>
     <body>
+        <a class="skip-link" href="#main">Skip to content</a>
         {{- partial "header.html" . -}}
-        <div class="container">
-          <a id="logo" title="GET ON THE SQUIRREL - THERE'S NO TIME TO EXPLAIN" href="/">
-            <img src="/img/get-on-the-squirrel.png">
-          </a>
-        {{- block "main" . }}{{- end }}
-        </div>
+        <main id="main" tabindex="-1">
+            {{- block "main" . }}{{- end }}
+        </main>
     </body>
 </html>

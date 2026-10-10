@@ -28,4 +28,4 @@ markup:
     renderer:
       unsafe: true
   highlight:
-    style: pygments
+    noClasses: false

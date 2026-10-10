@@ -24,10 +24,19 @@ class HTML(HTMLParser):
         self.assets = []
         self.ids = set()
         self.meta = {}
+        self.tags = set()
+        self.stylesheets = []
+        self.images = []
+        self.lang = None
         self.feed(path.read_text())
 
     def handle_starttag(self, tag, attrs):
         attrs = dict(attrs)
+        self.tags.add(tag)
+        if tag == "html":
+            self.lang = attrs.get("lang")
+        if tag == "img":
+            self.images.append(attrs)
         if "id" in attrs:
             self.ids.add(attrs["id"])
         if tag == "a" and "href" in attrs:
@@ -36,6 +45,7 @@ class HTML(HTMLParser):
             self.assets.append(attrs["src"])
         if tag == "link" and attrs.get("rel") == "stylesheet":
             self.assets.append(attrs["href"])
+            self.stylesheets.append(attrs["href"])
         if tag == "meta":
             self.meta[attrs.get("name", attrs.get("http-equiv"))] = attrs.get("content")
 
@@ -82,7 +92,22 @@ def check(output, base, preview):
     alarm = "2015/03/05/go-raspberry-pi-powered-alarm-clock/"
     for source in (ROOT / "content/posts/go-raspberry-pi-alarm-clock").glob("*.jpg"):
         assert (output / alarm / source.name).read_bytes() == source.read_bytes()
-    assert (output / "css/main.css").stat().st_size > 1000
+    assert len(home.stylesheets) == 1, "Expected one plain CSS stylesheet"
+    stylesheet = output / urlsplit(home.stylesheets[0]).path.lstrip("/")
+    assert 0 < stylesheet.stat().st_size < 6000, "Keep theme CSS small"
+    for route in ["", "404.html", *expected]:
+        page = output / (route if route == "404.html" else route + "index.html")
+        html = HTML(page)
+        assert html.lang == "en"
+        assert {"head", "header", "nav", "main"} <= html.tags
+        assert html.meta.get("viewport", "").replace(" ", "") == "width=device-width,initial-scale=1"
+        assert "#main" in html.links and "main" in html.ids
+        assert {"/", "/#blog", "/#speaking", "/#contact"} <= set(html.links)
+        logo = next(img for img in html.images if img.get("src") ==
+                    "/img/get-on-the-squirrel.png")
+        assert logo.get("alt") and logo.get("width") == "939" and logo.get("height") == "600"
+    assert {"blog", "speaking", "contact"} <= home.ids
+    assert "table" not in home.tags, "Homepage entries should use lists"
     alias = HTML(output / ALIAS)
     assert alias.meta.get("robots") == "noindex"
     assert alias.meta.get("refresh") == (
