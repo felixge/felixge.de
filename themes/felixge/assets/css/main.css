@@ -35,7 +35,7 @@ body {
 }
 
 .site-header { margin-bottom: 1.5rem; font-size: 1rem; }
-#logo { display: inline-flex; align-items: center; gap: .75rem; max-width: 100%; }
+#logo { display: flex; align-items: center; justify-content: space-between; gap: .75rem; }
 #logo img { display: block; width: 4rem; flex-shrink: 0; }
 #logo span { min-width: 0; }
 .skip-link { position: absolute; top: .5rem; left: 1rem; padding: .25rem .5rem; background: var(--bg); }
