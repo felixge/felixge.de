@@ -99,13 +99,16 @@ def check(output, base, preview):
         page = output / (route if route == "404.html" else route + "index.html")
         html = HTML(page)
         assert html.lang == "en"
-        assert {"head", "header", "nav", "main"} <= html.tags
+        assert {"head", "header", "main"} <= html.tags
+        assert "nav" not in html.tags, "Keep the header to one home link"
         assert html.meta.get("viewport", "").replace(" ", "") == "width=device-width,initial-scale=1"
         assert "#main" in html.links and "main" in html.ids
-        assert {"/", "/#blog", "/#speaking", "/#contact"} <= set(html.links)
+        assert "/" in html.links
         logo = next(img for img in html.images if img.get("src") ==
                     "/img/get-on-the-squirrel.png")
-        assert logo.get("alt") and logo.get("width") == "939" and logo.get("height") == "600"
+        # The adjacent site name labels the home link; the image is decorative.
+        assert "alt" in logo and not logo["alt"]
+        assert logo.get("width") == "939" and logo.get("height") == "600"
     assert {"blog", "speaking", "contact"} <= home.ids
     assert "table" not in home.tags, "Homepage entries should use lists"
     alias = HTML(output / ALIAS)
