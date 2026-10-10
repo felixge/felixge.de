@@ -172,7 +172,7 @@ def check(output, base, preview):
         if not route:
             assert html.navigation_by_label["Main navigation"] == ["/" + section for section in sections]
         assert html.current_pages == [current]
-        assert "Home" in html.navigation_text
+        assert "Felix Geisendörfer" in html.navigation_text
         if route:
             assert "›" in html.navigation_text
         for link in breadcrumbs:

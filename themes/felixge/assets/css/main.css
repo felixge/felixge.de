@@ -37,7 +37,6 @@ body {
 .site-header { margin-bottom: 1.5rem; }
 .site-header nav { font-size: .95rem; }
 .home-introduction { margin-bottom: 2rem; }
-.home-introduction h1 { margin-bottom: .5rem; }
 .home-navigation ul { display: flex; flex-wrap: wrap; gap: .25rem 1.25rem; margin: 0; padding: 0; list-style: none; }
 .breadcrumbs { list-style: none; margin: 0; padding: 0; }
 .breadcrumbs li { display: inline; }

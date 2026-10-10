@@ -1,7 +1,6 @@
 {{ define "main" -}}
 <article class="home-document">
   <header class="home-introduction">
-    <h1>{{ .Site.Title }}</h1>
     <nav class="home-navigation" aria-label="Main navigation">
       <ul>
         {{ range (where .Site.RegularPages "Type" "pages").ByWeight }}
@@ -11,7 +10,7 @@
     </nav>
   </header>
   <section aria-labelledby="blog-posts">
-    <h2 id="blog-posts">Blog</h2>
+    <h1 id="blog-posts">Blog</h1>
     {{ partial "blog-content.html" (dict "Page" (.Site.GetPage "/blog") "Label" "blog-posts") }}
   </section>
 </article>
