@@ -96,7 +96,7 @@ class HTML(HTMLParser):
 def check(output, base, preview):
     expected = set(ROUTES) | ({DRAFT} if preview else set())
     home = HTML(output / "index.html")
-    sections = ["blog/", "speaking/", "about/", "contact/"]
+    sections = ["about/", "blog/", "speaking/", "contact/"]
     assert home.navigation_by_label["Main navigation"] == [
         "/" + section for section in sections]
     assert not home.tables, "Homepage should only link to the main sections"

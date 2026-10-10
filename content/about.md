@@ -1,7 +1,7 @@
 ---
 title: About
 type: pages
-weight: 30
+weight: 5
 ---
 
 Hi, I am Felix Geisendörfer, a software developer living in Berlin, Germany.
