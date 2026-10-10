@@ -97,7 +97,7 @@ def check(output, base, preview):
     expected = set(ROUTES) | ({DRAFT} if preview else set())
     home = HTML(output / "index.html")
     sections = ["blog/", "speaking/", "about/", "contact/"]
-    assert [link for link in home.links if link in ["/" + section for section in sections]] == [
+    assert home.navigation_by_label["Main navigation"] == [
         "/" + section for section in sections]
     assert not home.tables, "Homepage should only link to the main sections"
     assert not any(urlsplit(link).path.lstrip("/") in expected for link in home.links)

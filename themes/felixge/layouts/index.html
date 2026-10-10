@@ -1,10 +1,18 @@
 {{ define "main" -}}
-<h1>{{ .Site.Title }}</h1>
-<nav aria-label="Main navigation">
-  <ul>
-    {{ range (where .Site.RegularPages "Type" "pages").ByWeight }}
-    <li><a id="{{ .File.ContentBaseName }}" href="{{ .RelPermalink }}">{{ .Title }}</a></li>
-    {{ end }}
-  </ul>
-</nav>
+{{ $about := .Site.GetPage "/about" }}
+<article class="home-document">
+  <header class="home-introduction">
+    <h1>{{ .Site.Title }}</h1>
+    <nav class="home-navigation" aria-label="Main navigation">
+      <ul>
+        {{ range (where .Site.RegularPages "Type" "pages").ByWeight }}
+        <li><a id="{{ .File.ContentBaseName }}" href="{{ .RelPermalink }}">{{ .Title }}</a></li>
+        {{ end }}
+      </ul>
+    </nav>
+  </header>
+  <div class="home-biography">
+    {{ $about.Content }}
+  </div>
+</article>
 {{- end }}
