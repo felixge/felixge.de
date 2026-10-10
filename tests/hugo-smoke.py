@@ -28,11 +28,15 @@ class HTML(HTMLParser):
         self.stylesheets = []
         self.images = []
         self.lang = None
+        self.navigation = []
+        self.in_nav = False
         self.feed(path.read_text())
 
     def handle_starttag(self, tag, attrs):
         attrs = dict(attrs)
         self.tags.add(tag)
+        if tag == "nav":
+            self.in_nav = True
         if tag == "html":
             self.lang = attrs.get("lang")
         if tag == "img":
@@ -41,6 +45,8 @@ class HTML(HTMLParser):
             self.ids.add(attrs["id"])
         if tag == "a" and "href" in attrs:
             self.links.append(attrs["href"])
+            if self.in_nav:
+                self.navigation.append(attrs["href"])
         if tag in ("img", "script") and "src" in attrs:
             self.assets.append(attrs["src"])
         if tag == "link" and attrs.get("rel") == "stylesheet":
@@ -48,6 +54,10 @@ class HTML(HTMLParser):
             self.stylesheets.append(attrs["href"])
         if tag == "meta":
             self.meta[attrs.get("name", attrs.get("http-equiv"))] = attrs.get("content")
+
+    def handle_endtag(self, tag):
+        if tag == "nav":
+            self.in_nav = False
 
 
 def check(output, base, preview):
@@ -102,10 +112,10 @@ def check(output, base, preview):
         assert {"head", "header", "nav", "main"} <= html.tags
         assert html.meta.get("viewport", "").replace(" ", "") == "width=device-width,initial-scale=1"
         assert "#main" in html.links and "main" in html.ids
-        assert {"/", "/#blog", "/#speaking", "/#contact"} <= set(html.links)
-        logo = next(img for img in html.images if img.get("src") ==
-                    "/img/get-on-the-squirrel.png")
-        assert logo.get("alt") and logo.get("width") == "939" and logo.get("height") == "600"
+        assert html.navigation == ["/", "mailto:hi@felixge.de"]
+        assert "logo" not in html.ids
+        assert "/img/get-on-the-squirrel.png" not in html.assets
+    assert not (output / "img/get-on-the-squirrel.png").exists()
     assert {"blog", "speaking", "contact"} <= home.ids
     assert "table" not in home.tags, "Homepage entries should use lists"
     alias = HTML(output / ALIAS)
