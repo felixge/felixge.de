@@ -208,7 +208,15 @@ def check(output, base, preview):
         assert status == "301!", f"Netlify must force permanent redirects over alias pages: {line}"
         assert source not in netlify_redirects, f"Duplicate Netlify redirect: {source}"
         netlify_redirects[source] = target
-    assert netlify_redirects == alias_redirects, "Netlify redirects must match all Hugo aliases"
+    host_redirects = {
+        f"{scheme}://blog.felixge.de{source}": f"https://felixge.de{target}"
+        for scheme in ("https", "http")
+        for source, target in [("/", "/blog/"), ("/rss/", "/posts.atom.xml"), ("/*", "/:splat")]
+    }
+    assert list(netlify_redirects)[:len(host_redirects)] == list(host_redirects), (
+        "Ghost hostname rules must come first, with homepage and feed rules before the wildcard")
+    assert netlify_redirects == {**host_redirects, **alias_redirects}, (
+        "Netlify redirects must match the Ghost hostname rules and all Hugo aliases")
 
     for source in (ROOT / "static").rglob("*"):
         if source.is_file():

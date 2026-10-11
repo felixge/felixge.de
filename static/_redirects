@@ -1,3 +1,11 @@
+# Move the old Ghost hostname to the main site. Keep specific rules before the wildcard.
+https://blog.felixge.de/ https://felixge.de/blog/ 301!
+https://blog.felixge.de/rss/ https://felixge.de/posts.atom.xml 301!
+https://blog.felixge.de/* https://felixge.de/:splat 301!
+http://blog.felixge.de/ https://felixge.de/blog/ 301!
+http://blog.felixge.de/rss/ https://felixge.de/posts.atom.xml 301!
+http://blog.felixge.de/* https://felixge.de/:splat 301!
+
 # Force permanent redirects over Hugo's HTML alias pages.
 /2017/05/05/postgresql-operations-that-you-cant-explain.html /2017/05/23/postgresql-operations-that-you-cant-explain/ 301!
 /testing-binary-encoders-decoders-via-incremental-verification/ /2023/01/11/testing-binary-encoders-decoders-via-incremental-verification/ 301!
