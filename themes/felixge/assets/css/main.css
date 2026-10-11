@@ -34,8 +34,7 @@ body {
   overflow-wrap: break-word;
 }
 
-.site-header { margin-bottom: 1.5rem; }
-.home-introduction { margin-bottom: 2rem; }
+.site-header, .home-introduction { margin-bottom: 2rem; }
 .home-navigation ul, .breadcrumbs { list-style: none; margin: 0; padding: 0; }
 .home-navigation li, .breadcrumbs li { display: inline-block; }
 .home-navigation span, .breadcrumbs span { margin: 0 .5em; color: var(--muted); }
