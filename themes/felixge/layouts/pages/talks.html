@@ -17,7 +17,7 @@
         </span>
       </td>
       <td class="event"><a href="{{ .eventUrl }}">{{ .location }}</a></td>
-      <td class="date"><time datetime="{{ (time .date).Format "2006-01-02T15:04:05Z0700" }}">{{ (time .date).Format "Jan 02, 2006" }}</time></td>
+      <td class="date"><time datetime="{{ (time .date).Format "2006-01-02T15:04:05Z0700" }}" title="{{ (time .date).Format "2006-01-02" }}">{{ (time .date).Format "Jan 2006" }}</time></td>
     </tr>
   {{ end }}
   </tbody>

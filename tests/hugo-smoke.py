@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import subprocess
 import tempfile
+from datetime import datetime
 from html.parser import HTMLParser
 from urllib.parse import urljoin, urlsplit, unquote
 import xml.etree.ElementTree as ET
@@ -52,6 +53,7 @@ class HTML(HTMLParser):
         self.tables = []
         self.in_table = None
         self.in_header = False
+        self.in_time = False
         self.feed(path.read_text())
 
     def handle_starttag(self, tag, attrs):
@@ -65,7 +67,7 @@ class HTML(HTMLParser):
             self.in_footer = True
         if tag == "table":
             self.in_table = {"label": attrs.get("aria-labelledby"), "rows": 0,
-                             "headers": [], "cells": []}
+                             "headers": [], "cells": [], "dates": []}
             self.tables.append(self.in_table)
         if self.in_table is not None:
             if tag == "tr":
@@ -76,6 +78,9 @@ class HTML(HTMLParser):
             if tag == "th":
                 self.in_header = True
                 self.in_table["headers"].append({**attrs, "text": ""})
+        if tag == "time" and self.in_table is not None:
+            self.in_time = True
+            self.in_table["dates"].append({**attrs, "text": ""})
         if tag == "nav":
             self.in_nav = True
             self.nav_labels.append(attrs.get("aria-label"))
@@ -119,6 +124,8 @@ class HTML(HTMLParser):
             self.meta[attrs.get("name", attrs.get("http-equiv"))] = attrs.get("content")
 
     def handle_data(self, data):
+        if self.in_time:
+            self.in_table["dates"][-1]["text"] += data
         if self.in_header:
             self.in_table["headers"][-1]["text"] += data
         if self.in_nav:
@@ -127,6 +134,8 @@ class HTML(HTMLParser):
             self.in_figure["caption"] += data
 
     def handle_endtag(self, tag):
+        if tag == "time":
+            self.in_time = False
         if tag == "th":
             self.in_header = False
         if tag == "figcaption":
@@ -319,10 +328,15 @@ def check(output, base, preview):
                      (ROOT / "data/talks.yml").read_text().splitlines())
     tables = blog.tables + talks.tables
     assert [table["rows"] for table in tables] == [len(expected) + 1, talk_count + 1]
-    for table, labels in zip(tables, [["Post", "Published"], ["Talk", "Event", "Date"]]):
+    for table, labels in zip(tables, [["Post", "Date"], ["Talk", "Event", "Date"]]):
         assert [header["text"].strip() for header in table["headers"]] == labels
         assert all(count == len(labels) for count in table["cells"])
         assert all(header.get("scope") == "col" for header in table["headers"])
+        assert len(table["dates"]) == table["rows"] - 1
+        for date in table["dates"]:
+            exact = datetime.strptime(date["datetime"][:10], "%Y-%m-%d")
+            assert date["title"] == exact.strftime("%Y-%m-%d")
+            assert date["text"].strip() == exact.strftime("%b %Y")
     alias = HTML(output / ALIAS)
     assert alias.meta.get("robots") == "noindex"
     assert alias.meta.get("refresh") == (
