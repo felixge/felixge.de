@@ -1,0 +1,16 @@
+{{ define "main" -}}
+<h1>{{ .Title }}</h1>
+
+Published: <time datetime="{{ .Date.Format "2006-01-02T15:04:05Z0700" }}">{{ .Date.Format "January 2, 2006" }}</time>
+{{ with .Params.cover }}
+{{ with $.Resources.Get . }}
+<p><img src="{{ .RelPermalink }}" width="{{ .Width }}" height="{{ .Height }}" alt="{{ $.Params.coverAlt | default $.Title }}" decoding="async"></p>
+{{ end }}
+{{ end }}
+{{ .Content }}
+
+-- Felix Geisendörfer
+<hr/>
+
+Subscribe to this blog via <a href="https://feeds.feedburner.com/{{ .Site.Params.feedburnerShortname }}">RSS</a> or <a href="https://feedburner.google.com/fb/a/mailverify?uri={{ .Site.Params.feedburnerShortname }}">E-Mail</a> or get small updates from me via <a href="https://twitter.com/{{ .Site.Params.twitterShortname }}">Twitter</a>.
+{{ end }}

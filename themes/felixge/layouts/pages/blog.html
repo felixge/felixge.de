@@ -1,0 +1,4 @@
+{{ define "main" -}}
+<h1 id="blog">{{ .Title }}</h1>
+{{ partial "blog-content.html" (dict "Page" . "Label" "blog") }}
+{{- end }}

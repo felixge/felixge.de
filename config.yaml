@@ -1,13 +1,10 @@
 baseURL: "https://felixge.de/"
 locale: "en-US"
 title: "Felix Geisendörfer"
-services:
-  disqus:
-    shortname: felixge
 permalinks:
   posts: /:year/:month/:day/:slug/
 
-# The homepage lists all posts; archive pages only need feeds.
+# The Blog page lists posts; the posts section only needs a feed.
 outputs:
   section: [RSS]
   taxonomy: [RSS]

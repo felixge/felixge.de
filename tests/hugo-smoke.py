@@ -1,4 +1,4 @@
-"""Build and check production and preview output with Python standard libraries."""
+"""Build and check production, preview, and local output with Python standard libraries."""
 
 import os
 from pathlib import Path
@@ -15,6 +15,11 @@ DRAFT = "2020/08/16/writing-your-own-postgresql-query-executor/"
 ALIAS = "2017/05/05/postgresql-operations-that-you-cant-explain.html"
 FEEDS = ["posts.atom.xml", "posts/posts.atom.xml",
          "categories/posts.atom.xml", "tags/posts.atom.xml"]
+VIDEO_EMBEDS = {
+    "history-of-gos-execution-tracer": ["a9xrxRsIbSU?start=1287"],
+    "debug-go-request-latency-with-datadogs-profiling-timeline": ["6MOtFkl2tq0"],
+    "how-to-make-a-tech-video-for-youtube": ["6MOtFkl2tq0", "SUL7fFBn6D8"],
+}
 
 
 class HTML(HTMLParser):
@@ -25,22 +30,61 @@ class HTML(HTMLParser):
         self.ids = set()
         self.meta = {}
         self.tags = set()
+        self.landmarks = []
         self.stylesheets = []
         self.images = []
+        self.videos = []
+        self.footer_images = []
+        self.in_footer = False
         self.lang = None
+        self.navigation = []
+        self.current_pages = []
+        self.navigation_text = ""
+        self.nav_labels = []
+        self.navigation_by_label = {}
+        self.in_nav = False
+        self.tables = []
+        self.in_table = None
         self.feed(path.read_text())
 
     def handle_starttag(self, tag, attrs):
         attrs = dict(attrs)
         self.tags.add(tag)
+        if ((tag == "header" and attrs.get("class") == "site-header") or
+                (tag == "main" and attrs.get("id") == "main") or
+                (tag == "footer" and attrs.get("class") == "site-footer")):
+            self.landmarks.append(tag)
+        if tag == "footer":
+            self.in_footer = True
+        if tag == "table":
+            self.in_table = {"label": attrs.get("aria-labelledby"), "rows": 0, "headers": []}
+            self.tables.append(self.in_table)
+        if self.in_table is not None:
+            if tag == "tr":
+                self.in_table["rows"] += 1
+            if tag == "th":
+                self.in_table["headers"].append(attrs)
+        if tag == "nav":
+            self.in_nav = True
+            self.nav_labels.append(attrs.get("aria-label"))
+            self.navigation_by_label[self.nav_labels[-1]] = []
         if tag == "html":
             self.lang = attrs.get("lang")
+        if tag == "iframe":
+            self.videos.append(attrs)
         if tag == "img":
             self.images.append(attrs)
+            if self.in_footer:
+                self.footer_images.append(attrs)
         if "id" in attrs:
             self.ids.add(attrs["id"])
         if tag == "a" and "href" in attrs:
             self.links.append(attrs["href"])
+            if self.in_nav:
+                self.navigation.append(attrs["href"])
+                self.navigation_by_label[self.nav_labels[-1]].append(attrs["href"])
+                if attrs.get("aria-current") == "page":
+                    self.current_pages.append(attrs["href"])
         if tag in ("img", "script") and "src" in attrs:
             self.assets.append(attrs["src"])
         if tag == "link" and attrs.get("rel") == "stylesheet":
@@ -49,17 +93,66 @@ class HTML(HTMLParser):
         if tag == "meta":
             self.meta[attrs.get("name", attrs.get("http-equiv"))] = attrs.get("content")
 
+    def handle_data(self, data):
+        if self.in_nav:
+            self.navigation_text += data
+
+    def handle_endtag(self, tag):
+        if tag == "footer":
+            self.in_footer = False
+        if tag == "table":
+            self.in_table = None
+        if tag == "nav":
+            self.in_nav = False
+
 
 def check(output, base, preview):
     expected = set(ROUTES) | ({DRAFT} if preview else set())
     home = HTML(output / "index.html")
-    home_posts = [urlsplit(link).path.lstrip("/") for link in home.links
-                  if urlsplit(link).path.lstrip("/") in expected]
-    assert set(home_posts) == expected, "Homepage post list changed"
+    assert "Hosted by" not in (output / "index.html").read_text(), "Hosting credit should be removed"
+    assert "https://www.netlify.com/" not in home.links
+    sections = ["about/", "blog/", "speaking/", "contact/"]
+    menu_links = ["/", "/blog/", "/speaking/", "/contact/"]
+    assert home.navigation_by_label["Main navigation"] == menu_links
+    assert home.navigation_text.count("·") == 3, "Expected middle dots between homepage links"
+    blog = HTML(output / "blog/index.html")
+    speaking = HTML(output / "speaking/index.html")
+    post_links = [link for link in blog.links if urlsplit(link).path.lstrip("/") in expected]
+    blog_posts = [urlsplit(link).path.lstrip("/") for link in post_links]
+    assert set(blog_posts) == expected, "Blog post list changed"
+    assert post_links == ["/" + route for route in blog_posts], "Blog links must be site-relative"
+    home_post_links = [link for link in home.links if urlsplit(link).path.lstrip("/") in expected]
+    assert not home_post_links, "Homepage should show About content, not the post list"
+    local = "http://localhost:1313/"
+    assert [urljoin(local + "blog/", link) for link in post_links] == [
+        local + route for route in blog_posts], "Blog links must stay on localhost during development"
+    for section in sections:
+        text = (output / section / "index.html").read_text()
+        assert "Published:" not in text
+    about = HTML(output / "about/index.html")
+    for route in ["index.html", "about/index.html"]:
+        assert "<h1>Felix Geisendörfer</h1>" in (output / route).read_text(), "Name heading missing"
+    assert "/contact/" in about.links
+    assert set(about.links) - {"/about/"} <= set(home.links), "Homepage must include the About page links"
+    assert "/contact/" in speaking.links
     for route in expected:
         page = output / route / "index.html"
         assert page.is_file(), f"Missing route: {route}"
-        assert "felixge.disqus.com/embed.js" in page.read_text(), "Disqus integration missing"
+        slug = route.strip("/").split("/")[-1]
+        videos = HTML(page).videos
+        assert [video.get("src") for video in videos] == [
+            "https://www.youtube-nocookie.com/embed/" + video for video in VIDEO_EMBEDS.get(slug, [])]
+        for video in videos:
+            assert video.get("title") and video.get("class") == "video"
+            assert video.get("loading") == "lazy" and "allowfullscreen" in video
+            assert video.get("width") == "560" and video.get("height") == "315"
+            assert video.get("referrerpolicy") == "strict-origin-when-cross-origin"
+        cover = ROOT / "content/posts" / slug / "cover.png"
+        if cover.is_file():
+            images = [img for img in HTML(page).images if img.get("src") == "/" + route + "cover.png"]
+            assert len(images) == 1, f"Missing cover image: {route}"
+            assert images[0].get("alt") and images[0].get("width") and images[0].get("height")
+            assert (output / route / "cover.png").read_bytes() == cover.read_bytes()
     assert (output / DRAFT / "index.html").exists() == preview
     assert (output / DRAFT / "main.js").exists() == preview
     if preview:
@@ -71,7 +164,7 @@ def check(output, base, preview):
         assert channel is not None
         items = channel.findall("item")
         links = [item.findtext("link") for item in items]
-        assert links == [base + route for route in home_posts], f"Feed order changed: {feed}"
+        assert links == [base + route for route in blog_posts], f"Feed order changed: {feed}"
         assert all(item.findtext("guid") == item.findtext("link") for item in items)
         assert all(item.findtext("pubDate") and item.findtext("description") for item in items)
         assert channel.findtext("language") == "en-US"
@@ -80,8 +173,20 @@ def check(output, base, preview):
 
     for page in output.rglob("*.html"):
         relative = page.relative_to(output).as_posix()
+        assert "disqus" not in page.read_text().lower(), f"Disqus should be removed: {relative}"
+        assert "__GHOST_URL__" not in page.read_text(), f"Unresolved Ghost URL: {relative}"
         page_url = base + relative.removesuffix("index.html")
-        for asset in HTML(page).assets:
+        html = HTML(page)
+        refresh = html.meta.get("refresh", "")
+        if refresh.startswith("0; url="):
+            target = urlsplit(refresh.removeprefix("0; url="))
+            assert not target.scheme and not target.netloc and target.path.startswith("/"), (
+                f"Alias redirects must be site-relative: {relative}: {refresh}")
+            alternate = "http://127.0.0.1:61449/"
+            assert urljoin(alternate + relative, target.path) == alternate + target.path.lstrip("/")
+            assert (output / target.path.lstrip("/") / "index.html").is_file(), (
+                f"Missing alias target: {relative}: {refresh}")
+        for asset in html.assets:
             url = urlsplit(urljoin(page_url, asset))
             if url.netloc == urlsplit(base).netloc:
                 target = output / unquote(url.path).lstrip("/")
@@ -95,26 +200,61 @@ def check(output, base, preview):
     assert len(home.stylesheets) == 1, "Expected one plain CSS stylesheet"
     stylesheet = output / urlsplit(home.stylesheets[0]).path.lstrip("/")
     assert 0 < stylesheet.stat().st_size < 6000, "Keep theme CSS small"
-    for route in ["", "404.html", *expected]:
+    for route in ["", "404.html", *sections, *expected]:
         page = output / (route if route == "404.html" else route + "index.html")
         html = HTML(page)
         assert html.lang == "en"
-        assert {"head", "header", "main"} <= html.tags
-        assert "nav" not in html.tags, "Keep the header to one home link"
+        assert {"head", "header", "nav", "main", "footer"} <= html.tags
+        assert html.landmarks == ["header", "main", "footer"], f"Incorrect page structure: {route}"
         assert html.meta.get("viewport", "").replace(" ", "") == "width=device-width,initial-scale=1"
         assert "#main" in html.links and "main" in html.ids
-        assert "/" in html.links
-        logo = next(img for img in html.images if img.get("src") ==
-                    "/img/get-on-the-squirrel.png")
-        # The adjacent site name labels the home link; the image is decorative.
-        assert "alt" in logo and not logo["alt"]
-        assert logo.get("width") == "939" and logo.get("height") == "600"
-    assert {"blog", "speaking", "contact"} <= home.ids
-    assert "table" not in home.tags, "Homepage entries should use lists"
+        current = "/" + route
+        breadcrumbs = ["/"] if route else []
+        if route in expected:
+            breadcrumbs.append("/blog/")
+        if route:
+            breadcrumbs.append(current)
+        assert html.nav_labels == (["Breadcrumb"] if route else ["Main navigation"])
+        if route:
+            assert html.navigation_by_label["Breadcrumb"] == breadcrumbs, f"Incorrect breadcrumbs: {route}"
+        else:
+            assert "Breadcrumb" not in html.navigation_by_label
+            assert html.navigation_by_label["Main navigation"] == menu_links
+        assert html.current_pages == [current]
+        assert "Felix Geisendörfer" in html.navigation_text
+        if route:
+            assert "›" in html.navigation_text
+        for link in breadcrumbs:
+            target = output / link.lstrip("/")
+            if not link.endswith(".html"):
+                target /= "index.html"
+            assert target.is_file(), f"Missing breadcrumb target: {link}"
+        logos = [img for img in html.images if img.get("src") ==
+                 "/img/get-on-the-squirrel.png"]
+        assert len(logos) == 1 and logos[0] in html.footer_images
+        logo = logos[0]
+        assert logo.get("alt") and logo.get("width") == "939" and logo.get("height") == "600"
+        assert logo.get("loading") == "lazy" and logo.get("decoding") == "async"
+    assert (output / "img/get-on-the-squirrel.png").read_bytes() == (
+        ROOT / "themes/felixge/static/img/get-on-the-squirrel.png").read_bytes()
+    assert {"blog", "speaking", "about", "contact"} <= home.ids
+    assert not home.tables, "Homepage should show the biography, not tables"
+    assert [table["label"] for table in blog.tables] == ["blog"]
+    assert [table["label"] for table in speaking.tables] == ["speaking"]
+    talk_count = sum(line.startswith("- title:") for line in
+                     (ROOT / "data/talks.yml").read_text().splitlines())
+    tables = blog.tables + speaking.tables
+    assert [table["rows"] for table in tables] == [len(expected) + 1, talk_count + 1]
+    for table in tables:
+        assert len(table["headers"]) == 2
+        assert all(header.get("scope") == "col" for header in table["headers"])
     alias = HTML(output / ALIAS)
     assert alias.meta.get("robots") == "noindex"
     assert alias.meta.get("refresh") == (
-        "0; url=" + base + "2017/05/23/postgresql-operations-that-you-cant-explain/")
+        "0; url=/2017/05/23/postgresql-operations-that-you-cant-explain/")
+    ghost_alias = HTML(output / "how-to-make-a-tech-video-for-youtube/index.html")
+    assert ghost_alias.meta.get("refresh") == (
+        "0; url=/2023/08/21/how-to-make-a-tech-video-for-youtube/")
 
     # These published anchors included the code-link URL before Hugo 0.144.
     profiling = HTML(output / "2021/12/01/advent-of-go-profiling-2021-day-1-1/index.html")
@@ -134,6 +274,7 @@ def main():
         for name, base, preview in [
             ("production", "https://felixge.de/", False),
             ("preview", "https://preview.example.com/", True),
+            ("local", "http://localhost:1313/", True),
         ]:
             output = temp / name
             command = ["hugo", "--gc", "--minify", "--panicOnWarning", "--noBuildLock",
