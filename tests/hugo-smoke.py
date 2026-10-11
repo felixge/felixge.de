@@ -15,6 +15,11 @@ DRAFT = "2020/08/16/writing-your-own-postgresql-query-executor/"
 ALIAS = "2017/05/05/postgresql-operations-that-you-cant-explain.html"
 FEEDS = ["posts.atom.xml", "posts/posts.atom.xml",
          "categories/posts.atom.xml", "tags/posts.atom.xml"]
+VIDEO_EMBEDS = {
+    "history-of-gos-execution-tracer": ["a9xrxRsIbSU?start=1287"],
+    "debug-go-request-latency-with-datadogs-profiling-timeline": ["6MOtFkl2tq0"],
+    "how-to-make-a-tech-video-for-youtube": ["6MOtFkl2tq0", "SUL7fFBn6D8"],
+}
 
 
 class HTML(HTMLParser):
@@ -27,6 +32,7 @@ class HTML(HTMLParser):
         self.tags = set()
         self.stylesheets = []
         self.images = []
+        self.videos = []
         self.footer_images = []
         self.in_footer = False
         self.lang = None
@@ -59,6 +65,8 @@ class HTML(HTMLParser):
             self.navigation_by_label[self.nav_labels[-1]] = []
         if tag == "html":
             self.lang = attrs.get("lang")
+        if tag == "iframe":
+            self.videos.append(attrs)
         if tag == "img":
             self.images.append(attrs)
             if self.in_footer:
@@ -124,7 +132,16 @@ def check(output, base, preview):
     for route in expected:
         page = output / route / "index.html"
         assert page.is_file(), f"Missing route: {route}"
-        cover = ROOT / "content/posts" / route.strip("/").split("/")[-1] / "cover.png"
+        slug = route.strip("/").split("/")[-1]
+        videos = HTML(page).videos
+        assert [video.get("src") for video in videos] == [
+            "https://www.youtube-nocookie.com/embed/" + video for video in VIDEO_EMBEDS.get(slug, [])]
+        for video in videos:
+            assert video.get("title") and video.get("class") == "video"
+            assert video.get("loading") == "lazy" and "allowfullscreen" in video
+            assert video.get("width") == "560" and video.get("height") == "315"
+            assert video.get("referrerpolicy") == "strict-origin-when-cross-origin"
+        cover = ROOT / "content/posts" / slug / "cover.png"
         if cover.is_file():
             images = [img for img in HTML(page).images if img.get("src") == "/" + route + "cover.png"]
             assert len(images) == 1, f"Missing cover image: {route}"

@@ -58,7 +58,7 @@ At this point we've already gotten a lot of value out of this feature internally
 
 **Update**: We've also released a 10 minute video showing this feature in action, you can check it out below:
 
-[Optimizing Go Request Latency with Datadog's Profiling Timeline](https://www.youtube.com/watch?v=6MOtFkl2tq0)
+<iframe class="video" src="https://www.youtube-nocookie.com/embed/6MOtFkl2tq0" title="Optimizing Go Request Latency with Datadog's Profiling Timeline" width="560" height="315" loading="lazy" allow="encrypted-media; picture-in-picture; fullscreen" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
 ------------------------------------------------------------------------
 

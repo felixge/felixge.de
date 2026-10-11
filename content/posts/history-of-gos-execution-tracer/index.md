@@ -11,7 +11,7 @@ Today I spent some time studying the early history of Go's execution tracer. Her
 
 The design and initial implementation was done by Dmitry Vyukov as outlined in his [Go Execution Tracer (Oct 2014)](https://docs.google.com/document/u/1/d/1FP5apqzBgr7ahCCgFO-yoVhk4YZrNIDNf9RybngBc14/pub) design document. This was followed by the [first upstream patch](https://go-review.googlesource.com/c/go/+/1450) being merged the following January, an announcement at GopherCon in July (Fig 1), and the release in [Go 1.5](https://go.dev/doc/devel/release#go1.5) in August 2015.
 
-[GopherCon 2015: Dmitry Vyukov - Go Dynamic Tools](https://www.youtube.com/watch?v=a9xrxRsIbSU&t=1287s)
+<iframe class="video" src="https://www.youtube-nocookie.com/embed/a9xrxRsIbSU?start=1287" title="GopherCon 2015: Dmitry Vyukov - Go Dynamic Tools" width="560" height="315" loading="lazy" allow="encrypted-media; picture-in-picture; fullscreen" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
 Fig. 1 *Dmitry briefly announcing the Go Execution Tracer at GopherCon 2015.*
 

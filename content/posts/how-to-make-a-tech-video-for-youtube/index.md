@@ -9,7 +9,7 @@ aliases:
 
 My team recently shipped a new [profiling feature](/2023/08/09/debug-go-request-latency-with-datadogs-profiling-timeline/) that we're very excited about. The feature is highly interactive and capable of slicing and dicing through tons of data. This makes it difficult to show the full experience with text and screenshots. So I decided to create a video that shows the tool in action.
 
-[Optimizing Go Request Latency with Datadog's Profiling Timeline](https://www.youtube.com/watch?v=6MOtFkl2tq0)
+<iframe class="video" src="https://www.youtube-nocookie.com/embed/6MOtFkl2tq0" title="Optimizing Go Request Latency with Datadog's Profiling Timeline" width="560" height="315" loading="lazy" allow="encrypted-media; picture-in-picture; fullscreen" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
 This blog post explains how I made this video.
 
@@ -70,7 +70,7 @@ While recording and editing the first version of the video, I started to doubt m
 
 You can see the first version of the video that I ended up discarding below:
 
-[2023 06 04 Profiling Timeline Beta Promo](https://www.youtube.com/watch?v=SUL7fFBn6D8)
+<iframe class="video" src="https://www.youtube-nocookie.com/embed/SUL7fFBn6D8" title="2023 06 04 Profiling Timeline Beta Promo" width="560" height="315" loading="lazy" allow="encrypted-media; picture-in-picture; fullscreen" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
 Early and incomplete footage I shared with colleagues to get feedback
 
