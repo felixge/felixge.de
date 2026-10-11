@@ -319,7 +319,7 @@ def check(output, base, preview):
                      (ROOT / "data/talks.yml").read_text().splitlines())
     tables = blog.tables + talks.tables
     assert [table["rows"] for table in tables] == [len(expected) + 1, talk_count + 1]
-    for table, labels in zip(tables, [["Post", "Published"], ["Talk", "Event", "Date"]]):
+    for table, labels in zip(tables, [["Post", "Published"], ["Talk", "Event", "Links", "Date"]]):
         assert [header["text"].strip() for header in table["headers"]] == labels
         assert all(count == len(labels) for count in table["cells"])
         assert all(header.get("scope") == "col" for header in table["headers"])

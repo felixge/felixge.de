@@ -3,18 +3,18 @@
 {{ .Content }}
 <table class="entries" aria-labelledby="talks">
   <thead>
-    <tr><th scope="col">Talk</th><th scope="col" class="event">Event</th><th scope="col" class="date">Date</th></tr>
+    <tr><th scope="col">Talk</th><th scope="col" class="event">Event</th><th scope="col" class="links">Links</th><th scope="col" class="date">Date</th></tr>
   </thead>
   <tbody>
   {{ range hugo.Data.talks }}
     <tr>
-      <td>
-        <a href="{{ .url }}">{{ .title }}</a>
-        {{ with .pdfUrl }} &middot; <a href="{{ . }}">pdf</a>{{ end }}
-        {{ with .videoUrl }} &middot; <a href="{{ . }}">video</a>{{ end }}
-        {{ with .codeUrl }} &middot; <a href="{{ . }}">code</a>{{ end }}
-      </td>
+      <td><a href="{{ .url }}">{{ .title }}</a></td>
       <td class="event"><a href="{{ .eventUrl }}">{{ .location }}</a></td>
+      <td class="links">
+        {{ with .pdfUrl }}<a href="{{ . }}">pdf</a>{{ end }}
+        {{ with .videoUrl }}<a href="{{ . }}">video</a>{{ end }}
+        {{ with .codeUrl }}<a href="{{ . }}">code</a>{{ end }}
+      </td>
       <td class="date"><time datetime="{{ (time .date).Format "2006-01-02T15:04:05Z0700" }}">{{ (time .date).Format "Jan 02, 2006" }}</time></td>
     </tr>
   {{ end }}

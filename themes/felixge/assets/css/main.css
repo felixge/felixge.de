@@ -82,7 +82,9 @@ table:not(.entries) { display: block; overflow-x: auto; }
 table:not(.entries) :is(th, td) { padding: .25rem .75rem; border-bottom: 1px solid var(--muted); }
 .entries { width: 100%; table-layout: fixed; }
 .entries th:first-child, .entries td:first-child { padding-right: 1rem; }
-.entries .event { width: 30%; padding-right: 1rem; }
+.entries .event { width: 25%; padding-right: 1rem; }
+.entries .links { width: 15%; }
+.entries .links a { display: block; }
 .entries .date { width: 25%; color: var(--muted); font-size: .85em; text-align: right; }
 
 @media print {
