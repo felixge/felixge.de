@@ -1,5 +1,6 @@
 """Build and check production, preview, and local output with Python standard libraries."""
 
+import json
 import os
 from pathlib import Path
 import subprocess
@@ -11,6 +12,7 @@ import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
 ROUTES = (ROOT / "tests/published-routes.txt").read_text().splitlines()
+IMAGE_CAPTIONS = json.loads((ROOT / "tests/ghost-image-captions.json").read_text())
 DRAFT = "2020/08/16/writing-your-own-postgresql-query-executor/"
 ALIAS = "2017/05/05/postgresql-operations-that-you-cant-explain.html"
 FEEDS = ["posts.atom.xml", "posts/posts.atom.xml",
@@ -34,6 +36,9 @@ class HTML(HTMLParser):
         self.stylesheets = []
         self.feeds = []
         self.images = []
+        self.figures = []
+        self.in_figure = None
+        self.in_caption = False
         self.videos = []
         self.footer_images = []
         self.in_footer = False
@@ -71,10 +76,21 @@ class HTML(HTMLParser):
             self.navigation_by_label[self.nav_labels[-1]] = []
         if tag == "html":
             self.lang = attrs.get("lang")
+        if tag == "figure":
+            assert self.in_figure is None, "Figures must not be nested"
+            self.in_figure = {"images": [], "caption": "", "tags": [], "captions": 0}
+        if tag == "figcaption":
+            assert self.in_figure is not None, "Captions must be inside a figure"
+            self.in_caption = True
+            self.in_figure["captions"] += 1
+        elif self.in_caption:
+            self.in_figure["tags"].append(tag)
         if tag == "iframe":
             self.videos.append(attrs)
         if tag == "img":
             self.images.append(attrs)
+            if self.in_figure is not None:
+                self.in_figure["images"].append(attrs)
             if self.in_footer:
                 self.footer_images.append(attrs)
         if "id" in attrs:
@@ -99,8 +115,15 @@ class HTML(HTMLParser):
     def handle_data(self, data):
         if self.in_nav:
             self.navigation_text += data
+        if self.in_caption:
+            self.in_figure["caption"] += data
 
     def handle_endtag(self, tag):
+        if tag == "figcaption":
+            self.in_caption = False
+        if tag == "figure":
+            self.figures.append(self.in_figure)
+            self.in_figure = None
         if tag == "footer":
             self.in_footer = False
         if tag == "table":
@@ -152,6 +175,15 @@ def check(output, base, preview):
             assert video.get("loading") == "lazy" and "allowfullscreen" in video
             assert video.get("width") == "560" and video.get("height") == "315"
             assert video.get("referrerpolicy") == "strict-origin-when-cross-origin"
+        if slug in IMAGE_CAPTIONS:
+            captions = []
+            for figure in HTML(page).figures:
+                assert len(figure["images"]) == 1 and figure["captions"] == 1, route
+                image = figure["images"][0]
+                assert "alt" in image and image.get("width") and image.get("height"), route
+                assert image.get("loading") == "lazy", route
+                captions.append({"image": image["src"], "caption": figure["caption"], "tags": figure["tags"]})
+            assert captions == IMAGE_CAPTIONS[slug], f"Ghost image captions changed: {route}"
         cover = ROOT / "content/posts" / slug / "cover.png"
         if cover.is_file():
             images = [img for img in HTML(page).images if img.get("src") == "/" + route + "cover.png"]

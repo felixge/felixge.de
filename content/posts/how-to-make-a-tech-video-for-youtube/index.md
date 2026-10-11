@@ -25,15 +25,17 @@ In my opinion, telling a good story is the most important part of making a video
 
 To plan my story, I created a storyboard using Google Slides. I initially put some bullets on the slides to create a rough outline. Then I hacked on my [demo application](https://github.com/DataDog/content-addressable-store) to try out the ideas I had and took screenshots to replace the bullets.
 
-![](./CleanShot-2023-08-19-at-10.27.20@2x.png)
-
-Using Google Slides for creating a storyboard
+<figure>
+  <img src="./CleanShot-2023-08-19-at-10.27.20@2x.png" alt="" width="2000" height="1897" loading="lazy">
+  <figcaption>Using Google Slides for creating a storyboard</figcaption>
+</figure>
 
 Finally I used the speaker notes to outline the things I wanted to say, as well as other reminders for the recording process.
 
-![](./CleanShot-2023-08-19-at-11.23.19@2x.png)
-
-Using speaker notes for the script and recording notes
+<figure>
+  <img src="./CleanShot-2023-08-19-at-11.23.19@2x.png" alt="" width="2000" height="1041" loading="lazy">
+  <figcaption>Using speaker notes for the script and recording notes</figcaption>
+</figure>
 
 I found the storyboard very helpful with planning the recording. In particular it allowed me to split the video into smaller takes that are easier to shoot than longer ones.
 
@@ -48,9 +50,10 @@ Initially I tried to record my screen first and then record the voice-over track
 
 So I gave up on this approach and recorded the screen and audio for each scene at the same time. But this led to a lot of mistakes. The best way to handle them is to take a deep breath, clap your hands, and then continue where you left off. Don't stop the recording, even if you have to reset things on the screen and go back a little. Instead edit out the bad parts once you think you have enough good material. To speed up the editing process, look for the distinct patterns of clapping your hands in the audio track:
 
-![](./CleanShot-2023-08-19-at-14.55.41@2x.png)
-
-Clapping is an easy way to leave visual markers in your audio track
+<figure>
+  <img src="./CleanShot-2023-08-19-at-14.55.41@2x.png" alt="" width="1898" height="338" loading="lazy">
+  <figcaption>Clapping is an easy way to leave visual markers in your audio track</figcaption>
+</figure>
 
 I'm happy this approach, but one disadvantage is that it produces longer videos. Speaking freely simply produces more redundant words and pauses than a tightly scripted narration track.
 

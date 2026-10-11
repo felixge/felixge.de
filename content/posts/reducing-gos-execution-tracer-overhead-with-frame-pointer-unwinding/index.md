@@ -24,17 +24,19 @@ It might be possible to optimize the implementation, but it's an uphill battle t
 
 The best way to explain frame pointer unwinding is using a diagram (Fig 1) that shows how to unwind a arm64 stack consisting of 3 frames.
 
-![Fig. 1 Traversing a stack of depth 3 using frame pointer unwinding.](./CleanShot-2023-02-05-at-12.01.54@2x.png)
-
-Fig. 1 Traversing a stack of depth 3 using frame pointer unwinding.
+<figure>
+  <img src="./CleanShot-2023-02-05-at-12.01.54@2x.png" alt="Fig. 1 Traversing a stack of depth 3 using frame pointer unwinding." width="1444" height="1110" loading="lazy">
+  <figcaption>Fig. 1 <em>Traversing a stack of depth 3 using frame pointer unwinding.</em></figcaption>
+</figure>
 
 The process starts by reading the value of the `r29` (arm64) or `rbp` (amd64) register (aka base pointer). This takes us to the frame pointer of `frame 2`. One word (8 bytes) above this value sits the return address of the caller, which is the first program counter that we need to collect. After this we follow the value of the frame pointer that takes us to `frame 1`, allowing us to discover the second return address. Repeating this process one more time leads us to `frame 0`, which we realize is the root frame because it contains a frame pointer holding the value `0`. So at this point we collect the last return address and stop the process.
 
 If you've paid close attention, you may realize that we have just traversed a linked list outside of a tech interview (Fig 2).
 
-![Fig 2 Meme: Wait, it's all Linked Lists? Always has been.](./image.png)
-
-Fig 2 CS101 finally gets its revenge.
+<figure>
+  <img src="./image.png" alt="Fig 2 Meme: Wait, it&#x27;s all Linked Lists? Always has been." width="888" height="499" loading="lazy">
+  <figcaption>Fig 2 <em>CS101 finally gets its revenge.</em></figcaption>
+</figure>
 
 As you can imagine, it's not very difficult to implement this, so I decided to turn it into a [small experimental patch](https://go-review.googlesource.com/c/go/+/463835) for the Go runtime. Which brings us back to our original motivation: Can this reduce the overhead of the Go execution tracer?
 
@@ -54,9 +56,10 @@ Fig 3 Execution tracer overhead for BenchmarkPingPongHog with gentraceback.
 
 774% overhead, yikes. But let's dig in. This data was captured while also running the CPU profiler, so we can easily see that `gentraceback` was responsible for 94% (!) of this overhead (Fig 4).
 
-![Fig 4 CPU profile showing 94% of execution tracer overhead in gentraceback.](./CleanShot-2023-01-27-at-21.55.10@2x.png)
-
-Fig 4 CPU profile showing 94% of execution tracer overhead in gentraceback.
+<figure>
+  <img src="./CleanShot-2023-01-27-at-21.55.10@2x.png" alt="Fig 4 CPU profile showing 94% of execution tracer overhead in gentraceback." width="1864" height="972" loading="lazy">
+  <figcaption>Fig 4 <em>CPU profile showing 94% of execution tracer overhead in gentraceback.</em></figcaption>
+</figure>
 
 Now that we've established this baseline, let's see how frame pointer unwinding performs by comparison (Fig 5).
 
@@ -72,9 +75,10 @@ Fig 5 Execution tracer overhead for BenchmarkPingPongHog with frame pointer unwi
 
 30% overhead, that's 26 times less overhead than `gentraceback`! I, for one, welcome our new linked list overlords. But before we get ahead of ourselves, let's take a look at the new CPU profile (Fig 6).
 
-![Fig 6 CPU profile showing 9% of execution tracer overhead in fpcallers.](./CleanShot-2023-01-27-at-21.57.24@2x-2.png)
-
-Fig 6 CPU profile showing 9% of execution tracer overhead in fpcallers.
+<figure>
+  <img src="./CleanShot-2023-01-27-at-21.57.24@2x-2.png" alt="Fig 6 CPU profile showing 9% of execution tracer overhead in fpcallers." width="1850" height="864" loading="lazy">
+  <figcaption>Fig 6 <em>CPU profile showing 9% of execution tracer overhead in fpcallers.</em></figcaption>
+</figure>
 
 As we can see, `fpcallers` is now down to 9% of the tracer's overhead, which means unwinding is no longer the achilles heel of the execution tracer. But of course new bottlenecks such as `cputicks` (28%) and `(*traceStackTable).put` (21%) are starting to emerge. You can take a look for yourself by [downloading the pprofs](https://drive.google.com/drive/folders/10VRje2xPWB6SdXXpK8cWCiZtPpjqUHo7?usp=sharing).
 

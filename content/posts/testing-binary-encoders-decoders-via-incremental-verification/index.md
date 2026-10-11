@@ -14,21 +14,24 @@ One common trick for testing such code is **round-trip testing**. The idea is to
 
 This works great when the test is passing. But unfortunately it's prone to produce error messages that are too terse as shown in Fig 1 below.
 
-![](./CleanShot-2023-01-11-at-15.44.00@2x.png)
-
-Fig. 1 *This is not enough data to understand the problem.*
+<figure>
+  <img src="./CleanShot-2023-01-11-at-15.44.00@2x.png" alt="" width="2000" height="263" loading="lazy">
+  <figcaption>Fig. 1 <em>This is not enough data to understand the problem.</em></figcaption>
+</figure>
 
 Alternatively one might end up with error messages that dump huge amounts of data. That's also difficult to reason about as you can see in Fig 2 here.
 
-![](./CleanShot-2023-01-11-at-15.43.36@2x.png)
-
-Fig. 2 *Oh no, this is too much data! And that's just a small part of it.*
+<figure>
+  <img src="./CleanShot-2023-01-11-at-15.43.36@2x.png" alt="" width="1868" height="1204" loading="lazy">
+  <figcaption>Fig. 2 <em>Oh no, this is too much data! And that's just a small part of it.</em></figcaption>
+</figure>
 
 The solution to this problem is simple. Instead of validating the output at the end of the test, one can [incrementally verify the output](https://github.com/felixge/traceutils/blob/07a7195e1e945b528abf52812e5b9e16976560f3/pkg/encoding/decoder_test.go#L63-L67) after every decoding and encoding step. If the implementation is correct, the new data produced after every step should be equal to the input data at the same offset. When it's not, the amount of data that needs debugging becomes much smaller, as can be seen in Fig 3.
 
-![](./CleanShot-2023-01-11-at-15.48.45@2x.png)
-
-Fig. 3 *Yes, that's a comfortable amount of binary data to debug!*
+<figure>
+  <img src="./CleanShot-2023-01-11-at-15.48.45@2x.png" alt="" width="1868" height="496" loading="lazy">
+  <figcaption>Fig. 3 <em>Yes, that's a comfortable amount of binary data to debug!</em></figcaption>
+</figure>
 
 In this case the problem was caused by the input data containing a padded 10-byte varint representation of the value `18` (`0x92 80 80 80 80 80 80 80 80 00`) while the encoder produced a more compact representation of the same value (`0x12`).
 

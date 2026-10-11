@@ -1,0 +1,117 @@
+{
+  "testing-binary-encoders-decoders-via-incremental-verification": [
+    {
+      "image": "./CleanShot-2023-01-11-at-15.44.00@2x.png",
+      "caption": "Fig. 1 This is not enough data to understand the problem.",
+      "tags": [
+        "em"
+      ]
+    },
+    {
+      "image": "./CleanShot-2023-01-11-at-15.43.36@2x.png",
+      "caption": "Fig. 2 Oh no, this is too much data! And that's just a small part of it.",
+      "tags": [
+        "em"
+      ]
+    },
+    {
+      "image": "./CleanShot-2023-01-11-at-15.48.45@2x.png",
+      "caption": "Fig. 3 Yes, that's a comfortable amount of binary data to debug!",
+      "tags": [
+        "em"
+      ]
+    }
+  ],
+  "reducing-gos-execution-tracer-overhead-with-frame-pointer-unwinding": [
+    {
+      "image": "./CleanShot-2023-02-05-at-12.01.54@2x.png",
+      "caption": "Fig. 1 Traversing a stack of depth 3 using frame pointer unwinding.",
+      "tags": [
+        "em"
+      ]
+    },
+    {
+      "image": "./image.png",
+      "caption": "Fig 2 CS101 finally gets its revenge.",
+      "tags": [
+        "em"
+      ]
+    },
+    {
+      "image": "./CleanShot-2023-01-27-at-21.55.10@2x.png",
+      "caption": "Fig 4 CPU profile showing 94% of execution tracer overhead in gentraceback.",
+      "tags": [
+        "em"
+      ]
+    },
+    {
+      "image": "./CleanShot-2023-01-27-at-21.57.24@2x-2.png",
+      "caption": "Fig 6 CPU profile showing 9% of execution tracer overhead in fpcallers.",
+      "tags": [
+        "em"
+      ]
+    }
+  ],
+  "debug-go-request-latency-with-datadogs-profiling-timeline": [
+    {
+      "image": "./CleanShot-2023-08-09-at-16.32.42@2x.png",
+      "caption": "Viewing the timelines of the goroutines involved in a request",
+      "tags": []
+    },
+    {
+      "image": "./CleanShot-2023-08-07-at-21.10.48-2@2x.png",
+      "caption": "Viewing the Flame Graph of an individual goroutine. Running is On-CPU, the rest if Off-CPU.",
+      "tags": [
+        "em"
+      ]
+    },
+    {
+      "image": "./CleanShot-2023-08-07-at-21.14.09-4@2x.png",
+      "caption": "Zooming into the timeline of a goroutine to see individual scheduling events.",
+      "tags": []
+    },
+    {
+      "image": "./CleanShot-2023-08-07-at-21.21.52-2@2x.png",
+      "caption": "Increasing the batch size of our messages eliminated the scheduling latency we saw earlier.",
+      "tags": []
+    }
+  ],
+  "how-to-make-a-tech-video-for-youtube": [
+    {
+      "image": "./CleanShot-2023-08-19-at-10.27.20@2x.png",
+      "caption": "Using Google Slides for creating a storyboard",
+      "tags": []
+    },
+    {
+      "image": "./CleanShot-2023-08-19-at-11.23.19@2x.png",
+      "caption": "Using speaker notes for the script and recording notes",
+      "tags": []
+    },
+    {
+      "image": "./CleanShot-2023-08-19-at-14.55.41@2x.png",
+      "caption": "Clapping is an easy way to leave visual markers in your audio track",
+      "tags": []
+    }
+  ],
+  "blazingly-fast-shadow-stacks-for-go": [
+    {
+      "image": "./2024-05-28-profiling-team--Channel----Datadog---70-new-items---Slack-at-00.22.57@2x.png",
+      "caption": "Message from an internal slack channel at work",
+      "tags": []
+    },
+    {
+      "image": "./2024-05-28-Untitled-spreadsheet---Google-Sheets-at-00.38.21@2x.png",
+      "caption": "Best-case: Regular FPCaller unwinding vs ShadowFPCallers",
+      "tags": [
+        "strong"
+      ]
+    },
+    {
+      "image": "./2024-05-28-Untitled-spreadsheet---Google-Sheets-at-00.38.35@2x.png",
+      "caption": "Worst-case: Regular FPCaller unwinding vs ShadowFPCallers",
+      "tags": [
+        "strong"
+      ]
+    }
+  ]
+}

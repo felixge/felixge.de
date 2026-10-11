@@ -49,6 +49,9 @@ a { color: var(--link); text-underline-offset: .15em; }
 a:visited { color: var(--visited); }
 :focus-visible { outline: 2px solid var(--link); outline-offset: 4px; }
 img, svg { max-width: 100%; height: auto; }
+figure { margin: 1.5rem 0; }
+figure img { display: block; }
+figcaption { margin-top: .5rem; color: var(--muted); font-size: .85em; }
 .video { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; border: 0; margin: 1rem 0; }
 blockquote { margin: 1.5rem 0; padding-left: 1rem; border-left: 3px solid var(--muted); }
 blockquote cite { display: block; text-align: right; }

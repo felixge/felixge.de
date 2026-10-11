@@ -20,31 +20,35 @@ os.Setenv("DD_PROFILING_EXECUTION_TRACE_PERIOD", "15m")
 
 Once this is enabled, you'll be able to click on slow requests in APM ❶ and navigate to the `Code Hotspots` ❷ → `Timeline` ❸ tab in order to see a timeline of every goroutine that was involved in serving this request. In the default zoom level, we aggregate events of the same type into small time buckets that are rendered as colorful area charts ❹.
 
-![](./CleanShot-2023-08-09-at-16.32.42@2x.png)
-
-Viewing the timelines of the goroutines involved in a request
+<figure>
+  <img src="./CleanShot-2023-08-09-at-16.32.42@2x.png" alt="" width="2000" height="1125" loading="lazy">
+  <figcaption>Viewing the timelines of the goroutines involved in a request</figcaption>
+</figure>
 
 The displayed data can be sliced and diced by selecting specific goroutines, time ranges and visualizations. For example, in the screenshot below I selected goroutine 104 (`http.(*conn).serve`) ❶ and opened the Flame Graph ❷ in the bottom drawer in order to understand what code is being executed.
 
-![](./CleanShot-2023-08-07-at-21.10.48-2@2x.png)
-
-Viewing the Flame Graph of an individual goroutine. *Running* is On-CPU, the rest if Off-CPU.
+<figure>
+  <img src="./CleanShot-2023-08-07-at-21.10.48-2@2x.png" alt="" width="2000" height="1125" loading="lazy">
+  <figcaption>Viewing the Flame Graph of an individual goroutine. <em>Running</em> is On-CPU, the rest if Off-CPU.</figcaption>
+</figure>
 
 One thing to notice is the high amount of *Unscheduled* time ❸ which indicates that the selected goroutine was experiencing scheduler latency. This can happen when all CPUs (GOMAXPROCS) are busy, but that wasn't the case here.
 
 To figure out the problem, we can zoom in to a 2.5ms time window ❶ and notice a pattern of spending only ~50 microseconds running ❷ before getting blocked by a send operation ❸ followed by a similar amount of unscheduled time ❹.
 
-![](./CleanShot-2023-08-07-at-21.14.09-4@2x.png)
-
-Zooming into the timeline of a goroutine to see individual scheduling events.
+<figure>
+  <img src="./CleanShot-2023-08-07-at-21.14.09-4@2x.png" alt="" width="2000" height="655" loading="lazy">
+  <figcaption>Zooming into the timeline of a goroutine to see individual scheduling events.</figcaption>
+</figure>
 
 Arguably this behavior from the scheduler doesn't seem ideal, but instead of going down this rabbit hole (we'll do it another time), we can simply increase the batch size of the individual messages that are being sent over the channel.
 
 This greatly reduces the number of times the goroutine has to be scheduled, which leads to a much smoother execution schedule and improves the latency of the endpoint by ~10% (335ms → 299ms ❶). This can be seen in the screenshot below, but you can also check out the [source code and commits of this application](https://github.com/DataDog/content-addressable-store/commits/main) for more details.
 
-![](./CleanShot-2023-08-07-at-21.21.52-2@2x.png)
-
-Increasing the batch size of our messages eliminated the scheduling latency we saw earlier.
+<figure>
+  <img src="./CleanShot-2023-08-07-at-21.21.52-2@2x.png" alt="" width="2000" height="591" loading="lazy">
+  <figcaption>Increasing the batch size of our messages eliminated the scheduling latency we saw earlier.</figcaption>
+</figure>
 
 Of course this is just a small example of how you can use this feature. In practice there are many different things that can cause latency problems (network, disk, mutex contention, channel operations, garbage collection, etc.), and it's not always practical or even feasible to instrument all of them with APM. But with the profiling timeline there is no need for additional instrumentation – we can finally give you full visibility into everything. This should help you to resolve even the most challenging latency problems.
 

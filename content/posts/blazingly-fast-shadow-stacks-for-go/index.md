@@ -43,9 +43,10 @@ It turns out that I was wrong. An alternative approach is to populate a shadow s
 
 I was immediately intrigued by the potential of this idea. In theory it seems like it could amortize most of the costs associated with DWARF unwinding on the happy path. However, I was skeptical how well the approach would fare under what I imagined to be a worst-case workload.
 
-![](./2024-05-28-profiling-team--Channel----Datadog---70-new-items---Slack-at-00.22.57@2x.png)
-
-Message from an internal slack channel at work
+<figure>
+  <img src="./2024-05-28-profiling-team--Channel----Datadog---70-new-items---Slack-at-00.22.57@2x.png" alt="" width="936" height="202" loading="lazy">
+  <figcaption>Message from an internal slack channel at work</figcaption>
+</figure>
 
 ## Implementing Shadow Stacks in Go
 
@@ -141,15 +142,17 @@ It took quite a bit of hacking to get the details right, but as far as I can tel
 
 This allowed me to do some benchmarking. The first benchmark shown below is a best-case scenario of capturing stack traces in a loop at a fixed stack depth. As you can see, the `ShadowFPCallers` approach is **8x faster** than the `FPCallers` implementation which is already really fast 🚀.
 
-![](./2024-05-28-Untitled-spreadsheet---Google-Sheets-at-00.38.21@2x.png)
-
-**Best-case:** Regular FPCaller unwinding vs ShadowFPCallers
+<figure>
+  <img src="./2024-05-28-Untitled-spreadsheet---Google-Sheets-at-00.38.21@2x.png" alt="" width="2000" height="889" loading="lazy">
+  <figcaption><strong>Best-case:</strong> Regular FPCaller unwinding vs ShadowFPCallers</figcaption>
+</figure>
 
 But as suspected, performance is mixed when it comes to a worst-case benchmark where the stack depth is increased up to a limit and then decreased back down while taking a stack trace upon entering a certain depth level as well as when leaving it. Here it seems like the shadow stack approach is only competitive for stacks that are a little deeper than 32 frames. At lower stack depths, the approach is **up to 4x slower** 🐌.
 
-![](./2024-05-28-Untitled-spreadsheet---Google-Sheets-at-00.38.35@2x.png)
-
-**Worst-case:** Regular FPCaller unwinding vs ShadowFPCallers
+<figure>
+  <img src="./2024-05-28-Untitled-spreadsheet---Google-Sheets-at-00.38.35@2x.png" alt="" width="2000" height="878" loading="lazy">
+  <figcaption><strong>Worst-case:</strong> Regular FPCaller unwinding vs ShadowFPCallers</figcaption>
+</figure>
 
 I can think of a few ways to mitigate the worst-case scenario. For example, the shadow stack could be disabled for stack depths below 32 frames. Or perhaps we could keep some statistics about the stack depths and use some more advanced heuristics. The implementation itself could probably also be further optimized. But, since this was just a small side project, I didn't have time to explore this further.
 
