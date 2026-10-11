@@ -79,3 +79,5 @@ Internally this will [cause Go](https://github.com/golang/go/blob/master/src/sys
 
 > I remember when it was possible to understand Unix.  
 > — [Rob Pike](https://groups.google.com/d/msg/golang-dev/MdNdaAN5ZBY/lE06YS6gk_UJ) (talking about process control)
+
+*Originally published on [Medium](https://medium.com/@felixge/killing-a-child-process-and-all-of-its-children-in-go-54079af94773) on September 23, 2015.*
