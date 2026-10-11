@@ -13,3 +13,14 @@
 2021/12/03/advent-of-go-profiling-2021-day-1-1-branchless-go/
 2022/02/11/connecting-go-profiling-with-tracing/
 2022/02/11/profiling-improvements-in-go-1.18/
+2023/01/11/testing-binary-encoders-decoders-via-incremental-verification/
+2023/01/12/go-execution-trace-size-breakdown/
+2023/01/13/history-of-gos-execution-tracer/
+2023/01/31/reducing-gos-execution-tracer-overhead-with-frame-pointer-unwinding/
+2023/02/05/go-arm64-function-call-assembly/
+2023/03/06/flamescope-for-go/
+2023/04/03/8-unexpected-profiling-use-cases-beyond-performance-optimization/
+2023/06/30/waiting-for-go1-21-execution-tracing-with-less-than-one-percent-overhead/
+2023/08/09/debug-go-request-latency-with-datadogs-profiling-timeline/
+2023/08/21/how-to-make-a-tech-video-for-youtube/
+2024/05/28/blazingly-fast-shadow-stacks-for-go/

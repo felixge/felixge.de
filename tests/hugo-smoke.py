@@ -145,8 +145,16 @@ def check(output, base, preview):
     for page in output.rglob("*.html"):
         relative = page.relative_to(output).as_posix()
         assert "disqus" not in page.read_text().lower(), f"Disqus should be removed: {relative}"
+        assert "__GHOST_URL__" not in page.read_text(), f"Unresolved Ghost URL: {relative}"
         page_url = base + relative.removesuffix("index.html")
-        for asset in HTML(page).assets:
+        html = HTML(page)
+        refresh = html.meta.get("refresh", "")
+        if refresh.startswith("0; url="):
+            target = urlsplit(refresh.removeprefix("0; url="))
+            assert target.netloc == urlsplit(base).netloc
+            assert (output / target.path.lstrip("/") / "index.html").is_file(), (
+                f"Missing alias target: {relative}: {refresh}")
+        for asset in html.assets:
             url = urlsplit(urljoin(page_url, asset))
             if url.netloc == urlsplit(base).netloc:
                 target = output / unquote(url.path).lstrip("/")
