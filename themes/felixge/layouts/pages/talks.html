@@ -11,8 +11,8 @@
       <td>
         <a href="{{ .url }}">{{ .title }}</a>
         <span class="talk-links">
-        {{ with .pdfUrl }}<a href="{{ . }}" aria-label="PDF" title="PDF"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 1H3v14h10V5L9 1Zm0 0v4h4M5 8h6M5 11h6"/></svg></a>{{ end }}
-        {{ if .videoUrl }}<a href="{{ .videoUrl }}" aria-label="Video" title="Video"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="m4 2 10 6-10 6Z"/></svg></a>{{ end }}
+        {{ with .pdfUrl }}<a href="{{ . }}" aria-label="View PDF slides" title="View PDF slides"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 1H3v14h10V5L9 1Zm0 0v4h4M5 8h6M5 11h6"/></svg></a>{{ end }}
+        {{ if .videoUrl }}<a href="{{ .videoUrl }}" aria-label="Watch video recording" title="Watch video recording"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="m4 2 10 6-10 6Z"/></svg></a>{{ end }}
         {{ if .codeUrl }}<a href="{{ .codeUrl }}">code</a>{{ end }}
         </span>
       </td>
