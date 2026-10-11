@@ -2,6 +2,7 @@
 title: "FlameScope for Go"
 date: 2023-03-06T13:47:23.000Z
 slug: "flamescope-for-go"
+cover: cover.png
 aliases:
   - /flamescope-for-go/
 ---

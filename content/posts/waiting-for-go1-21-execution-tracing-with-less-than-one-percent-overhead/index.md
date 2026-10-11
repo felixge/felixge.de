@@ -2,6 +2,7 @@
 title: "Waiting for go1.21: Execution Tracing with < 1% Overhead"
 date: 2023-06-30T19:15:32.000Z
 slug: "waiting-for-go1-21-execution-tracing-with-less-than-one-percent-overhead"
+cover: cover.png
 aliases:
   - /waiting-for-go1-21-execution-tracing-with-less-than-one-percent-overhead/
 ---

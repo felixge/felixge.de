@@ -2,6 +2,7 @@
 title: "Debug Go Request Latency with Datadog's Profiling Timeline"
 date: 2023-08-09T14:56:28.000Z
 slug: "debug-go-request-latency-with-datadogs-profiling-timeline"
+cover: cover.png
 aliases:
   - /debug-go-request-latency-with-datadogs-profiling-timeline/
 ---

@@ -2,6 +2,7 @@
 title: "How to Make a Tech Video for YouTube"
 date: 2023-08-21T12:41:38.000Z
 slug: "how-to-make-a-tech-video-for-youtube"
+cover: cover.png
 aliases:
   - /how-to-make-a-tech-video-for-youtube/
 ---

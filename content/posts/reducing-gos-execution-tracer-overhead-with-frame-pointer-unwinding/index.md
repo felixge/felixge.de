@@ -2,6 +2,7 @@
 title: "Reducing Go Execution Tracer Overhead With Frame Pointer Unwinding"
 date: 2023-01-31T16:57:47.000Z
 slug: "reducing-gos-execution-tracer-overhead-with-frame-pointer-unwinding"
+cover: cover.png
 aliases:
   - /reducing-gos-execution-tracer-overhead-with-frame-pointer-unwinding/
 ---

@@ -2,6 +2,7 @@
 title: "Blazingly Fast Shadow Stacks for Go"
 date: 2024-05-28T10:19:46.000Z
 slug: "blazingly-fast-shadow-stacks-for-go"
+cover: cover.png
 aliases:
   - /blazingly-fast-shadow-stacks-for-go/
 ---

@@ -2,6 +2,7 @@
 title: "Go arm64 Function Call Assembly"
 date: 2023-02-05T09:17:02.000Z
 slug: "go-arm64-function-call-assembly"
+cover: cover.png
 aliases:
   - /go-arm64-function-call-assembly/
 ---

@@ -124,6 +124,12 @@ def check(output, base, preview):
     for route in expected:
         page = output / route / "index.html"
         assert page.is_file(), f"Missing route: {route}"
+        cover = ROOT / "content/posts" / route.strip("/").split("/")[-1] / "cover.png"
+        if cover.is_file():
+            images = [img for img in HTML(page).images if img.get("src") == "/" + route + "cover.png"]
+            assert len(images) == 1, f"Missing cover image: {route}"
+            assert images[0].get("alt") and images[0].get("width") and images[0].get("height")
+            assert (output / route / "cover.png").read_bytes() == cover.read_bytes()
     assert (output / DRAFT / "index.html").exists() == preview
     assert (output / DRAFT / "main.js").exists() == preview
     if preview:

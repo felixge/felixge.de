@@ -2,6 +2,8 @@
 title: "Testing binary encoders/decoders via incremental output verification"
 date: 2023-01-11T15:50:59.000Z
 slug: "testing-binary-encoders-decoders-via-incremental-verification"
+cover: cover.png
+coverAlt: "Binary diff output produced by a round-trip test when using incremental output verification"
 aliases:
   - /testing-binary-encoders-decoders-via-incremental-verification/
 ---

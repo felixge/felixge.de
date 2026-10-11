@@ -2,6 +2,7 @@
 title: "History of Go's Execution Tracer"
 date: 2023-01-13T21:17:52.000Z
 slug: "history-of-gos-execution-tracer"
+cover: cover.png
 aliases:
   - /history-of-gos-execution-tracer/
 ---

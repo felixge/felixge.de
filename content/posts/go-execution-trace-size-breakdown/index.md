@@ -2,6 +2,7 @@
 title: "Go Execution Trace Size Breakdown"
 date: 2023-01-12T22:34:00.000Z
 slug: "go-execution-trace-size-breakdown"
+cover: cover.png
 aliases:
   - /go-execution-trace-size-breakdown/
 ---
