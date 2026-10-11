@@ -176,6 +176,7 @@ def check(output, base, preview):
         self_link = channel.find("{http://www.w3.org/2005/Atom}link")
         assert self_link is not None and self_link.get("href") == base + feed
 
+    alias_redirects = {}
     for page in output.rglob("*.html"):
         relative = page.relative_to(output).as_posix()
         assert "disqus" not in page.read_text().lower(), f"Disqus should be removed: {relative}"
@@ -187,6 +188,7 @@ def check(output, base, preview):
         refresh = html.meta.get("refresh", "")
         if refresh.startswith("0; url="):
             target = urlsplit(refresh.removeprefix("0; url="))
+            alias_redirects["/" + relative.removesuffix("index.html")] = target.path
             assert not target.scheme and not target.netloc and target.path.startswith("/"), (
                 f"Alias redirects must be site-relative: {relative}: {refresh}")
             alternate = "http://127.0.0.1:61449/"
@@ -198,6 +200,16 @@ def check(output, base, preview):
             if url.netloc == urlsplit(base).netloc:
                 target = output / unquote(url.path).lstrip("/")
                 assert target.is_file(), f"Missing asset: {relative}: {asset}"
+    netlify_redirects = {}
+    for line in (output / "_redirects").read_text().splitlines():
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+        source, target, status = line.split()
+        assert status == "301!", f"Netlify must force permanent redirects over alias pages: {line}"
+        assert source not in netlify_redirects, f"Duplicate Netlify redirect: {source}"
+        netlify_redirects[source] = target
+    assert netlify_redirects == alias_redirects, "Netlify redirects must match all Hugo aliases"
+
     for source in (ROOT / "static").rglob("*"):
         if source.is_file():
             assert (output / source.relative_to(ROOT / "static")).read_bytes() == source.read_bytes()
