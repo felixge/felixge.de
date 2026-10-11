@@ -109,6 +109,7 @@ def check(output, base, preview):
     sections = ["about/", "blog/", "speaking/", "contact/"]
     menu_links = ["/", "/blog/", "/speaking/", "/contact/"]
     assert home.navigation_by_label["Main navigation"] == menu_links
+    assert home.navigation_text.count("·") == 3, "Expected middle dots between homepage links"
     blog = HTML(output / "blog/index.html")
     speaking = HTML(output / "speaking/index.html")
     post_links = [link for link in blog.links if urlsplit(link).path.lstrip("/") in expected]

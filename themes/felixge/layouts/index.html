@@ -4,9 +4,9 @@
   <header class="home-introduction">
     <nav class="home-navigation" aria-label="Main navigation">
       <ul>
-        {{ range (where .Site.RegularPages "Type" "pages").ByWeight }}
+        {{ range $index, $page := (where .Site.RegularPages "Type" "pages").ByWeight }}
         {{ $homeLink := eq .File.ContentBaseName "about" }}
-        <li><a id="{{ .File.ContentBaseName }}" href="{{ if $homeLink }}{{ $.Site.Home.RelPermalink }}{{ else }}{{ .RelPermalink }}{{ end }}"{{ if $homeLink }} aria-current="page"{{ end }}>{{ .Title }}</a></li>
+        <li>{{ if $index }}<span aria-hidden="true">·</span>{{ end }}<a id="{{ .File.ContentBaseName }}" href="{{ if $homeLink }}{{ $.Site.Home.RelPermalink }}{{ else }}{{ .RelPermalink }}{{ end }}"{{ if $homeLink }} aria-current="page"{{ end }}>{{ .Title }}</a></li>
         {{ end }}
       </ul>
     </nav>

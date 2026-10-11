@@ -36,10 +36,9 @@ body {
 
 .site-header { margin-bottom: 1.5rem; }
 .home-introduction { margin-bottom: 2rem; }
-.home-navigation ul { display: flex; flex-wrap: wrap; gap: .25rem 1.25rem; margin: 0; padding: 0; list-style: none; }
-.breadcrumbs { list-style: none; margin: 0; padding: 0; }
-.breadcrumbs li { display: inline; }
-.breadcrumbs span { margin: 0 .5em; color: var(--muted); }
+.home-navigation ul, .breadcrumbs { list-style: none; margin: 0; padding: 0; }
+.home-navigation li, .breadcrumbs li { display: inline-block; }
+.home-navigation span, .breadcrumbs span { margin: 0 .5em; color: var(--muted); }
 .skip-link { position: absolute; top: .5rem; left: 1rem; padding: .25rem .5rem; background: var(--bg); }
 .skip-link:not(:focus) { clip-path: inset(50%); width: 1px; height: 1px; overflow: hidden; }
 
