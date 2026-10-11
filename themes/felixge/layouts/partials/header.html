@@ -14,8 +14,9 @@
       <li><a href="/">{{ .Site.Title }}</a></li>
       {{ if eq .Type "posts" }}
         <li><span aria-hidden="true">&rsaquo;</span><a href="{{ (.Site.GetPage "/blog").RelPermalink }}">Blog</a></li>
-      {{ end }}
+      {{ else }}
       <li><span aria-hidden="true">&rsaquo;</span><a href="{{ .RelPermalink }}" aria-current="page">{{ if eq .Kind "404" }}Page not found{{ else }}{{ .Title }}{{ end }}</a></li>
+      {{ end }}
     </ol>
   </nav>
   {{- end }}

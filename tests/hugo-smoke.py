@@ -272,7 +272,7 @@ def check(output, base, preview):
         breadcrumbs = ["/"] if route else []
         if route in expected:
             breadcrumbs.append("/blog/")
-        if route:
+        if route and route not in expected:
             breadcrumbs.append(current)
         assert html.nav_labels == (["Breadcrumb"] if route else ["Main navigation"])
         if route:
@@ -280,7 +280,7 @@ def check(output, base, preview):
         else:
             assert "Breadcrumb" not in html.navigation_by_label
             assert html.navigation_by_label["Main navigation"] == menu_links
-        assert html.current_pages == [current]
+        assert html.current_pages == ([] if route in expected else [current])
         assert "Felix Geisendörfer" in html.navigation_text
         if route:
             assert "›" in html.navigation_text
