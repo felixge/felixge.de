@@ -6,6 +6,7 @@
 2013/12/25/godrone-a-parrot-ar-drone-2.0-firmware-written-in-go/
 2014/08/26/using-tcp-keepalive-with-go/
 2015/03/05/go-raspberry-pi-powered-alarm-clock/
+2015/09/23/killing-a-child-process-and-all-of-its-children-in-go/
 2017/05/23/postgresql-operations-that-you-cant-explain/
 2017/07/27/implementing-state-machines-in-postgresql/
 2020/09/27/csv-boilerplate-for-go/
