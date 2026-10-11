@@ -1,9 +1,6 @@
 baseURL: "https://felixge.de/"
 locale: "en-US"
 title: "Felix Geisendörfer"
-services:
-  disqus:
-    shortname: felixge
 permalinks:
   posts: /:year/:month/:day/:slug/
 

@@ -114,7 +114,7 @@ def check(output, base, preview):
         local + route for route in blog_posts], "Blog links must stay on localhost during development"
     for section in sections:
         text = (output / section / "index.html").read_text()
-        assert "Published:" not in text and "disqus.com/embed.js" not in text
+        assert "Published:" not in text
     about = HTML(output / "about/index.html")
     for route in ["index.html", "about/index.html"]:
         assert "<h1>About</h1>" in (output / route).read_text(), "About heading missing"
@@ -124,7 +124,6 @@ def check(output, base, preview):
     for route in expected:
         page = output / route / "index.html"
         assert page.is_file(), f"Missing route: {route}"
-        assert "felixge.disqus.com/embed.js" in page.read_text(), "Disqus integration missing"
     assert (output / DRAFT / "index.html").exists() == preview
     assert (output / DRAFT / "main.js").exists() == preview
     if preview:
@@ -145,6 +144,7 @@ def check(output, base, preview):
 
     for page in output.rglob("*.html"):
         relative = page.relative_to(output).as_posix()
+        assert "disqus" not in page.read_text().lower(), f"Disqus should be removed: {relative}"
         page_url = base + relative.removesuffix("index.html")
         for asset in HTML(page).assets:
             url = urlsplit(urljoin(page_url, asset))

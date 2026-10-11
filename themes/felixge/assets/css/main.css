@@ -81,6 +81,6 @@ table:not(.entries) :is(th, td) { padding: .25rem .75rem; border-bottom: 1px sol
   :root { color-scheme: light; --bg: #fff; --fg: #111; --muted: #555; --link: #00e; --visited: #551a8b; --code: #f0f0f0; --keyword: #006b36; --string: #a31515; }
   body { max-width: none; padding: 0; }
   .footer-logo img { filter: none; }
-  .site-header nav, .skip-link, #disqus_thread { display: none; }
+  .site-header nav, .skip-link { display: none; }
   pre { white-space: pre-wrap; overflow-wrap: anywhere; }
 }
