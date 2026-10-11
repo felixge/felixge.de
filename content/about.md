@@ -14,7 +14,7 @@ Prior to that, I co-founded and bootstrapped [Transloadit](http://transloadit.co
 
 I've also created a [lot of open source](https://github.com/felixge) over the years. Most notable are my contributions to the Go runtime ([50+ patches](https://go-review.googlesource.com/q/owner:felix.geisendoerfer@datadoghq.com+status:merged), e.g. [frame pointer unwinding](https://www.youtube.com/watch?v=0f8JnJhC0-0&t=0s)). I was also one of the first Node.js core contributors ([100+ patches](https://github.com/nodejs/node/commits?author=felixge)) and created many modules, e.g. [node-mysql](https://github.com/mysqljs/mysql) and [node-formidable](https://github.com/node-formidable/formidable).
 
-Back when drones were fun and harmless, I created a [community](https://scholar.google.com/scholar?hl=en&as_sdt=0%2C5&q=node-ar-drone&btnG=) around programming flying robots with JavaScript. It really took off after I organized the [NodeCopter](https://web.archive.org/web/20250105164856/https://www.nodecopter.com/) event in Berlin with a few friends.
+Back when drones were fun and harmless, a few friends and I organized [NodeCopter](https://web.archive.org/web/20250105164856/https://www.nodecopter.com/), a hackathon for programming drones with JavaScript. It inspired about 30 satellite events and some [academic literature](https://scholar.google.com/scholar?hl=en&as_sdt=0%2C5&q=node-ar-drone&btnG=).
 
 Last but not least, I enjoy playing competitive beach volleyball.
 
