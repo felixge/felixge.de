@@ -266,13 +266,13 @@
 
 - title: Node.js - A quick tour
   date: 2011-02-15
-  location: Atlanta JavaScript Meetup Group
+  location: Atlanta JavaScript Meetup
   url: http://www.slideshare.net/the_undefined/nodejs-a-quick-tour-v5
   eventUrl: http://www.meetup.com/AtlantaJavaScript/events/16170144/
 
 - title: Node.js - Should Ruby Developers Care?
   date: 2011-02-09
-  location: Atlanta Ruby Meetup Group
+  location: Atlanta Ruby Meetup
   url: http://www.slideshare.net/the_undefined/nodejs-should-ruby-developers-care
   eventUrl: http://www.meetup.com/atlantaruby/events/15955963/
   pdfUrl: http://felixge.s3.amazonaws.com/11/nodejs-should-ruby-developers-care.pdf
