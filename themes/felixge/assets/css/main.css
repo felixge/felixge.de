@@ -57,7 +57,7 @@ blockquote cite { display: block; text-align: right; }
 .entry-meta { display: block; color: var(--muted); font-size: .85em; }
 .site-footer { margin-top: 1rem; }
 .footer-logo { display: inline-block; max-width: 100%; }
-.footer-logo img { display: block; width: 8rem; }
+.footer-logo img { display: block; width: 9.6rem; }
 
 code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .9em; }
 pre { background: var(--code); padding: 1rem; overflow-x: auto; font-size: .9em; line-height: 1.5; }
