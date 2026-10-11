@@ -30,6 +30,7 @@ class HTML(HTMLParser):
         self.ids = set()
         self.meta = {}
         self.tags = set()
+        self.landmarks = []
         self.stylesheets = []
         self.images = []
         self.videos = []
@@ -49,6 +50,10 @@ class HTML(HTMLParser):
     def handle_starttag(self, tag, attrs):
         attrs = dict(attrs)
         self.tags.add(tag)
+        if ((tag == "header" and attrs.get("class") == "site-header") or
+                (tag == "main" and attrs.get("id") == "main") or
+                (tag == "footer" and attrs.get("class") == "site-footer")):
+            self.landmarks.append(tag)
         if tag == "footer":
             self.in_footer = True
         if tag == "table":
@@ -200,6 +205,7 @@ def check(output, base, preview):
         html = HTML(page)
         assert html.lang == "en"
         assert {"head", "header", "nav", "main", "footer"} <= html.tags
+        assert html.landmarks == ["header", "main", "footer"], f"Incorrect page structure: {route}"
         assert html.meta.get("viewport", "").replace(" ", "") == "width=device-width,initial-scale=1"
         assert "#main" in html.links and "main" in html.ids
         current = "/" + route

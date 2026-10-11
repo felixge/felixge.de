@@ -1,19 +1,5 @@
 {{ define "main" -}}
 {{ $about := .Site.GetPage "/about" }}
-<article class="home-document">
-  <header class="home-introduction">
-    <nav class="home-navigation" aria-label="Main navigation">
-      <ul>
-        {{ range $index, $page := (where .Site.RegularPages "Type" "pages").ByWeight }}
-        {{ $homeLink := eq .File.ContentBaseName "about" }}
-        <li>{{ if $index }}<span aria-hidden="true">·</span>{{ end }}<a id="{{ .File.ContentBaseName }}" href="{{ if $homeLink }}{{ $.Site.Home.RelPermalink }}{{ else }}{{ .RelPermalink }}{{ end }}"{{ if $homeLink }} aria-current="page"{{ end }}>{{ .Title }}</a></li>
-        {{ end }}
-      </ul>
-    </nav>
-  </header>
-  <div class="home-biography">
-    <h1>{{ $about.Params.heading | default $about.Title }}</h1>
-    {{ $about.Content }}
-  </div>
-</article>
+<h1>{{ $about.Params.heading | default $about.Title }}</h1>
+{{ $about.Content }}
 {{- end }}

@@ -1,7 +1,16 @@
-{{ if not .IsHome -}}
 <header class="site-header">
+  {{ if .IsHome -}}
+  <nav aria-label="Main navigation">
+    <ul>
+      {{ range $index, $page := (where .Site.RegularPages "Type" "pages").ByWeight }}
+      {{ $homeLink := eq .File.ContentBaseName "about" }}
+      <li>{{ if $index }}<span aria-hidden="true">·</span>{{ end }}<a id="{{ .File.ContentBaseName }}" href="{{ if $homeLink }}{{ $.Site.Home.RelPermalink }}{{ else }}{{ .RelPermalink }}{{ end }}"{{ if $homeLink }} aria-current="page"{{ end }}>{{ .Title }}</a></li>
+      {{ end }}
+    </ul>
+  </nav>
+  {{ else -}}
   <nav aria-label="Breadcrumb">
-    <ol class="breadcrumbs">
+    <ol>
       <li><a href="/">{{ .Site.Title }}</a></li>
       {{ if eq .Type "posts" }}
         <li><span aria-hidden="true">&rsaquo;</span><a href="{{ (.Site.GetPage "/blog").RelPermalink }}">Blog</a></li>
@@ -9,5 +18,5 @@
       <li><span aria-hidden="true">&rsaquo;</span><a href="{{ .RelPermalink }}" aria-current="page">{{ if eq .Kind "404" }}Page not found{{ else }}{{ .Title }}{{ end }}</a></li>
     </ol>
   </nav>
+  {{- end }}
 </header>
-{{- end }}
