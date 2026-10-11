@@ -174,7 +174,10 @@ def check(output, base, preview):
         refresh = html.meta.get("refresh", "")
         if refresh.startswith("0; url="):
             target = urlsplit(refresh.removeprefix("0; url="))
-            assert target.netloc == urlsplit(base).netloc
+            assert not target.scheme and not target.netloc and target.path.startswith("/"), (
+                f"Alias redirects must be site-relative: {relative}: {refresh}")
+            alternate = "http://127.0.0.1:61449/"
+            assert urljoin(alternate + relative, target.path) == alternate + target.path.lstrip("/")
             assert (output / target.path.lstrip("/") / "index.html").is_file(), (
                 f"Missing alias target: {relative}: {refresh}")
         for asset in html.assets:
@@ -241,7 +244,10 @@ def check(output, base, preview):
     alias = HTML(output / ALIAS)
     assert alias.meta.get("robots") == "noindex"
     assert alias.meta.get("refresh") == (
-        "0; url=" + base + "2017/05/23/postgresql-operations-that-you-cant-explain/")
+        "0; url=/2017/05/23/postgresql-operations-that-you-cant-explain/")
+    ghost_alias = HTML(output / "how-to-make-a-tech-video-for-youtube/index.html")
+    assert ghost_alias.meta.get("refresh") == (
+        "0; url=/2023/08/21/how-to-make-a-tech-video-for-youtube/")
 
     # These published anchors included the code-link URL before Hugo 0.144.
     profiling = HTML(output / "2021/12/01/advent-of-go-profiling-2021-day-1-1/index.html")
