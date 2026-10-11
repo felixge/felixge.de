@@ -16,7 +16,7 @@ I've also created a [lot of open source](https://github.com/felixge) over the ye
 
 Back when drones were fun and harmless, [a few friends](https://web.archive.org/web/20240424231729/http://www.nodecopter.com/core) and I organized [NodeCopter](https://web.archive.org/web/20250105164856/https://www.nodecopter.com/), a hackathon for programming flying robots with JavaScript. It inspired about 30 satellite events and some [academic literature](https://scholar.google.com/scholar?hl=en&as_sdt=0%2C5&q=node-ar-drone&btnG=).
 
-Last but not least, I enjoy playing competitive beach volleyball.
+Last but not least, I enjoy playing competitive beach volleyball on a weekly basis.
 
 You can also find me on [Bluesky](https://bsky.app/profile/felixge.de), [LinkedIn](https://www.linkedin.com/in/felixg2/), [Twitter](https://twitter.com/felixge),
 [GitHub](https://github.com/felixge), [YouTube](https://www.youtube.com/@felix.geisendoerfer) or [contact me](/contact/) directly.
