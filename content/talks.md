@@ -1,7 +1,7 @@
 ---
-title: Speaking
+title: Talks
 type: pages
-layout: speaking
+layout: talks
 weight: 20
 ---
 

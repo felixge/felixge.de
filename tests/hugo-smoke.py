@@ -137,12 +137,16 @@ def check(output, base, preview):
     home = HTML(output / "index.html")
     assert "Hosted by" not in (output / "index.html").read_text(), "Hosting credit should be removed"
     assert "https://www.netlify.com/" not in home.links
-    sections = ["about/", "blog/", "speaking/", "contact/"]
-    menu_links = ["/", "/blog/", "/speaking/", "/contact/"]
+    sections = ["about/", "blog/", "talks/", "contact/"]
+    menu_links = ["/", "/blog/", "/talks/", "/contact/"]
     assert home.navigation_by_label["Main navigation"] == menu_links
     assert home.navigation_text.count("·") == 3, "Expected middle dots between homepage links"
     blog = HTML(output / "blog/index.html")
-    speaking = HTML(output / "speaking/index.html")
+    talks = HTML(output / "talks/index.html")
+    assert "talks" in talks.ids
+    assert ">Talks</h1>" in (output / "talks/index.html").read_text()
+    assert "Talks" in home.navigation_text
+    assert not (output / "speaking/index.html").exists()
     assert "/posts.atom.xml" in blog.links, "Blog subscription must use the local RSS feed"
     post_links = [link for link in blog.links if urlsplit(link).path.lstrip("/") in expected]
     blog_posts = [urlsplit(link).path.lstrip("/") for link in post_links]
@@ -161,7 +165,7 @@ def check(output, base, preview):
         assert "<h1>Felix Geisendörfer</h1>" in (output / route).read_text(), "Name heading missing"
     assert "/contact/" in about.links
     assert set(about.links) - {"/about/"} <= set(home.links), "Homepage must include the About page links"
-    assert "/contact/" in speaking.links
+    assert "/contact/" in talks.links
     for route in expected:
         page = output / route / "index.html"
         assert page.is_file(), f"Missing route: {route}"
@@ -297,13 +301,13 @@ def check(output, base, preview):
         assert logo.get("loading") == "lazy" and logo.get("decoding") == "async"
     assert (output / "img/get-on-the-squirrel.png").read_bytes() == (
         ROOT / "themes/felixge/static/img/get-on-the-squirrel.png").read_bytes()
-    assert {"blog", "speaking", "about", "contact"} <= home.ids
+    assert {"blog", "talks", "about", "contact"} <= home.ids
     assert not home.tables, "Homepage should show the biography, not tables"
     assert [table["label"] for table in blog.tables] == ["blog"]
-    assert [table["label"] for table in speaking.tables] == ["speaking"]
+    assert [table["label"] for table in talks.tables] == ["talks"]
     talk_count = sum(line.startswith("- title:") for line in
                      (ROOT / "data/talks.yml").read_text().splitlines())
-    tables = blog.tables + speaking.tables
+    tables = blog.tables + talks.tables
     assert [table["rows"] for table in tables] == [len(expected) + 1, talk_count + 1]
     for table in tables:
         assert len(table["headers"]) == 2
