@@ -1,6 +1,5 @@
 ---
 title: Felix Geisendörfer
-heading: About
 type: pages
 weight: 5
 ---
