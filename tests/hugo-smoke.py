@@ -177,6 +177,8 @@ def check(output, base, preview):
         assert "__GHOST_URL__" not in page.read_text(), f"Unresolved Ghost URL: {relative}"
         page_url = base + relative.removesuffix("index.html")
         html = HTML(page)
+        assert not any("feedburner.google.com/fb/a/mailverify" in link for link in html.links), (
+            f"Email subscription links should be removed: {relative}")
         refresh = html.meta.get("refresh", "")
         if refresh.startswith("0; url="):
             target = urlsplit(refresh.removeprefix("0; url="))
