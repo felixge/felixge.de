@@ -26,7 +26,7 @@
 
 body {
   max-width: 70ch;
-  margin: 0;
+  margin: 0 auto;
   padding: 2rem 1rem 4rem;
   background: var(--bg);
   color: var(--fg);
