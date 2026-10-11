@@ -1,6 +1,6 @@
 {{ $page := .Page }}
 {{ $page.Content }}
-<p>You can subscribe to updates via <a href="https://feeds.feedburner.com/{{ $page.Site.Params.feedburnerShortname }}">RSS</a>.</p>
+<p>You can subscribe to updates via <a href="{{ ($page.Site.Home.OutputFormats.Get "RSS").RelPermalink }}">RSS</a>.</p>
 
 <table class="entries" aria-labelledby="{{ .Label }}">
   <thead>

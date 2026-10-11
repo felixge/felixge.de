@@ -32,6 +32,7 @@ class HTML(HTMLParser):
         self.tags = set()
         self.landmarks = []
         self.stylesheets = []
+        self.feeds = []
         self.images = []
         self.videos = []
         self.footer_images = []
@@ -90,6 +91,8 @@ class HTML(HTMLParser):
         if tag == "link" and attrs.get("rel") == "stylesheet":
             self.assets.append(attrs["href"])
             self.stylesheets.append(attrs["href"])
+        if tag == "link" and attrs.get("type") == "application/rss+xml":
+            self.feeds.append(attrs["href"])
         if tag == "meta":
             self.meta[attrs.get("name", attrs.get("http-equiv"))] = attrs.get("content")
 
@@ -117,6 +120,7 @@ def check(output, base, preview):
     assert home.navigation_text.count("·") == 3, "Expected middle dots between homepage links"
     blog = HTML(output / "blog/index.html")
     speaking = HTML(output / "speaking/index.html")
+    assert "/posts.atom.xml" in blog.links, "Blog subscription must use the local RSS feed"
     post_links = [link for link in blog.links if urlsplit(link).path.lstrip("/") in expected]
     blog_posts = [urlsplit(link).path.lstrip("/") for link in post_links]
     assert set(blog_posts) == expected, "Blog post list changed"
@@ -139,6 +143,7 @@ def check(output, base, preview):
         page = output / route / "index.html"
         assert page.is_file(), f"Missing route: {route}"
         slug = route.strip("/").split("/")[-1]
+        assert "/posts.atom.xml" in HTML(page).links, f"Missing local RSS subscription: {route}"
         videos = HTML(page).videos
         assert [video.get("src") for video in videos] == [
             "https://www.youtube-nocookie.com/embed/" + video for video in VIDEO_EMBEDS.get(slug, [])]
@@ -205,6 +210,7 @@ def check(output, base, preview):
     for route in ["", "404.html", *sections, *expected]:
         page = output / (route if route == "404.html" else route + "index.html")
         html = HTML(page)
+        assert html.feeds == ["/posts.atom.xml"], f"RSS discovery must use the local feed: {route}"
         assert html.lang == "en"
         assert {"head", "header", "nav", "main", "footer"} <= html.tags
         assert html.landmarks == ["header", "main", "footer"], f"Incorrect page structure: {route}"

@@ -18,7 +18,6 @@ outputFormats:
 
 theme: "felixge"
 params:
-  feedburnerShortname: felixge
   twitterShortname: felixge
 markup:
   goldmark:
