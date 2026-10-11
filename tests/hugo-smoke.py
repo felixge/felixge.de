@@ -96,6 +96,8 @@ class HTML(HTMLParser):
 def check(output, base, preview):
     expected = set(ROUTES) | ({DRAFT} if preview else set())
     home = HTML(output / "index.html")
+    assert "Hosted by" not in (output / "index.html").read_text(), "Hosting credit should be removed"
+    assert "https://www.netlify.com/" not in home.links
     sections = ["about/", "blog/", "speaking/", "contact/"]
     menu_links = ["/", "/blog/", "/speaking/", "/contact/"]
     assert home.navigation_by_label["Main navigation"] == menu_links

@@ -55,7 +55,7 @@ blockquote { margin: 1.5rem 0; padding-left: 1rem; border-left: 3px solid var(--
 blockquote cite { display: block; text-align: right; }
 
 .entry-meta { display: block; color: var(--muted); font-size: .85em; }
-.site-footer { margin-top: 1rem; color: var(--muted); font-size: .85em; }
+.site-footer { margin-top: 1rem; }
 .footer-logo { display: inline-block; max-width: 100%; }
 .footer-logo img { display: block; width: 8rem; }
 
