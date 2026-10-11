@@ -51,6 +51,7 @@ class HTML(HTMLParser):
         self.in_nav = False
         self.tables = []
         self.in_table = None
+        self.in_header = False
         self.feed(path.read_text())
 
     def handle_starttag(self, tag, attrs):
@@ -63,13 +64,18 @@ class HTML(HTMLParser):
         if tag == "footer":
             self.in_footer = True
         if tag == "table":
-            self.in_table = {"label": attrs.get("aria-labelledby"), "rows": 0, "headers": []}
+            self.in_table = {"label": attrs.get("aria-labelledby"), "rows": 0,
+                             "headers": [], "cells": []}
             self.tables.append(self.in_table)
         if self.in_table is not None:
             if tag == "tr":
                 self.in_table["rows"] += 1
+                self.in_table["cells"].append(0)
+            if tag in ("th", "td"):
+                self.in_table["cells"][-1] += 1
             if tag == "th":
-                self.in_table["headers"].append(attrs)
+                self.in_header = True
+                self.in_table["headers"].append({**attrs, "text": ""})
         if tag == "nav":
             self.in_nav = True
             self.nav_labels.append(attrs.get("aria-label"))
@@ -113,12 +119,16 @@ class HTML(HTMLParser):
             self.meta[attrs.get("name", attrs.get("http-equiv"))] = attrs.get("content")
 
     def handle_data(self, data):
+        if self.in_header:
+            self.in_table["headers"][-1]["text"] += data
         if self.in_nav:
             self.navigation_text += data
         if self.in_caption:
             self.in_figure["caption"] += data
 
     def handle_endtag(self, tag):
+        if tag == "th":
+            self.in_header = False
         if tag == "figcaption":
             self.in_caption = False
         if tag == "figure":
@@ -309,8 +319,9 @@ def check(output, base, preview):
                      (ROOT / "data/talks.yml").read_text().splitlines())
     tables = blog.tables + talks.tables
     assert [table["rows"] for table in tables] == [len(expected) + 1, talk_count + 1]
-    for table in tables:
-        assert len(table["headers"]) == 2
+    for table, labels in zip(tables, [["Post", "Published"], ["Talk", "Event", "Date"]]):
+        assert [header["text"].strip() for header in table["headers"]] == labels
+        assert all(count == len(labels) for count in table["cells"])
         assert all(header.get("scope") == "col" for header in table["headers"])
     alias = HTML(output / ALIAS)
     assert alias.meta.get("robots") == "noindex"
