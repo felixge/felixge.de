@@ -25,7 +25,7 @@
 
 - title: tus.io - Resumable File Uploads
   date: 2013-05-01
-  location: UIKonf Preparty, Berlin
+  location: UIKonf, Berlin
   url: https://speakerdeck.com/felixge/tus-dot-io-resumable-file-uploads-lightning-talk
   eventUrl: http://www.uikonf.com/2013/03/28/preparty.html
   pdfUrl: https://speakerd.s3.amazonaws.com/presentations/321b01b09538013066ae7e72ba47199d/tus.pdf
@@ -107,7 +107,7 @@
 
 - title: Programming flying robots with node.js
   date: 2012-09-28
-  location: LXJS Lisbon JavaScript, Lisbon
+  location: LXJS, Lisbon
   url: https://speakerdeck.com/felixge/programming-flying-robots-with-javascript
   eventUrl: http://2012.lxjs.org/
   pdfUrl: https://speakerd.s3.amazonaws.com/presentations/c7646c803ff90130e97412313b100342/slides.pdf
@@ -115,14 +115,14 @@
 
 - title: The power of node.js (with quadcopters)
   date: 2012-09-07
-  location: Developer Conference, Hamburg
+  location: DevCon, Hamburg
   url: https://speakerdeck.com/felixge/the-power-of-node-dot-js
   eventUrl: http://www.developer-conference-hh.de/
   pdfUrl: http://felixge.s3.amazonaws.com/12/the%20power%20of%20node.pdf
 
 - title: The zen of node.js
   date: 2012-08-22
-  location: Campus Party Europe, Berlin
+  location: Campus Party, Berlin
   url: https://speakerdeck.com/felixge/the-zen-of-node-dot-js
   eventUrl: http://www.campus-party.eu/2012/index.html
   pdfUrl: https://speakerd.s3.amazonaws.com/presentations/2bd99e103ff90130b9ec1231381f54b3/zen-of-node.pdf
@@ -233,7 +233,7 @@
 
 - title: Node.js - Eine praktische Einführung
   date: 2011-05-21
-  location: Developer Conference, Hamburg
+  location: DevCon, Hamburg
   url: http://www.slideshare.net/the_undefined/nodejs-eine-praktische-einfhrung-v7
   eventUrl: http://www.devcon-hamburg.de/workshops-2011/#Einf%C3%BChrung%20node.js
 
@@ -252,7 +252,7 @@
 
 - title: Node.js - A quick tour
   date: 2011-04-20
-  location: Gameforge AG, Karlsruhe
+  location: Gameforge, Karlsruhe
   url: http://www.slideshare.net/the_undefined/nodejs-a-quick-tour-v6
   eventUrl: http://corporate.gameforge.com/
   pdfUrl: http://felixge.s3.amazonaws.com/11/nodejs-a-quick-tour-v6.pdf
