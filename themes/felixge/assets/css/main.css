@@ -30,7 +30,7 @@ body {
   padding: 2rem 1rem 4rem;
   background: var(--bg);
   color: var(--fg);
-  font: 1.125rem/1.6 'Helvetica Neue Light', HelveticaNeue-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font: 1.25rem/1.6 'Helvetica Neue Light', HelveticaNeue-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
   overflow-wrap: break-word;
 }
 
