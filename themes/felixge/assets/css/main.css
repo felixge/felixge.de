@@ -35,7 +35,7 @@ body {
 }
 
 .site-header {
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
   padding-bottom: .75rem;
   border-bottom: 1px solid color-mix(in srgb, var(--fg) 15%, var(--bg));
 }
