@@ -8,7 +8,7 @@ I'm a software engineer living in Berlin, Germany with my partner and two kids.
 
 Since 2021, I've been working on Datadog's [Continuous Profiler](https://www.datadoghq.com/product/code-profiling/) product with a focus on Go profiling. I also work on OpenTelemetry, internal cost efficiency and various other things.
 
-Before that, I spent 6.5 years building a factory traceability system for Apple. Your Apple device probably has a barcode from it.
+Before that, I spent 6.5 years building a factory traceability system for Apple. This work improved profits, time to market and reduced environmental waste. Your Apple device probably has a barcode from this system inside of it.
 
 Prior to that, I co-founded and bootstrapped [Transloadit](http://transloadit.com/) into a profitable business.
 
